@@ -1,0 +1,7 @@
+numpy
+scipy
+umap
+tqdm
+numba
+sklearn
+umap-learn
