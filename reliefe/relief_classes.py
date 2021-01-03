@@ -261,7 +261,7 @@ class ReliefE:
             unique_indice_maps = {}
 
             if y.ndim > 1:
-                ## MLC
+                # MLC
                 for j in range(y.shape[0]):
                     nzc = np.nonzero(y[j])[1]
                     nze = np.array2string(nzc)
@@ -272,7 +272,7 @@ class ReliefE:
                     else:
                         unique_indice_maps[nze].append(j)
             else:
-                ## CC
+                # CC
                 unique_hashes = np.unique(y)
                 for uh in unique_hashes:
                     unique_indice_maps[uh] = np.where(y == uh)[0].tolist()
@@ -298,7 +298,7 @@ class ReliefE:
 
         ts = time.time()
 
-        ## sparsify the input matrix some more
+        # sparsify the input matrix some more
         sparsity_var = len(
             x_sampled.nonzero()[0]) / (x_sampled.shape[1] * x_sampled.shape[0])
 
@@ -318,9 +318,9 @@ class ReliefE:
             quad2 = np.zeros((quad1.shape[0], quad3.shape[1]))
             quad4 = np.zeros((quad3.shape[0], quad1.shape[1]))
 
-            ## (n+m)x(n+m) --> symmetry
+            # (n+m)x(n+m) --> symmetry
             C = np.block([[quad2, quad1], [quad3, quad4]])
-            var_sum = np.max(np.mean(C, axis=0))  ## heuristic
+            var_sum = np.max(np.mean(C, axis=0))  # heuristic
 
             self.send_message("Initial sparsity: {}".format(sparsity_var))
 
@@ -381,7 +381,7 @@ class ReliefE:
                                 init="spectral")
 
             try:
-                ## very low-dim datasets can be problematic
+                # very low-dim datasets can be problematic
                 transf_um = reducer.fit(x_sampled)
                 transf = transf_um.transform(x)
                 x_embedded = sparse.csr_matrix(transf)
@@ -419,7 +419,8 @@ class ReliefE:
         if self.embedding_based_distances:
             pairwise_distances = "cosine"
         else:
-            pairwise_distances = "cityblock"  # cdist(x_embedded[samples], x_embedded, metric="cityblock")
+            # cdist(x_embedded[samples], x_embedded, metric="cityblock")
+            pairwise_distances = "cityblock"
 
         self.send_message("Using {} distance for the Relief iteration.".format(
             pairwise_distances))
@@ -440,7 +441,7 @@ class ReliefE:
                 if self.verbose:
                     self.send_message("Computing embedding of target space.")
 
-                ## compute embedding of target space.
+                # compute embedding of target space.
                 reducer = umap.UMAP(n_components=latent_dim,
                                     n_neighbors=self.k,
                                     low_memory=True,
