@@ -2,7 +2,7 @@ import reliefe
 import numpy as np
 import scipy.io as sio
 
-mat_obj = sio.loadmat("../data/mlc/Health1.mat")
+mat_obj = sio.loadmat("../data/mlc/medical.mat")
 x = mat_obj['input_space']
 y = mat_obj['target_space']  ## this is not one hot for scc
 

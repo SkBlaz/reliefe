@@ -43,6 +43,7 @@ def _sparsify_matrix_kernel(sparse_matrix_input, epsilon=0.001):
     : param epsilon: approximation constant. See https://www.researchgate.net/publication/221462839_A_Fast_Random_Sampling_Algorithm_for_Sparsifying_Matrices
     """
 
+    sparse_matrix_input = sparse_matrix_input
     n = sparse_matrix_input.shape[1]
     for i in prange(n):
         for j in prange(n):
@@ -659,7 +660,7 @@ class ReliefE:
             var_sum = np.max(np.mean(C, axis=0))  # heuristic
 
             self.send_message("Initial sparsity: {}".format(sparsity_var))
-
+            C = C.todense()
             x_sampled = _sparsify_matrix_kernel(C, var_sum)
             x_sampled = x_sampled[0:quad1.shape[0], quad2.shape[1]:]
             x_sampled = sparse.csr_matrix(x_sampled)
