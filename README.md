@@ -40,21 +40,15 @@ To perform ranking, let's consider the following example:
 import scipy.io as sio
 import numpy as np
 
+# Load the data first
 mat_obj = sio.loadmat("../data/mcc/chess.mat")
-x = mat_obj['input_space']
-y = mat_obj['target_space']  ## this is not one hot for scc
-y = np.array(y).reshape(-1)
-wrange = []
+x = mat_obj['input_space'] ## scipy csr sparse matrix (or numpy dense)
+y = mat_obj['target_space']  ## scipy csr sparse matrix (or numpy dense)
 
 # Fully fledged ReliefE (with all functionality)
-reliefE_instance = reliefe.ReliefE(embedding_based_distances=True,
-                                         verbose=True,
-                                         use_average_neighbour=True,
-                                         determine_k_automatically=True,
-                                         num_iter=[100])
-
-reliefE_instance.fit(x, y)
-print(reliefE_instance.feature_importances_)
+reliefE_instance = reliefe.ReliefE() # Initialize default ReliefE
+reliefE_instance.fit(x, y) # Compute rankings
+print(reliefE_instance.feature_importances_) # rankings for features (same order as x)
 
 ```
 Returns:
