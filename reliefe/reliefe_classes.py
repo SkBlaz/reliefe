@@ -343,7 +343,9 @@ class ReliefE:
                  verbose=False,
                  mlc_distance="f1",
                  latent_dimension=128,
+                 sparsity_threshold = 0.15,
                  determine_k_automatically=False,
+                 samples = 3000,
                  use_average_neighbour=False):
         """
         Initiate the Relief object. Some standard parameters can be assigned:
@@ -370,9 +372,8 @@ class ReliefE:
         self.verbose = verbose
         self.mlc_distance = mlc_distance
         self.timed = {}
-        self.sparsity_threshold = 0.2
-        self.max_ram = 8
-        self.samples = 3000
+        self.sparsity_threshold = sparsity_threshold
+        self.samples = samples
         self.use_average_neighbour = use_average_neighbour
         self.feature_importances_ = None
         self.task_type = "unknown"

@@ -45,6 +45,11 @@ This code snipped initialized ReliefE with all the functionality described in th
    * - mlc_distance
      - Distance used for comparison in MLC setting
      - ["f1","cosine","hyperbolic","hamming","accuracy","subset"]
-       
+   * - sparsity_threshold
+     - If number of non-zero elements is larger than this, sparsify.
+     - float between 0 and 1
+   * - samples
+     - Number of samples if the number of instances is too large.
+     - Integer
 More detailed descriptions can be found in the method description pages in
 :ref:`genindex`.
