@@ -24,10 +24,12 @@ Welcome to ReliefE's documentation pages!
    :maxdepth: 3
    :caption: Contents:
 
+   reliefe.rst
+   
+..
+   Method index
+   ==================
 
-Method index
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`
