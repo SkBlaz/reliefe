@@ -10,10 +10,10 @@ wrange = []
 
 # Fully fledged ReliefE (with all functionality)
 reliefE_instance = reliefe.ReliefE(embedding_based_distances=True,
-                                         verbose=True,
-                                         use_average_neighbour=True,
-                                         determine_k_automatically=True,
-                                         num_iter=[100])
+                                   verbose=True,
+                                   use_average_neighbour=True,
+                                   determine_k_automatically=True,
+                                   num_iter=[100])
 
 reliefE_instance.fit(x, y)
 print(reliefE_instance.feature_importances_)

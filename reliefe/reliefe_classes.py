@@ -13,24 +13,12 @@ from numba import jit, prange
 from sklearn import metrics
 from .utils import TaskTypes, MLCDistances
 import time
+
 import logging
 logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 logging.getLogger().setLevel(logging.INFO)
 
-
-def function_with_pep484_type_annotations(param1: int, param2: str) -> bool:
-    """Example function with PEP 484 type annotations.
-
-    Args:
-        param1: The first parameter.
-        param2: The second parameter.
-
-    Returns:
-        The return value. True for success, False otherwise.
-
-    """
-    return 
 
 @jit(nopython=True)
 def sgn(el):
@@ -51,7 +39,7 @@ def sgn(el):
 
 
 @jit(nopython=True, parallel=True)
-def _sparsify_matrix_kernel(matrix_input, epsilon=0.001):
+def _sparsify_matrix_kernel(matrix_input, epsilon=1):
     """
     The matrix sparsification procedure. See https://www.researchgate.net/publication/221462839_A_Fast_Random_Sampling_Algorithm_for_Sparsifying_Matrices
 
@@ -378,9 +366,9 @@ class ReliefE:
                  verbose=False,
                  mlc_distance="f1",
                  latent_dimension=128,
-                 sparsity_threshold = 0.15,
+                 sparsity_threshold=0.15,
                  determine_k_automatically=False,
-                 samples = 3000,
+                 samples=3000,
                  use_average_neighbour=False):
         """
         Initiate the Relief object. Some standard parameters can be assigned:
@@ -704,7 +692,6 @@ class ReliefE:
             var_sum = np.max(np.mean(C, axis=0))  # heuristic
 
             self.send_message("Initial sparsity: {}".format(sparsity_var))
-            C = C.todense()
             x_sampled = _sparsify_matrix_kernel(C, var_sum)
             x_sampled = x_sampled[0:quad1.shape[0], quad2.shape[1]:]
             x_sampled = sparse.csr_matrix(x_sampled)
