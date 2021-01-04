@@ -1,11 +1,74 @@
 import reliefe
 import scipy.io as sio
-from utils import load_arff
+import glob
+from reliefe.utils import load_arff
+import numpy as np
+import pytest
+
+testdata = glob.glob("../data/mlc/*")
 
 
-def test_experiment1(x, y):
+def test_operator_sgn():
 
-    mat_obj = sio.loadmat("../preprocessed_sparse_matrices/ohscal.wc.mat")
+    assert reliefe.sgn(-1) == -1
+    assert reliefe.sgn(1) == 1
+    assert reliefe.sgn(0) == 0
+
+
+@pytest.mark.parametrize("dataset", testdata)
+def test_experiment_mlc_embeddings(dataset):
+
+    mat_obj = sio.loadmat(dataset)
+    x = mat_obj['input_space']
+    y = mat_obj['target_space']  ## this is not one hot for scc
+    assert y.shape[1] > 1
+    reliefe_instance = reliefe.ReliefE(embedding_based_distances=True,
+                                       verbose=True,
+                                       use_average_neighbour=False,
+                                       determine_k_automatically=False,
+                                       num_iter=50)
+
+    reliefe_instance.fit(x, y)
+    assert len(reliefe_instance.feature_importances_) > 0
+
+
+@pytest.mark.parametrize("dataset", testdata)
+def test_experiment_mlc_avgn(dataset):
+
+    mat_obj = sio.loadmat(dataset)
+    x = mat_obj['input_space']
+    y = mat_obj['target_space']  ## this is not one hot for scc
+    assert y.shape[1] > 1
+    reliefe_instance = reliefe.ReliefE(embedding_based_distances=False,
+                                       verbose=True,
+                                       use_average_neighbour=True,
+                                       determine_k_automatically=False,
+                                       num_iter=50)
+
+    reliefe_instance.fit(x, y)
+    assert len(reliefe_instance.feature_importances_) > 0
+
+
+@pytest.mark.parametrize("dataset", testdata)
+def test_experiment_mlc_autok(dataset):
+
+    mat_obj = sio.loadmat(dataset)
+    x = mat_obj['input_space']
+    y = mat_obj['target_space']  ## this is not one hot for scc
+    assert y.shape[1] > 1
+    reliefe_instance = reliefe.ReliefE(embedding_based_distances=False,
+                                       verbose=True,
+                                       use_average_neighbour=False,
+                                       determine_k_automatically=True,
+                                       num_iter=50)
+
+    reliefe_instance.fit(x, y)
+    assert len(reliefe_instance.feature_importances_) > 0
+
+
+def test_experiment_mcc():
+
+    mat_obj = sio.loadmat("../data/mcc/chess.mat")
     x = mat_obj['input_space']
     y = mat_obj['target_space']  ## this is not one hot for scc
 
@@ -35,7 +98,7 @@ def test_experiment1(x, y):
         print(k + "\t" + str(v))
 
 
-def test_experiment2():
+def test_experiment_arff_mlc():
     ova = "../data/test.arff"
     features = [0, 1, 2, 3, 4]
     targets = [5, 6]

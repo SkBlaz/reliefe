@@ -1,6 +1,5 @@
 numpy
 scipy
-umap
 tqdm
 numba
 sklearn
