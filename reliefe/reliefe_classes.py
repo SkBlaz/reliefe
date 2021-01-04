@@ -23,6 +23,7 @@ logging.getLogger().setLevel(logging.INFO)
 def sgn(el):
     """
     The standard sgn function.
+
     :param el: a float.
     """
 
@@ -39,6 +40,7 @@ def sgn(el):
 @jit(nopython=True, parallel=True)
 def _sparsify_matrix_kernel(sparse_matrix_input, epsilon=0.001):
     """
+
     : param sparse_matrix_input: a matrix to be sparsified
     : param epsilon: approximation constant. See https://www.researchgate.net/publication/221462839_A_Fast_Random_Sampling_Algorithm_for_Sparsifying_Matrices
     """
@@ -66,6 +68,7 @@ def _sparsify_matrix_kernel(sparse_matrix_input, epsilon=0.001):
 def _numba_distance(u, v, dist):
     """
     A method consisting of to-be compiled distance computations.
+
     : param u: vector 1
     : param v: vector 2
     : param dist: distance name
@@ -88,6 +91,7 @@ def _numba_distance(u, v, dist):
 def _get_sparse_row(row_index, data, pointers, indices):
     """
     Unfolder csr indexing. See CSR format for more details.
+
     : param row_index: row indices.
     : param data: data
     : param pointers: pointers
@@ -110,6 +114,7 @@ def _compiled_classification_update_weights(
         use_average_neighbour):
     """
     A compiled kernel for the weight update step.
+
     :param samples: Number of instance samples
     :param num_iter: a list of numbers of iterations
     :param data: Input data set (vector of present floats)
@@ -217,6 +222,10 @@ def _compiled_classification_update_weights(
 def _numba_distance_target(row1, row2, dist):
     """
     Compute distance amongst targets.
+
+    :param row1: first vector
+    :param row2: second vector
+    :param dist: distance name
     """
 
     if dist == "f1":
@@ -258,6 +267,7 @@ def _compiled_multi_label_classification_update_weights(
         indices_y, k, pairwise_distances, mlc_distance, nrow, ncol):
     """
     A compiled kernel for the weight update step.
+
     :param samples: Number of instance samples
     :param num_iter: list of numbers of iterations
     :param xs: Input data set
@@ -350,15 +360,16 @@ class ReliefE:
                  use_average_neighbour=False):
         """
         Initiate the Relief object. Some standard parameters can be assigned:
-        :param num_iter:
-        :param k:
+
+        :param num_iter: Number of iterations
+        :param k: Number of neighbors
         :param normalize_descriptive:
         :param embedding_based_distances:
-        :param num_threads:
-        :param verbose:
-        :param mlc_distance:
-        :param latent_dimension:
-        :param determine_k_automatically:
+        :param num_threads: Number of parallel threads
+        :param verbose: Output intermediary steps?
+        :param mlc_distance: Type of MLC distance to use
+        :param latent_dimension: Latent dimension
+        :param determine_k_automatically: Should k be determined automatically?
         :param use_average_neighbour: Should a) compute the average neighbour, and b) perform weight updates with it?
         Note that standard Relief a) uses all neighbours, b) performs updates, and c) averages the updates
         update
@@ -392,6 +403,7 @@ class ReliefE:
         """
         A method for computing the latent dimension,
         based on the paper: https://www.nature.com/articles/s41598-017-11873-y.pdf
+
         :param xs: data matrix X
         :param true_dim: the actual dimension or None
         :param empirical_left_continuous:
@@ -581,6 +593,7 @@ class ReliefE:
         Key idea of ReliefE:
         embed the instance space. Compute mean embedding for each of the classes.
         compare, in the update step, to the joint label embedding instead of the single instance
+
         :param x: Feature space, array-like.
         :param y: Target space, a 0/1 array-like structure (1-hot encoded for classification).
         """
