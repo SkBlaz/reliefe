@@ -23,9 +23,8 @@ logging.getLogger().setLevel(logging.INFO)
 def sgn(el):
     """The standard sgn function.
 
-
-    :param el: a float.
-    :return: the sign
+    :param el: float input
+    :return: sign of the number
     """
 
     if el < 0:
