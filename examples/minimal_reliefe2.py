@@ -8,17 +8,12 @@ y = mat_obj['target_space']  ## this is not one hot for scc
 y = np.array(y).reshape(-1)
 wrange = []
 
-for u in range(x.shape[0]):
-    if 2**u <= x.shape[0]:
-        wrange.append(int(2**u))
-wrange.append(int(x.shape[0]))
-
 # Fully fledged ReliefE (with all functionality)
 reliefE_instance = reliefe.ReliefE(embedding_based_distances=True,
                                          verbose=True,
                                          use_average_neighbour=True,
                                          determine_k_automatically=True,
-                                         num_iter=wrange)
+                                         num_iter=[100])
 
 reliefE_instance.fit(x, y)
 print(reliefE_instance.feature_importances_)

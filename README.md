@@ -34,25 +34,23 @@ import reliefe
 This call imports the reliefe namespace with all the required libraries.
 To perform ranking, let's consider the following example:
 
+
 ```
 import scipy.io as sio
 import numpy as np
-mat_obj = sio.loadmat("./data/mcc/chess.mat")
+
+mat_obj = sio.loadmat("../data/mcc/chess.mat")
 x = mat_obj['input_space']
 y = mat_obj['target_space']  ## this is not one hot for scc
 y = np.array(y).reshape(-1)
 wrange = []
-for u in range(x.shape[0]):
-    if 2**u <= x.shape[0]:
-        wrange.append(int(2**u))
-wrange.append(int(x.shape[0]))
 
 # Fully fledged ReliefE (with all functionality)
 reliefE_instance = reliefe.ReliefE(embedding_based_distances=True,
                                          verbose=True,
                                          use_average_neighbour=True,
                                          determine_k_automatically=True,
-                                         num_iter=wrange)
+                                         num_iter=[100])
 
 reliefE_instance.fit(x, y)
 print(reliefE_instance.feature_importances_)
