@@ -22,4 +22,4 @@ ReliefE was adapted for various classification tasks. The key difference between
 	print(reliefE_instance.feature_importances_) # rankings for features (same order as x)
 
 
-**There is no difference**. ReliefE automatically recognizes that as the shape of `y` is > 1, it needs to perform _multilabel_ ranking.
+**There is no difference**. ReliefE automatically recognizes that as the shape of `y` is > 1, it needs to perform **multilabel** ranking.
