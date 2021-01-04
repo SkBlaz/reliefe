@@ -24,7 +24,13 @@ Requirements can be installed via (from the repo folder):
 .. code:: bash
 
     pip install -r requirements.txt
+
+We also provide the conda virtual env specification file (yml), found in the root directory of `ReliefE <https://github.com/SkBlaz/reliefe/>`_ repo.
+
+.. code:: bash
 	  
+   conda env create -f conda_env.yml
+   
 To test whether the core library functionality works well, you can run the test suite from the ./tests folder (`ReliefE <https://github.com/SkBlaz/reliefe/>`_) as::
   
   py.test
