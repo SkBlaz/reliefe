@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ReliefE Hyperparameters &#8212; ReliefE  documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Multiclass and multilabel classification" href="task_types.html" /> 
+  </head><body>
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>ReliefE  documentation</span></a></h1>
+        <h2 class="heading"><span>ReliefE Hyperparameters</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="task_types.html">Multiclass and multilabel classification</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <div class="section" id="reliefe-hyperparameters">
+<h1>ReliefE Hyperparameters<a class="headerlink" href="#reliefe-hyperparameters" title="Permalink to this headline">¶</a></h1>
+<p>ReliefE has multiple hyperparameters, which determine its performance. Let’s discuss the main ones next.</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">reliefe</span>
+
+<span class="n">reliefE_instance</span> <span class="o">=</span> <span class="n">reliefe</span><span class="o">.</span><span class="n">ReliefE</span><span class="p">(</span><span class="n">embedding_based_distances</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">use_average_neighbour</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">determine_k_automatically</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">num_iter</span><span class="o">=</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>This code snipped initialized ReliefE with all the functionality described in the paper. The parameters are:</p>
+<table class="colwidths-given docutils align-default" id="id1">
+<caption><span class="caption-text">Hyperparameter descriptions. Below you can find key hyperparameters.</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 60%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Hyperparameter</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Values</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>embedding_based_distances</p></td>
+<td><p>Whether to embed the input and output space if possible (ReliefE). Instances are compared via <em>cosine</em> distance, but the distance for targets needs to be specified (see below).</p></td>
+<td><p>True/False</p></td>
+</tr>
+<tr class="row-odd"><td><p>use_average_neighbour</p></td>
+<td><p>Whether to average the neighbors’ embeddings during computation</p></td>
+<td><p>True/False</p></td>
+</tr>
+<tr class="row-even"><td><p>determine_k_automatically</p></td>
+<td><p>Whether to determine the size of neighborhood</p></td>
+<td><p>True/False</p></td>
+</tr>
+<tr class="row-odd"><td><p>num_iter</p></td>
+<td><p>Number of iterations</p></td>
+<td><p>Integer</p></td>
+</tr>
+<tr class="row-even"><td><p>normalize_descriptive</p></td>
+<td><p>Normalization of descriptive attributes?</p></td>
+<td><p>True/False</p></td>
+</tr>
+<tr class="row-odd"><td><p>latent_dimension</p></td>
+<td><p>Embedding dimension</p></td>
+<td><p>Integer</p></td>
+</tr>
+<tr class="row-even"><td><p>mlc_distance</p></td>
+<td><p>Distance used for comparison in MLC setting</p></td>
+<td><p>[“f1”,”cosine”,”hyperbolic”,”hamming”,”accuracy”,”subset”]</p></td>
+</tr>
+</tbody>
+</table>
+<p>More detailed descriptions can be found in the method description pages in
+<a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a>.</p>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="task_types.html">Multiclass and multilabel classification</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Blaz Skrlj, Matej Petkovic.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.1.
+    </div>
+  </body>
+</html>

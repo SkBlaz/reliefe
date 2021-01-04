@@ -6,22 +6,19 @@
 Welcome to ReliefE's documentation pages!
 ===================================
 
+`ReliefE <https://github.com/SkBlaz/reliefe/>`_ is an extension of  ReliefF family of the algorithms to the realm of real-valued learnable embeddings. All examples assume you have the `ReliefE <https://github.com/SkBlaz/reliefe/>`_ repo downloaded (alongside the data).
 
-Found at: https://github.com/SkBlaz/reliefe
+.. image:: scheme.png
+   :width: 450
 
-ReliefE is an extension of the ReliefF family of the algorithms to the realm of real-valued learnable embeddings.
+.. toctree::
+   :maxdepth: 3
+   :caption: Tutorial and first steps:
 
-.. code:: bash
-
-    pip install reliefe
-
-    
-To test whether the core library functionality works well, you can run the test suite from the ./tests folder (on the git repo) as::
-  
-  py.test
-
-Getting started examples can be found at: https://github.com/SkBlaz/reliefe/examples
-Overview of the library:
+   installation.rst
+   core_idea.rst
+   task_types.rst
+   reliefe_types.rst
 
 .. toctree::
    :maxdepth: 3

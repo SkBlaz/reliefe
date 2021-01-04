@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiclass and multilabel classification &#8212; ReliefE  documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ReliefE Hyperparameters" href="reliefe_types.html" />
+    <link rel="prev" title="Getting started" href="core_idea.html" /> 
+  </head><body>
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>ReliefE  documentation</span></a></h1>
+        <h2 class="heading"><span>Multiclass and multilabel classification</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="core_idea.html">Getting started</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="reliefe_types.html">ReliefE Hyperparameters</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <div class="section" id="multiclass-and-multilabel-classification">
+<h1>Multiclass and multilabel classification<a class="headerlink" href="#multiclass-and-multilabel-classification" title="Permalink to this headline">¶</a></h1>
+<p>ReliefE was adapted for various classification tasks. The key difference between doing ranking in a multiclass or multilabel setting is the <cite>shape</cite> of the output matrix. Having considered the multiclass example before, let’s inspect how does the code differ in a multilabel case:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">reliefe</span>
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">sio</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># Load the data first</span>
+<span class="n">mat_obj</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="s2">&quot;data/mlc/Science1.mat&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">mat_obj</span><span class="p">[</span><span class="s1">&#39;input_space&#39;</span><span class="p">]</span> <span class="c1">## scipy csr sparse matrix (or numpy dense)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">mat_obj</span><span class="p">[</span><span class="s1">&#39;target_space&#39;</span><span class="p">]</span>  <span class="c1">## scipy csr sparse matrix (or numpy dense)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># 40 possible labels</span>
+
+<span class="n">reliefE_instance</span> <span class="o">=</span> <span class="n">reliefe</span><span class="o">.</span><span class="n">ReliefE</span><span class="p">()</span> <span class="c1"># Initialize default ReliefE</span>
+<span class="n">reliefE_instance</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="c1"># Compute rankings</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">reliefE_instance</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">)</span> <span class="c1"># rankings for features (same order as x)</span>
+</pre></div>
+</div>
+<p><strong>There is no difference</strong>. ReliefE automatically recognizes that as the shape of <cite>y</cite> is &gt; 1, it needs to perform _multilabel_ ranking.</p>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="core_idea.html">Getting started</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="reliefe_types.html">ReliefE Hyperparameters</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Blaz Skrlj, Matej Petkovic.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.1.
+    </div>
+  </body>
+</html>
