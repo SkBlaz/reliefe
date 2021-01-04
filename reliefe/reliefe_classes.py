@@ -21,8 +21,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 @jit(nopython=True)
 def sgn(el):
-    """
-    The standard sgn function.
+    """The standard sgn function.
 
 
     :param el: a float.
@@ -40,20 +39,20 @@ def sgn(el):
 
 
 @jit(nopython=True, parallel=True)
-def _sparsify_matrix_kernel(sparse_matrix_input, epsilon=0.001):
+def _sparsify_matrix_kernel(matrix_input, epsilon=0.001):
     """
     The matrix sparsification procedure. See https://www.researchgate.net/publication/221462839_A_Fast_Random_Sampling_Algorithm_for_Sparsifying_Matrices
 
-    :param sparse_matrix_input: a matrix to be sparsified
+    :param matrix_input: a matrix to be sparsified
     :param epsilon: approximation constant.
     :return: a sparsified matrix
     """
 
-    sparse_matrix_input = sparse_matrix_input
-    n = sparse_matrix_input.shape[1]
+    matrix_input = matrix_input
+    n = matrix_input.shape[1]
     for i in prange(n):
         for j in prange(n):
-            matrix_el = sparse_matrix_input[i, j]
+            matrix_el = matrix_input[i, j]
             sqrt_n = np.sqrt(n)
             if matrix_el > epsilon / sqrt_n:
                 continue
@@ -64,8 +63,8 @@ def _sparsify_matrix_kernel(sparse_matrix_input, epsilon=0.001):
                 placeholder = 0
                 if coin <= probability:
                     placeholder = sgn(matrix_el) * (epsilon) / sqrt_n
-                sparse_matrix_input[i, j] = placeholder
-    return sparse_matrix_input
+                matrix_input[i, j] = placeholder
+    return matrix_input
 
 
 @jit(nopython=True)
