@@ -41,8 +41,8 @@ def sgn(el):
 def _sparsify_matrix_kernel(sparse_matrix_input, epsilon=0.001):
     """
 
-    : param sparse_matrix_input: a matrix to be sparsified
-    : param epsilon: approximation constant. See https://www.researchgate.net/publication/221462839_A_Fast_Random_Sampling_Algorithm_for_Sparsifying_Matrices
+    :param sparse_matrix_input: a matrix to be sparsified
+    :param epsilon: approximation constant. See https://www.researchgate.net/publication/221462839_A_Fast_Random_Sampling_Algorithm_for_Sparsifying_Matrices
     """
 
     sparse_matrix_input = sparse_matrix_input
@@ -69,9 +69,9 @@ def _numba_distance(u, v, dist):
     """
     A method consisting of to-be compiled distance computations.
 
-    : param u: vector 1
-    : param v: vector 2
-    : param dist: distance name
+    :param u: vector 1
+    :param v: vector 2
+    :param dist: distance name
     """
 
     if dist == "euclidean":
@@ -92,10 +92,10 @@ def _get_sparse_row(row_index, data, pointers, indices):
     """
     Unfolder csr indexing. See CSR format for more details.
 
-    : param row_index: row indices.
-    : param data: data
-    : param pointers: pointers
-    : param indices: indices
+    :param row_index: row indices.
+    :param data: data
+    :param pointers: pointers
+    :param indices: indices
     """
 
     placeholder = np.zeros(np.max(indices) + 1, dtype=np.float64)
