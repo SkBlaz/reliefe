@@ -2,6 +2,7 @@
 Welcome to the official implementation sites of ReliefE.
 This repository hosts the ReliefE idea, suitable both for _multiclass_ and _multilabel_ classification problems.
 
+![Scheme](images/scheme.png)
 ## Getting started
 To install stable ReliefE, try:
 ```
