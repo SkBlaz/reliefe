@@ -24,7 +24,9 @@ def sgn(el):
     """
     The standard sgn function.
 
+
     :param el: a float.
+    :return: the sign
     """
 
     if el < 0:
@@ -40,9 +42,11 @@ def sgn(el):
 @jit(nopython=True, parallel=True)
 def _sparsify_matrix_kernel(sparse_matrix_input, epsilon=0.001):
     """
+    The matrix sparsification procedure. See https://www.researchgate.net/publication/221462839_A_Fast_Random_Sampling_Algorithm_for_Sparsifying_Matrices
 
     :param sparse_matrix_input: a matrix to be sparsified
-    :param epsilon: approximation constant. See https://www.researchgate.net/publication/221462839_A_Fast_Random_Sampling_Algorithm_for_Sparsifying_Matrices
+    :param epsilon: approximation constant.
+    :return: a sparsified matrix
     """
 
     sparse_matrix_input = sparse_matrix_input
@@ -72,6 +76,7 @@ def _numba_distance(u, v, dist):
     :param u: vector 1
     :param v: vector 2
     :param dist: distance name
+    :return: computed distance
     """
 
     if dist == "euclidean":
@@ -92,10 +97,12 @@ def _get_sparse_row(row_index, data, pointers, indices):
     """
     Unfolder csr indexing. See CSR format for more details.
 
+
     :param row_index: row indices.
     :param data: data
     :param pointers: pointers
     :param indices: indices
+    :return: extract a given row.
     """
 
     placeholder = np.zeros(np.max(indices) + 1, dtype=np.float64)
@@ -115,6 +122,7 @@ def _compiled_classification_update_weights(
     """
     A compiled kernel for the weight update step.
 
+
     :param samples: Number of instance samples
     :param num_iter: a list of numbers of iterations
     :param data: Input data set (vector of present floats)
@@ -130,6 +138,7 @@ def _compiled_classification_update_weights(
     :param nrow_all: number of rows
     :param ncol_all: number of cols
     :param use_average_neighbour: see ReliefE constructor
+    :return: Updated weights
     """
 
     number_of_columns = ncol_all
@@ -223,9 +232,11 @@ def _numba_distance_target(row1, row2, dist):
     """
     Compute distance amongst targets.
 
+
     :param row1: first vector
     :param row2: second vector
     :param dist: distance name
+    :return: Distance between two vectors
     """
 
     if dist == "f1":
@@ -268,6 +279,7 @@ def _compiled_multi_label_classification_update_weights(
     """
     A compiled kernel for the weight update step.
 
+
     :param samples: Number of instance samples
     :param num_iter: list of numbers of iterations
     :param xs: Input data set
@@ -277,6 +289,7 @@ def _compiled_multi_label_classification_update_weights(
     :param mlc_distance: distance type for MLC
     :param nrow: number of rows
     :param ncol: number of columns
+    :return: weight space
     """
 
     number_of_columns = ncol
@@ -361,6 +374,7 @@ class ReliefE:
         """
         Initiate the Relief object. Some standard parameters can be assigned:
 
+
         :param num_iter: Number of iterations
         :param k: Number of neighbors
         :param normalize_descriptive:
@@ -373,6 +387,7 @@ class ReliefE:
         :param use_average_neighbour: Should a) compute the average neighbour, and b) perform weight updates with it?
         Note that standard Relief a) uses all neighbours, b) performs updates, and c) averages the updates
         update
+        :return: None.
         """
 
         self.num_iter = num_iter if isinstance(num_iter, list) else [num_iter]
@@ -404,9 +419,12 @@ class ReliefE:
         A method for computing the latent dimension,
         based on the paper: https://www.nature.com/articles/s41598-017-11873-y.pdf
 
+
         :param xs: data matrix X
         :param true_dim: the actual dimension or None
-        :param empirical_left_continuous:
+        :param empirical_left_continuous: Whether only left continous part shall be considered.
+        :param metric: The metric to compute the distances.
+        :return: Latent dimension.
         """
 
         # data, pointers, indices = xs.data, xs.indptr, xs.indices
@@ -594,8 +612,10 @@ class ReliefE:
         embed the instance space. Compute mean embedding for each of the classes.
         compare, in the update step, to the joint label embedding instead of the single instance
 
+
         :param x: Feature space, array-like.
         :param y: Target space, a 0/1 array-like structure (1-hot encoded for classification).
+        :return: None.
         """
 
         if self.verbose:
