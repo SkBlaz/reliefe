@@ -9,7 +9,7 @@ Welcome to ReliefE's documentation pages!
 `ReliefE <https://github.com/SkBlaz/reliefe/>`_ is an extension of  ReliefF family of the algorithms to the realm of real-valued learnable embeddings. All examples assume you have the `ReliefE <https://github.com/SkBlaz/reliefe/>`_ repo downloaded (alongside the data).
 
 .. image:: scheme.png
-   :width: 450
+   :width: 600
 
 .. toctree::
    :maxdepth: 3
@@ -25,7 +25,7 @@ Welcome to ReliefE's documentation pages!
    :caption: Contents:
 
 
-Indices and tables
+Method index
 ==================
 
 * :ref:`genindex`

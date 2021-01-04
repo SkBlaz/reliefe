@@ -1,7 +1,10 @@
 Getting started
 ===============
 The key idea behind ReliefE is simplicity. The purpose of this library is to offer off-the-shelf
-functionality not supported elsewhere, with minimal user effort. The minimal example is given next:
+functionality not supported elsewhere, with minimal user effort.
+The data used in the example is accessible at: https://github.com/SkBlaz/reliefe/tree/master/data
+
+The minimal example is given next.
 
 .. code:: python3
 
