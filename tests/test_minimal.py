@@ -4,9 +4,25 @@ import glob
 from reliefe.utils import load_arff
 import numpy as np
 import pytest
+from sklearn.decomposition import PCA
 
 testdata = glob.glob("../data/mlc/*")
 
+def test_custom_embedding():
+
+    mat_obj = sio.loadmat("../data/mcc/chess.mat")
+    x = mat_obj['input_space']
+    y = mat_obj['target_space']  ## this is not one hot for scc
+    assert y.shape[1] > 1
+    reliefe_instance = reliefe.ReliefE(embedding_based_distances=True,
+                                       verbose=True,
+                                       use_average_neighbour=False,
+                                       determine_k_automatically=False,
+                                       num_iter=50)
+
+    emb_custom = PCA()
+    reliefe_instance.fit(x, y, embedding_method = emb_custom)
+    assert len(reliefe_instance.feature_importances_) > 0    
 
 def test_operator_sgn():
 

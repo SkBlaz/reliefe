@@ -5,7 +5,14 @@ ReliefE algorithm : Skrlj and Petkovic, 2021
 from typing import List, Union
 import numpy as np
 from scipy import sparse
-import umap.umap_ as umap
+
+try:
+    import umap.umap_ as umap
+    
+except:
+    
+    print("UMAP not found! This means that you need to provide your own embedding method for ReliefE to work.")
+    
 from sklearn.preprocessing import OneHotEncoder, normalize
 from scipy.sparse import csr_matrix
 from typing import Union, List
@@ -47,7 +54,7 @@ def _sparsify_matrix_kernel(matrix_input, epsilon=1):
     :param epsilon: approximation constant.
     :return: a sparsified matrix
     """
-
+    
     matrix_input = matrix_input
     n = matrix_input.shape[1]
     for i in prange(n):
@@ -368,7 +375,7 @@ class ReliefE:
                  latent_dimension=128,
                  sparsity_threshold=0.15,
                  determine_k_automatically=False,
-                 samples=3000,
+                 samples=2048,
                  use_average_neighbour=False):
         """
         Initiate the Relief object. Some standard parameters can be assigned:
@@ -605,7 +612,7 @@ class ReliefE:
         if self.verbose:
             logging.info(message)
 
-    def fit(self, x, y):
+    def fit(self, x, y, embedding_method = None):
         """
         Key idea of ReliefE:
         embed the instance space. Compute mean embedding for each of the classes.
@@ -743,11 +750,17 @@ class ReliefE:
             self.send_message("Estimating embedding from {}.".format(
                 x_sampled.shape))
             latent_dim = min(self.determine_latent_dim(x_sampled), 8)
-            reducer = umap.UMAP(n_components=latent_dim,
-                                n_neighbors=self.k,
-                                low_memory=True,
-                                init="spectral")
-
+            if embedding_method is None:
+                reducer = umap.UMAP(n_components=latent_dim,
+                                    n_neighbors=self.k,
+                                    low_memory=True,
+                                    init="spectral")
+                
+            else:
+                if self.verbose:
+                    logging.info(f"Using custom embedding algorithm: {embedding_method}")
+                reducer = embedding_method
+            
             try:
                 # very low-dim datasets can be problematic
                 transf_um = reducer.fit(x_sampled)
@@ -810,19 +823,30 @@ class ReliefE:
                     self.send_message("Computing embedding of target space.")
 
                 # compute embedding of target space.
-                reducer = umap.UMAP(n_components=latent_dim,
-                                    n_neighbors=self.k,
-                                    low_memory=True,
-                                    init="spectral")
+                if embedding_method is None:
+                    reducer = umap.UMAP(n_components=latent_dim,
+                                        n_neighbors=self.k,
+                                        low_memory=True,
+                                        init="spectral")
+                    
+                else:
+                    reducer = embedding_method
+                    
                 y = sparse.csr_matrix(
                     reducer.fit(y[indices_sample]).transform(y))
 
             elif self.mlc_distance == "hyperbolic":
-                reducer = umap.UMAP(output_metric="hyperboloid",
-                                    n_components=latent_dim,
-                                    n_neighbors=self.k,
-                                    low_memory=True,
-                                    init="spectral")
+
+                if embedding_method is None:
+                    reducer = umap.UMAP(output_metric="hyperboloid",
+                                        n_components=latent_dim,
+                                        n_neighbors=self.k,
+                                        low_memory=True,
+                                        init="spectral")
+                    
+                else:
+                    reducer = embedding_method
+                    
                 y = sparse.csr_matrix(
                     reducer.fit(y[indices_sample]).transform(y))
 

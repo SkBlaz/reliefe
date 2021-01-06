@@ -13,12 +13,19 @@ Welcome to ReliefE's documentation pages!
 
 .. toctree::
    :maxdepth: 3
+   :caption: About:
+
+   key_idea.rst
+	   
+.. toctree::
+   :maxdepth: 3
    :caption: Tutorial and first steps:
 
    installation.rst
    core_idea.rst
    task_types.rst
    reliefe_types.rst
+   custom_embeddings.rst
 
 .. toctree::
    :maxdepth: 3
