@@ -696,7 +696,7 @@ class ReliefE:
 
             # (n+m)x(n+m) --> symmetry
             C = np.block([[quad2, quad1], [quad3, quad4]])
-            var_sum = np.max(np.mean(C, axis=0))  # heuristic
+            var_sum = np.max(np.mean(np.abs(C), axis=0))  # heuristic
 
             self.send_message("Initial sparsity: {}".format(sparsity_var))
             x_sampled = _sparsify_matrix_kernel(C, var_sum)
