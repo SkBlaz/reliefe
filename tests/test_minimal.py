@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA
 
 testdata = glob.glob("../data/mlc/*")
 
+
 def test_custom_embedding():
 
     mat_obj = sio.loadmat("../data/mcc/chess.mat")
@@ -21,8 +22,9 @@ def test_custom_embedding():
                                        num_iter=50)
 
     emb_custom = PCA()
-    reliefe_instance.fit(x, y, embedding_method = emb_custom)
-    assert len(reliefe_instance.feature_importances_) > 0    
+    reliefe_instance.fit(x, y, embedding_method=emb_custom)
+    assert len(reliefe_instance.feature_importances_) > 0
+
 
 def test_operator_sgn():
 
