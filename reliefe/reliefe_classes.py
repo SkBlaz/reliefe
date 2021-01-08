@@ -349,7 +349,7 @@ class ReliefE:
                  embedding_based_distances=False,
                  num_threads="all",
                  verbose=False,
-                 mlc_distance="f1",
+                 mlc_distance="cosine",
                  latent_dimension=128,
                  sparsity_threshold=0.15,
                  determine_k_automatically=False,
@@ -610,9 +610,8 @@ class ReliefE:
         if self.samples < x.shape[0]:
             self.send_message(
                 "Subsampling to {} instances.".format(subsamples))
-
             unique_indice_maps = {}
-
+            
             if y.ndim > 1:
                 # MLC
                 for j in range(y.shape[0]):
@@ -643,14 +642,14 @@ class ReliefE:
 
             indices_sample = np.array(indices_sample)
             x_sampled = x[indices_sample]
-            y[indices_sample]
+            #y = y[indices_sample]
 
         else:
             x_sampled = x
             indices_sample = list(range(x.shape[0]))
 
         ts = time.time()
-
+        
         # sparsify the input matrix some more
         sparsity_var = len(
             x_sampled.nonzero()[0]) / (x_sampled.shape[1] * x_sampled.shape[0])
@@ -709,8 +708,7 @@ class ReliefE:
 
             class_counts = np.array(np.sum(y, axis=0).tolist())[0]
             class_priors = np.array(class_counts) / n_examples
-            class_members, examples_to_class, class_first_indices = ReliefE.compute_members(
-                y)
+            class_members, examples_to_class, class_first_indices = ReliefE.compute_members(y)
 
         elif self.task_type == TaskTypes.MLC:
             class_counts = np.array(
@@ -751,21 +749,32 @@ class ReliefE:
                         f"Using custom embedding algorithm: {embedding_method}"
                     )
                 reducer = embedding_method
-
             try:
-                # very low-dim datasets can be problematic
-                transf_um = reducer.fit(x_sampled)
-                transf = transf_um.transform(x)
-                x_embedded = sparse.csr_matrix(transf)
+                if self.verbose:
+                    logging.info("Computing embedding of the input space.")
+                    
+                x_sampled = sparse.csr_matrix(x_sampled)
+                reducer.fit(x_sampled)
+                
+                if self.verbose:
+                    logging.info("Transforming the origin space.")
+                try:
+                    # In most cases this works with sparse.csr fine.
+                    transf_um = reducer.transform(x)
+                except Exception as es:
+                    logging.info(f"Umap datatype not recognized, reverting to dense matrix algebra for the .transform(), exception: {es}")                    
+                    transf_um = reducer.transform(x.todense())
+                x_embedded = sparse.csr_matrix(transf_um)
+                self.send_message("Embedding obtained.")
 
             except Exception as es:
                 self.send_message(es)
                 x_embedded = sparse.csr_matrix(x)
+                self.send_message("WARNING! Embedding not obtained; reverting to origin space. This could be due to the improper input formatting.")
 
             if self.normalize:
                 x_embedded = normalize(x_embedded)  # l2 norm
 
-            self.send_message("Embedding obtained.")
 
         else:
 
@@ -780,7 +789,7 @@ class ReliefE:
                 factors = np.asarray(factors)[0]
                 diags = sparse.diags(1 / factors)
                 x_embedded = x_embedded.dot(diags)
-
+            
         ts2 = time.time()
         self.timed["embedding"] = ts2 - ts
 
@@ -817,9 +826,6 @@ class ReliefE:
                     )
                 latent_dim = self.determine_latent_dim(y)
 
-                if self.verbose:
-                    self.send_message("Computing embedding of target space.")
-
                 # compute embedding of target space.
                 if embedding_method is None:
                     reducer = umap.UMAP(n_components=latent_dim,
@@ -829,7 +835,8 @@ class ReliefE:
 
                 else:
                     reducer = embedding_method
-
+                if self.verbose:
+                    logging.info(f"Computing embedding of the output space (self.mlc_distance.")
                 y = sparse.csr_matrix(
                     reducer.fit(y[indices_sample]).transform(y))
 
@@ -850,14 +857,11 @@ class ReliefE:
 
                 else:
                     reducer = embedding_method
-
+                if self.verbose:
+                    logging.info("Computing embedding of the output space.")
                 y = sparse.csr_matrix(
                     reducer.fit(y[indices_sample]).transform(y))
 
-            if self.verbose:
-                logging.info(
-                    f"Not embedding the output space, using {self.mlc_distance}"
-                )
             data_y, pointers_y, indices_y = y.data, y.indptr, y.indices
             if self.verbose:
                 logging.info("Ranking (MLC) .. ")
