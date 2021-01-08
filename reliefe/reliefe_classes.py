@@ -168,11 +168,8 @@ def _compiled_classification_update_weights(
             if determine_k_automatically:
                 sorted_distances = distances[top_neighbour_indices]
                 diffs = np.diff(sorted_distances)
-                fdiffs = diffs[1:-1]
-                fdiffs2 = diffs[2:]
-                ratios = np.divide(fdiffs2, fdiffs)
-                if len(ratios) > 0:
-                    k = np.argmax(ratios) + 1
+                if len(diffs) > 0:
+                    k = np.argmax(diffs) + 1
             if considered_class == c:
                 offset = 1  # ignore itself when computing the neighbours
                 prior = -1.0  # 1 negative, so the weight gets lower for hits
@@ -295,12 +292,9 @@ def _compiled_multi_label_classification_update_weights(
         if determine_k_automatically:
             sorted_distances = distances[top_neighbour_indices]
             diffs = np.diff(sorted_distances)
-            fdiffs = diffs[1:-1]
-            fdiffs2 = diffs[2:]
-            ratios = np.divide(fdiffs2, fdiffs)
-            if len(ratios) > 0:
-                k = np.argmax(ratios) + 1
-        top_neighbor_indices = np.argsort(distances)[1:k + 1]
+            if len(diffs) > 0:
+                k = np.argmax(diffs) + 2
+        top_neighbor_indices = top_neighbor_indices[1:k]
         nearest_neighbours = np.zeros(
             (len(top_neighbor_indices), ndim_via_pointer))
         for enx, tnm in enumerate(top_neighbor_indices):
