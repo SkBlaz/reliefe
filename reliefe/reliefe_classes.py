@@ -283,29 +283,28 @@ def _compiled_multi_label_classification_update_weights(
         # extract distances
         distances = np.zeros(n_examples)
         ith_sample_row = _get_sparse_row(sample, data, pointers, indices)
-        for i_neighbor in range(n_examples):
-            neigh_row = _get_sparse_row(i_neighbor, data, pointers, indices)
+        for i_neighbour in range(n_examples):
+            neigh_row = _get_sparse_row(i_neighbour, data, pointers, indices)
             internal_distance = _numba_distance(ith_sample_row, neigh_row,
-                                                pairwise_distances)
-            distances[i_neighbor] = internal_distance
+                                                pairwise_distances) # Distance computation
+            distances[i_neighbour] = internal_distance
         top_neighbour_indices = np.argsort(distances)
-        if determine_k_automatically:
+        if determine_k_automatically: # Adaptive k estimation.
             sorted_distances = distances[top_neighbour_indices]
             diffs = np.diff(sorted_distances)
             if len(diffs) > 0:
-                k = np.argmax(diffs) + 2
-        top_neighbor_indices = top_neighbor_indices[1:k]
+                k = np.argmax(diffs) + 1
+        top_neighbour_indices = top_neighbour_indices[1:k+1]
         nearest_neighbours = np.zeros(
-            (len(top_neighbor_indices), ndim_via_pointer))
-        for enx, tnm in enumerate(top_neighbor_indices):
+            (len(top_neighbour_indices), ndim_via_pointer))
+        for enx, tnm in enumerate(top_neighbour_indices): # Traverse the neighbor index map
             rx = _get_sparse_row(tnm, data, pointers, indices)
             assert rx.shape[0] == nearest_neighbours.shape[1]
             nearest_neighbours[enx] = rx
-        # Update weights
-        target_diffs = np.zeros(k)
+        target_diffs = np.zeros(k) # Update weights
         y_sample_row = _get_sparse_row(sample, data_y, pointers_y, indices_y)
         for i in range(k):
-            col_idx = top_neighbor_indices[i]
+            col_idx = top_neighbour_indices[i]
             ith_y_row = _get_sparse_row(col_idx, data_y, pointers_y, indices_y)
             tdist = _numba_distance_target(y_sample_row, ith_y_row,
                                            mlc_distance)
@@ -315,7 +314,7 @@ def _compiled_multi_label_classification_update_weights(
             # skipping those for which the update is ill defined
             continue
         sample_row = _get_sparse_row(sample, data, pointers, indices)
-        for j in range(number_of_columns):
+        for j in range(number_of_columns): # The update step
             descriptive_diffs = np.abs(sample_row[j] -
                                        nearest_neighbours[:, j])
             if use_average_neighbour:
@@ -332,6 +331,7 @@ def _compiled_multi_label_classification_update_weights(
         if i_sample + 1 == num_iter[num_iter_position]:
             weights_final[num_iter_position, :] = weights
             num_iter_position += 1
+
     return weights_final
 
 
