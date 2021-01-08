@@ -151,9 +151,12 @@ def _compiled_classification_update_weights(
                              dtype=np.float64)
     weights = np.zeros(number_of_columns, dtype=np.float64)  # current weights
     num_iter_position = 0
+    kvec = np.zeros(len(samples) * len(class_first_indices[:-1]))
+    kvx = 0
     for i_sample, sample in enumerate(samples):
         considered_class = examples_to_class[sample]
         for c, number_of_samples in enumerate(class_first_indices[:-1]):
+            kvx+=1
             first_index = class_first_indices[c]
             last_index = class_first_indices[c + 1]
             members = class_members[first_index:last_index]
@@ -170,6 +173,7 @@ def _compiled_classification_update_weights(
                 diffs = np.diff(sorted_distances)
                 if len(diffs) > 0:
                     k = np.argmax(diffs) + 1
+                kvec[kvx] = k
             if considered_class == c:
                 offset = 1  # ignore itself when computing the neighbours
                 prior = -1.0  # 1 negative, so the weight gets lower for hits
@@ -201,7 +205,7 @@ def _compiled_classification_update_weights(
         if i_sample + 1 == num_iter[num_iter_position]:
             weights_final[num_iter_position, :] = weights
             num_iter_position = num_iter_position + 1
-    return weights_final
+    return weights_final, kvec
 
 
 @jit(nopython=True)
@@ -583,7 +587,7 @@ class ReliefE:
         if self.verbose:
             logging.info(message)
 
-    def fit(self, x, y, embedding_method=None):
+    def fit(self, x, y, embedding_method=None, store_neighborhoods = None):
         """
         Key idea of ReliefE:
         embed the instance space. Compute mean embedding for each of the classes.
@@ -592,9 +596,14 @@ class ReliefE:
 
         :param x: Feature space, array-like.
         :param y: Target space, a 0/1 array-like structure (1-hot encoded for classification).
+        :param embedding_method: Custom embedding class (e.g., TruncatedSVD())
+        :param store_neighborhoods: File to store adaptive k values to for ablation.
         :return: None.
         """
 
+        if not store_neighborhoods is None:
+            self.store_neighborhoods = store_neighborhoods
+            
         if self.verbose:
             self.send_message("Dataset shape X: {} Y: {}".format(
                 x.shape, y.shape))
@@ -805,11 +814,15 @@ class ReliefE:
         if self.task_type == TaskTypes.CLASSIFICATION:
             if self.verbose:
                 logging.info("Ranking (MCC) .. ")
-            weights = _compiled_classification_update_weights(
+            weights, neighborhoods = _compiled_classification_update_weights(
                 samples, self.num_iter, data, pointers, indices, class_priors,
                 self.k, pairwise_distances, class_members, examples_to_class,
                 class_first_indices, nrow_raw, ncol_raw,
                 self.determine_k_automatically, self.use_average_neighbour)
+
+            if not self.store_neighborhoods is None:
+                np.save(self.store_neighborhoods, neighborhoods)
+                
         elif self.task_type == TaskTypes.MLC:
 
             if self.mlc_distance == "cosine":
