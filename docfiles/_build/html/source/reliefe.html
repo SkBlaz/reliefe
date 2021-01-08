@@ -164,6 +164,9 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-reliefe.minimal_neighborhood_ablation">
+<span id="reliefe-minimal-neighborhood-ablation-module"></span><h2>reliefe.minimal_neighborhood_ablation module<a class="headerlink" href="#module-reliefe.minimal_neighborhood_ablation" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="module-reliefe.reliefe_classes">
 <span id="reliefe-reliefe-classes-module"></span><h2>reliefe.reliefe_classes module<a class="headerlink" href="#module-reliefe.reliefe_classes" title="Permalink to this headline">¶</a></h2>
 <p>ReliefE algorithm : Skrlj and Petkovic, 2021</p>
@@ -198,7 +201,7 @@ based on the paper: <a class="reference external" href="https://www.nature.com/a
 
 <dl class="py method">
 <dt id="reliefe.reliefe_classes.ReliefE.fit">
-<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">embedding_method</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.reliefe_classes.ReliefE.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">embedding_method</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">store_neighborhoods</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.reliefe_classes.ReliefE.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Key idea of ReliefE:
 embed the instance space. Compute mean embedding for each of the classes.
 compare, in the update step, to the joint label embedding instead of the single instance</p>
@@ -207,6 +210,8 @@ compare, in the update step, to the joint label embedding instead of the single 
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> – Feature space, array-like.</p></li>
 <li><p><strong>y</strong> – Target space, a 0/1 array-like structure (1-hot encoded for classification).</p></li>
+<li><p><strong>embedding_method</strong> – Custom embedding class (e.g., TruncatedSVD())</p></li>
+<li><p><strong>store_neighborhoods</strong> – File to store adaptive k values to for ablation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

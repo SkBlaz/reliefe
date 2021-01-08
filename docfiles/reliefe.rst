@@ -4,6 +4,14 @@ reliefe package
 Submodules
 ----------
 
+reliefe.minimal\_neighborhood\_ablation module
+----------------------------------------------
+
+.. automodule:: reliefe.minimal_neighborhood_ablation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 reliefe.reliefe\_classes module
 -------------------------------
 
