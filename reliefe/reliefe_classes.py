@@ -836,7 +836,7 @@ class ReliefE:
                 else:
                     reducer = embedding_method
                 if self.verbose:
-                    logging.info(f"Computing embedding of the output space (self.mlc_distance.")
+                    logging.info(f"Computing embedding of the output space ({self.mlc_distance})")
                 y = sparse.csr_matrix(
                     reducer.fit(y[indices_sample]).transform(y))
 
