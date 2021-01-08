@@ -156,7 +156,7 @@ def _compiled_classification_update_weights(
     for i_sample, sample in enumerate(samples):
         considered_class = examples_to_class[sample]
         for c, number_of_samples in enumerate(class_first_indices[:-1]):
-            kvx+=1
+            kvx += 1
             first_index = class_first_indices[c]
             last_index = class_first_indices[c + 1]
             members = class_members[first_index:last_index]
@@ -289,23 +289,25 @@ def _compiled_multi_label_classification_update_weights(
         ith_sample_row = _get_sparse_row(sample, data, pointers, indices)
         for i_neighbour in range(n_examples):
             neigh_row = _get_sparse_row(i_neighbour, data, pointers, indices)
-            internal_distance = _numba_distance(ith_sample_row, neigh_row,
-                                                pairwise_distances) # Distance computation
+            internal_distance = _numba_distance(
+                ith_sample_row, neigh_row,
+                pairwise_distances)  # Distance computation
             distances[i_neighbour] = internal_distance
         top_neighbour_indices = np.argsort(distances)
-        if determine_k_automatically: # Adaptive k estimation.
+        if determine_k_automatically:  # Adaptive k estimation.
             sorted_distances = distances[top_neighbour_indices]
             diffs = np.diff(sorted_distances)
             if len(diffs) > 0:
                 k = np.argmax(diffs) + 1
-        top_neighbour_indices = top_neighbour_indices[1:k+1]
+        top_neighbour_indices = top_neighbour_indices[1:k + 1]
         nearest_neighbours = np.zeros(
             (len(top_neighbour_indices), ndim_via_pointer))
-        for enx, tnm in enumerate(top_neighbour_indices): # Traverse the neighbor index map
+        for enx, tnm in enumerate(
+                top_neighbour_indices):  # Traverse the neighbor index map
             rx = _get_sparse_row(tnm, data, pointers, indices)
             assert rx.shape[0] == nearest_neighbours.shape[1]
             nearest_neighbours[enx] = rx
-        target_diffs = np.zeros(k) # Update weights
+        target_diffs = np.zeros(k)  # Update weights
         y_sample_row = _get_sparse_row(sample, data_y, pointers_y, indices_y)
         for i in range(k):
             col_idx = top_neighbour_indices[i]
@@ -318,7 +320,7 @@ def _compiled_multi_label_classification_update_weights(
             # skipping those for which the update is ill defined
             continue
         sample_row = _get_sparse_row(sample, data, pointers, indices)
-        for j in range(number_of_columns): # The update step
+        for j in range(number_of_columns):  # The update step
             descriptive_diffs = np.abs(sample_row[j] -
                                        nearest_neighbours[:, j])
             if use_average_neighbour:
@@ -587,7 +589,7 @@ class ReliefE:
         if self.verbose:
             logging.info(message)
 
-    def fit(self, x, y, embedding_method=None, store_neighborhoods = None):
+    def fit(self, x, y, embedding_method=None, store_neighborhoods=None):
         """
         Key idea of ReliefE:
         embed the instance space. Compute mean embedding for each of the classes.
@@ -603,7 +605,7 @@ class ReliefE:
 
         if not store_neighborhoods is None:
             self.store_neighborhoods = store_neighborhoods
-            
+
         if self.verbose:
             self.send_message("Dataset shape X: {} Y: {}".format(
                 x.shape, y.shape))
@@ -614,7 +616,7 @@ class ReliefE:
             self.send_message(
                 "Subsampling to {} instances.".format(subsamples))
             unique_indice_maps = {}
-            
+
             if y.ndim > 1:
                 # MLC
                 for j in range(y.shape[0]):
@@ -652,7 +654,7 @@ class ReliefE:
             indices_sample = list(range(x.shape[0]))
 
         ts = time.time()
-        
+
         # sparsify the input matrix some more
         sparsity_var = len(
             x_sampled.nonzero()[0]) / (x_sampled.shape[1] * x_sampled.shape[0])
@@ -711,7 +713,8 @@ class ReliefE:
 
             class_counts = np.array(np.sum(y, axis=0).tolist())[0]
             class_priors = np.array(class_counts) / n_examples
-            class_members, examples_to_class, class_first_indices = ReliefE.compute_members(y)
+            class_members, examples_to_class, class_first_indices = ReliefE.compute_members(
+                y)
 
         elif self.task_type == TaskTypes.MLC:
             class_counts = np.array(
@@ -755,17 +758,19 @@ class ReliefE:
             try:
                 if self.verbose:
                     logging.info("Computing embedding of the input space.")
-                    
+
                 x_sampled = sparse.csr_matrix(x_sampled)
                 reducer.fit(x_sampled)
-                
+
                 if self.verbose:
                     logging.info("Transforming the origin space.")
                 try:
                     # In most cases this works with sparse.csr fine.
                     transf_um = reducer.transform(x)
                 except Exception as es:
-                    logging.info(f"Umap datatype not recognized, reverting to dense matrix algebra for the .transform(), exception: {es}")                    
+                    logging.info(
+                        f"Umap datatype not recognized, reverting to dense matrix algebra for the .transform(), exception: {es}"
+                    )
                     transf_um = reducer.transform(x.todense())
                 x_embedded = sparse.csr_matrix(transf_um)
                 self.send_message("Embedding obtained.")
@@ -773,11 +778,12 @@ class ReliefE:
             except Exception as es:
                 self.send_message(es)
                 x_embedded = sparse.csr_matrix(x)
-                self.send_message("WARNING! Embedding not obtained; reverting to origin space. This could be due to the improper input formatting.")
+                self.send_message(
+                    "WARNING! Embedding not obtained; reverting to origin space. This could be due to the improper input formatting."
+                )
 
             if self.normalize:
                 x_embedded = normalize(x_embedded)  # l2 norm
-
 
         else:
 
@@ -792,7 +798,7 @@ class ReliefE:
                 factors = np.asarray(factors)[0]
                 diags = sparse.diags(1 / factors)
                 x_embedded = x_embedded.dot(diags)
-            
+
         ts2 = time.time()
         self.timed["embedding"] = ts2 - ts
 
@@ -822,7 +828,7 @@ class ReliefE:
 
             if not self.store_neighborhoods is None:
                 np.save(self.store_neighborhoods, neighborhoods)
-                
+
         elif self.task_type == TaskTypes.MLC:
 
             if self.mlc_distance == "cosine":
@@ -843,7 +849,9 @@ class ReliefE:
                 else:
                     reducer = embedding_method
                 if self.verbose:
-                    logging.info(f"Computing embedding of the output space ({self.mlc_distance})")
+                    logging.info(
+                        f"Computing embedding of the output space ({self.mlc_distance})"
+                    )
                 y = sparse.csr_matrix(
                     reducer.fit(y[indices_sample]).transform(y))
 
