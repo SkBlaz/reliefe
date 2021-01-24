@@ -1,5 +1,6 @@
 Installation
 ===============
+Current `numba`-based implementation requires python < 3.9.
 
 To install the stable version of the code, you can try:
 
