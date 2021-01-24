@@ -4,4 +4,4 @@ This repository hosts the implementation of the ReliefE idea, suitable both for 
 
 ![Scheme](images/scheme.png)
 
-To get started with ReliefE, please consult the [documentation pages](https://reliefe.readthedocs.io/en/latest/)
+To get started with ReliefE, please consult the [documentation pages](https://skblaz.github.io/reliefe/)
