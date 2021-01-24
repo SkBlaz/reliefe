@@ -14,7 +14,7 @@ def test_custom_embedding():
     mat_obj = sio.loadmat("../data/mcc/chess.mat")
     x = mat_obj['input_space']
     y = mat_obj['target_space']  ## this is not one hot for scc
-    assert y.shape[1] > 1
+    y = y.reshape(-1)
     reliefe_instance = reliefe.ReliefE(embedding_based_distances=True,
                                        verbose=True,
                                        use_average_neighbour=False,
@@ -89,12 +89,7 @@ def test_experiment_mcc():
     mat_obj = sio.loadmat("../data/mcc/chess.mat")
     x = mat_obj['input_space']
     y = mat_obj['target_space']  ## this is not one hot for scc
-
-    if y.shape[1] >= 2 and "scipy.sparse" in type(y).__module__:
-        y = np.array(np.argmax(y, axis=1)).reshape(-1)
-
-    else:
-        y = np.array(y).reshape(-1)
+    y = y.reshape(-1)
 
     wrange = []
     for u in range(x.shape[0]):
@@ -159,3 +154,6 @@ def test_experiment_arff_mlc():
     relief_b3_instance.fit(x_train, y_train)
     importances2 = relief_b3_instance.feature_importances_
     print(importances2)
+
+if __name__ == "__main__":
+    test_experiment_arff_mlc()

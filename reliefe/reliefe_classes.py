@@ -603,9 +603,6 @@ class ReliefE:
         :return: None.
         """
 
-        if not store_neighborhoods is None:
-            self.store_neighborhoods = store_neighborhoods
-
         if self.verbose:
             self.send_message("Dataset shape X: {} Y: {}".format(
                 x.shape, y.shape))
@@ -826,8 +823,8 @@ class ReliefE:
                 class_first_indices, nrow_raw, ncol_raw,
                 self.determine_k_automatically, self.use_average_neighbour)
 
-            if not self.store_neighborhoods is None:
-                np.save(self.store_neighborhoods, neighborhoods)
+            if not store_neighborhoods is None:
+                np.save(store_neighborhoods, neighborhoods)
 
         elif self.task_type == TaskTypes.MLC:
 
