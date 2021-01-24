@@ -1,0 +1,490 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>reliefe package &mdash; ReliefE  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Using custom embeddings" href="custom_embeddings.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> ReliefE
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">About:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="key_idea.html">Key idea behind ReliefE</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial and first steps:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_idea.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_types.html">Multiclass and multilabel classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reliefe_types.html">ReliefE Hyperparameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_embeddings.html">Using custom embeddings</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">reliefe package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-reliefe.minimal_neighborhood_ablation">reliefe.minimal_neighborhood_ablation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-reliefe.reliefe_classes">reliefe.reliefe_classes module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-reliefe.reliefe_evaluation">reliefe.reliefe_evaluation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-reliefe.utils">reliefe.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-reliefe">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ReliefE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>reliefe package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/reliefe.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="reliefe-package">
+<h1>reliefe package<a class="headerlink" href="#reliefe-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-reliefe.minimal_neighborhood_ablation">
+<span id="reliefe-minimal-neighborhood-ablation-module"></span><h2>reliefe.minimal_neighborhood_ablation module<a class="headerlink" href="#module-reliefe.minimal_neighborhood_ablation" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-reliefe.reliefe_classes">
+<span id="reliefe-reliefe-classes-module"></span><h2>reliefe.reliefe_classes module<a class="headerlink" href="#module-reliefe.reliefe_classes" title="Permalink to this headline">¶</a></h2>
+<p>ReliefE algorithm : Skrlj and Petkovic, 2021</p>
+<dl class="py class">
+<dt id="reliefe.reliefe_classes.ReliefE">
+<em class="property">class </em><code class="sig-prename descclassname">reliefe.reliefe_classes.</code><code class="sig-name descname">ReliefE</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_iter</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>float<span class="p">, </span>int<span class="p">, </span>List<span class="p">[</span>Union<span class="p">[</span>float<span class="p">, </span>int<span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">k</span><span class="o">=</span><span class="default_value">8</span></em>, <em class="sig-param"><span class="n">normalize_descriptive</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">embedding_based_distances</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">num_threads</span><span class="o">=</span><span class="default_value">'all'</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">mlc_distance</span><span class="o">=</span><span class="default_value">'cosine'</span></em>, <em class="sig-param"><span class="n">latent_dimension</span><span class="o">=</span><span class="default_value">128</span></em>, <em class="sig-param"><span class="n">sparsity_threshold</span><span class="o">=</span><span class="default_value">0.15</span></em>, <em class="sig-param"><span class="n">determine_k_automatically</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">samples</span><span class="o">=</span><span class="default_value">2048</span></em>, <em class="sig-param"><span class="n">use_average_neighbour</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.reliefe_classes.ReliefE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="reliefe.reliefe_classes.ReliefE.compute_members">
+<em class="property">static </em><code class="sig-name descname">compute_members</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.reliefe_classes.ReliefE.compute_members" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="reliefe.reliefe_classes.ReliefE.determine_latent_dim">
+<code class="sig-name descname">determine_latent_dim</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xs</span></em>, <em class="sig-param"><span class="n">true_dim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">empirical_left_continuous</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">metric</span><span class="o">=</span><span class="default_value">'euclidean'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.reliefe_classes.ReliefE.determine_latent_dim" title="Permalink to this definition">¶</a></dt>
+<dd><p>A method for computing the latent dimension,
+based on the paper: <a class="reference external" href="https://www.nature.com/articles/s41598-017-11873-y.pdf">https://www.nature.com/articles/s41598-017-11873-y.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xs</strong> – data matrix X</p></li>
+<li><p><strong>true_dim</strong> – the actual dimension or None</p></li>
+<li><p><strong>empirical_left_continuous</strong> – Whether only left continous part shall be considered.</p></li>
+<li><p><strong>metric</strong> – The metric to compute the distances.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Latent dimension.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="reliefe.reliefe_classes.ReliefE.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">embedding_method</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">store_neighborhoods</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.reliefe_classes.ReliefE.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key idea of ReliefE:
+embed the instance space. Compute mean embedding for each of the classes.
+compare, in the update step, to the joint label embedding instead of the single instance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Feature space, array-like.</p></li>
+<li><p><strong>y</strong> – Target space, a 0/1 array-like structure (1-hot encoded for classification).</p></li>
+<li><p><strong>embedding_method</strong> – Custom embedding class (e.g., TruncatedSVD())</p></li>
+<li><p><strong>store_neighborhoods</strong> – File to store adaptive k values to for ablation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="reliefe.reliefe_classes.ReliefE.send_message">
+<code class="sig-name descname">send_message</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">message</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.reliefe_classes.ReliefE.send_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.reliefe_classes.sgn">
+<code class="sig-prename descclassname">reliefe.reliefe_classes.</code><code class="sig-name descname">sgn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">el</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.reliefe_classes.sgn" title="Permalink to this definition">¶</a></dt>
+<dd><p>The standard sgn function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>el</strong> – float input</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sign of the number</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-reliefe.reliefe_evaluation">
+<span id="reliefe-reliefe-evaluation-module"></span><h2>reliefe.reliefe_evaluation module<a class="headerlink" href="#module-reliefe.reliefe_evaluation" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="reliefe.reliefe_evaluation.evaluate_importances_with_logistic_regression">
+<code class="sig-prename descclassname">reliefe.reliefe_evaluation.</code><code class="sig-name descname">evaluate_importances_with_logistic_regression</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_train</span></em>, <em class="sig-param"><span class="n">x_test</span></em>, <em class="sig-param"><span class="n">y_train</span></em>, <em class="sig-param"><span class="n">y_test</span></em>, <em class="sig-param"><span class="n">importances</span></em>, <em class="sig-param"><span class="n">k</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.reliefe_evaluation.evaluate_importances_with_logistic_regression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-reliefe.utils">
+<span id="reliefe-utils-module"></span><h2>reliefe.utils module<a class="headerlink" href="#module-reliefe.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="reliefe.utils.MLCDistances">
+<em class="property">class </em><code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">MLCDistances</code><a class="headerlink" href="#reliefe.utils.MLCDistances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="reliefe.utils.MLCDistances.ACCURACY">
+<code class="sig-name descname">ACCURACY</code><em class="property"> = 'accuracy'</em><a class="headerlink" href="#reliefe.utils.MLCDistances.ACCURACY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="reliefe.utils.MLCDistances.DISTANCES">
+<code class="sig-name descname">DISTANCES</code><em class="property"> = ['hamming', 'f1', 'accuracy', 'subset', 'cosine', 'hyperbolic']</em><a class="headerlink" href="#reliefe.utils.MLCDistances.DISTANCES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="reliefe.utils.MLCDistances.F1">
+<code class="sig-name descname">F1</code><em class="property"> = 'f1'</em><a class="headerlink" href="#reliefe.utils.MLCDistances.F1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="reliefe.utils.MLCDistances.HAMMING">
+<code class="sig-name descname">HAMMING</code><em class="property"> = 'hamming'</em><a class="headerlink" href="#reliefe.utils.MLCDistances.HAMMING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="reliefe.utils.MLCDistances.SUBSET">
+<code class="sig-name descname">SUBSET</code><em class="property"> = 'subset'</em><a class="headerlink" href="#reliefe.utils.MLCDistances.SUBSET" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="reliefe.utils.TaskTypes">
+<em class="property">class </em><code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">TaskTypes</code><a class="headerlink" href="#reliefe.utils.TaskTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="reliefe.utils.TaskTypes.CLASSIFICATION">
+<code class="sig-name descname">CLASSIFICATION</code><em class="property"> = 'classification'</em><a class="headerlink" href="#reliefe.utils.TaskTypes.CLASSIFICATION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="reliefe.utils.TaskTypes.HMLC">
+<code class="sig-name descname">HMLC</code><em class="property"> = 'hierarchical multi-label classification'</em><a class="headerlink" href="#reliefe.utils.TaskTypes.HMLC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="reliefe.utils.TaskTypes.MLC">
+<code class="sig-name descname">MLC</code><em class="property"> = 'multi-label classification'</em><a class="headerlink" href="#reliefe.utils.TaskTypes.MLC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="reliefe.utils.TaskTypes.REGRESSION">
+<code class="sig-name descname">REGRESSION</code><em class="property"> = 'regression'</em><a class="headerlink" href="#reliefe.utils.TaskTypes.REGRESSION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.aggregate_nom">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">aggregate_nom</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.aggregate_nom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.aggregate_num">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">aggregate_num</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.aggregate_num" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.basic_parse_sparse_line">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">basic_parse_sparse_line</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">line</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.basic_parse_sparse_line" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.feature_ranking_wrapper">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">feature_ranking_wrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_arff</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">descriptive_indices</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>None<span class="p">, </span>List<span class="p">[</span>int<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">target_index</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>None<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">feature_ranking</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.feature_ranking_wrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes care of the datasets that contain nominal attributes:
+- loads the data from arff file and 1-hot encode the nominal features
+- computed the relevance of the transformed features
+- compute the relevance of original features by summing up the relevance of the 1-hot encoded groups</p>
+<p>E.g., if the data has two features: x1 which is numeric and x2 which can take values A, B, and C, the pipeline
+is like this:
+- load data which has now 4 features: x1, x2-A, x2-B, x2-C (e.g., if originally, the first example is 2.3,B,</p>
+<blockquote>
+<div><p>the converted example is 2.3,0,1,0.)</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>compute relevance for the transformed features, e.g., [0.1, 0.2, 0.3, 0.05]</p></li>
+<li><p>compute relevance for the original features: [0.1, 0.55], since 0.2 + 0.3 + 0.05 = 0.55.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.get_task_type">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">get_task_type</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target_attributes_values</span><span class="p">:</span> <span class="n">List<span class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.get_task_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the task type from the possible attribute values.
+:param target_attributes_values:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.impute_missing_values">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">impute_missing_values</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">column</span></em>, <em class="sig-param"><span class="n">possible_values</span></em>, <em class="sig-param"><span class="n">is_numeric</span></em>, <em class="sig-param"><span class="n">missing_char_nom</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.impute_missing_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces missing_char_nom for nominal and np.NaNs for numeric attributes with the modes and averages.
+This is done in-place.
+:param column: list of values
+:param possible_values: empty for numeric (and ignored), and list of possible values otherwise
+:param is_numeric: is the attribute numeric
+:param missing_char_nom: character that denotes missing nominal value
+:return: number of missing values</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.is_one_based_sparse_arff">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">is_one_based_sparse_arff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_data</span></em>, <em class="sig-param"><span class="n">n_attributes</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.is_one_based_sparse_arff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the data is given in sparse format. If it is, determines whether the attribute indices
+are 0- or 1-based
+:param path_to_data:
+:param n_attributes:
+:return: (True/False, 0/1) The second component is not used if the arff is not sparse, i.e., if the first component
+(equals True).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.load_arff">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">load_arff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_data</span></em>, <em class="sig-param"><span class="n">descriptive_indices</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">target_indices</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>int<span class="p">, </span>List<span class="p">[</span>int<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">missing_character</span><span class="o">=</span><span class="default_value">'?'</span></em>, <em class="sig-param"><span class="n">impute_missing</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.load_arff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads arff in sparse or dense form. Nominal attributes (descriptive or target) are 1-hot encoded.</p>
+<p>Due to some inconsistencies in use of quotation marks, of data-creators, single and double quotation marks
+are simply removed prior to any processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_to_data</strong> – path to arff</p></li>
+<li><p><strong>descriptive_indices</strong> – list of 0-based indices of descriptive attributes</p></li>
+<li><p><strong>target_indices</strong> – analogue of descriptive indices. Can be a single number.</p></li>
+<li><p><strong>missing_character</strong> – character that denotes missing value in the arff</p></li>
+<li><p><strong>impute_missing</strong> – should missing values be imputed? Is so, simple per-column means/modes are computed.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Otherwise, missing numeric values are converted to np.NaNs.
+:return: descriptive matrix (dense), target matrix (sparse), attribute_ranges
+The ranges are given as a dictionary {index of original descriptive attribute: (start, end), …},
+where columns with indices in range(start, end) in descriptive matrix belong to the descriptive attribute.
+For example, if the attribute was originally numeric, then start = end - 1.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.measure_time">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">measure_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.measure_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.read_meta">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">read_meta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dframe</span></em>, <em class="sig-param"><span class="n">specs</span><span class="o">=</span><span class="default_value">'dataset_specifications.txt'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.read_meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.show_arff_attributes">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">show_arff_attributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_data</span></em>, <em class="sig-param"><span class="n">k</span><span class="o">=</span><span class="default_value">5</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.show_arff_attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="reliefe.utils.test_stuff">
+<code class="sig-prename descclassname">reliefe.utils.</code><code class="sig-name descname">test_stuff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_first</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">test_second</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#reliefe.utils.test_stuff" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-reliefe">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-reliefe" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="custom_embeddings.html" class="btn btn-neutral float-left" title="Using custom embeddings" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Blaz Skrlj, Matej Petkovic
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

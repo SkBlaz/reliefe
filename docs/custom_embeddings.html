@@ -1,0 +1,259 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Using custom embeddings &mdash; ReliefE  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="reliefe package" href="reliefe.html" />
+    <link rel="prev" title="ReliefE Hyperparameters" href="reliefe_types.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> ReliefE
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">About:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="key_idea.html">Key idea behind ReliefE</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial and first steps:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_idea.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_types.html">Multiclass and multilabel classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reliefe_types.html">ReliefE Hyperparameters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using custom embeddings</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="reliefe.html">reliefe package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ReliefE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Using custom embeddings</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/custom_embeddings.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="using-custom-embeddings">
+<h1>Using custom embeddings<a class="headerlink" href="#using-custom-embeddings" title="Permalink to this headline">¶</a></h1>
+<p>UMAP is only one of many possible embedding techniques that can be exploited by ReliefE. The following example shows how SVD-based representations can be used in the very same manner as e.g., the UMAP-based ones.</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">reliefe</span>
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">sio</span>
+<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">TruncatedSVD</span>
+
+<span class="n">mat_obj</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="s2">&quot;../data/mcc/chess.mat&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">mat_obj</span><span class="p">[</span><span class="s1">&#39;input_space&#39;</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">mat_obj</span><span class="p">[</span><span class="s1">&#39;target_space&#39;</span><span class="p">]</span>  <span class="c1">## this is not one hot for scc</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="n">reliefe_instance</span> <span class="o">=</span> <span class="n">reliefe</span><span class="o">.</span><span class="n">ReliefE</span><span class="p">(</span><span class="n">embedding_based_distances</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Simply provide a sklearn-like transform object</span>
+<span class="n">emb_custom</span> <span class="o">=</span> <span class="n">TruncatedSVD</span><span class="p">()</span> <span class="c1"># Let&#39;s do SVD</span>
+
+<span class="c1"># Provide it as the &quot;embedding_method&quot; parameter</span>
+<span class="n">reliefe_instance</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">embedding_method</span> <span class="o">=</span> <span class="n">emb_custom</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">reliefe_instance</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns the following ranking:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="mf">3.27528470e-04</span>  <span class="mf">8.12616155e-04</span>  <span class="mf">3.15436806e-04</span>  <span class="mf">0.00000000e+00</span>
+  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">2.39045842e-04</span> <span class="o">-</span><span class="mf">5.65957574e-04</span>
+  <span class="mf">1.93557981e-04</span> <span class="o">-</span><span class="mf">4.57150539e-04</span>  <span class="mf">1.47203139e-04</span> <span class="o">-</span><span class="mf">3.43643779e-04</span>
+  <span class="mf">9.86991482e-05</span> <span class="o">-</span><span class="mf">2.30556572e-04</span>  <span class="mf">4.88615029e-05</span> <span class="o">-</span><span class="mf">1.14931228e-04</span>
+  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>
+  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>
+  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>
+  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>
+  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>
+  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="reliefe.html" class="btn btn-neutral float-right" title="reliefe package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="reliefe_types.html" class="btn btn-neutral float-left" title="ReliefE Hyperparameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Blaz Skrlj, Matej Petkovic
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting started &mdash; ReliefE  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Multiclass and multilabel classification" href="task_types.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> ReliefE
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">About:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="key_idea.html">Key idea behind ReliefE</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial and first steps:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_types.html">Multiclass and multilabel classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reliefe_types.html">ReliefE Hyperparameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_embeddings.html">Using custom embeddings</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="reliefe.html">reliefe package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ReliefE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Getting started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/core_idea.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>The key idea behind ReliefE is simplicity. The purpose of this library is to offer off-the-shelf
+functionality not supported elsewhere, with minimal user effort.
+The data used in the example is accessible at: <a class="reference external" href="https://github.com/SkBlaz/reliefe/tree/master/data">https://github.com/SkBlaz/reliefe/tree/master/data</a></p>
+<p>The minimal example is given next.</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">reliefe</span>
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">sio</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># Load the data first</span>
+<span class="n">mat_obj</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="s2">&quot;data/mcc/chess.mat&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">mat_obj</span><span class="p">[</span><span class="s1">&#39;input_space&#39;</span><span class="p">]</span> <span class="c1">## scipy csr sparse matrix (or numpy dense)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">mat_obj</span><span class="p">[</span><span class="s1">&#39;target_space&#39;</span><span class="p">]</span>  <span class="c1">## scipy csr sparse matrix (or numpy dense)</span>
+
+<span class="c1"># Fully fledged ReliefE (with all functionality)</span>
+<span class="n">reliefE_instance</span> <span class="o">=</span> <span class="n">reliefe</span><span class="o">.</span><span class="n">ReliefE</span><span class="p">()</span> <span class="c1"># Initialize default ReliefE</span>
+<span class="n">reliefE_instance</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="c1"># Compute rankings</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">reliefE_instance</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">)</span> <span class="c1"># rankings for features (same order as x)</span>
+</pre></div>
+</div>
+<p>Returns the following ranking:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="mf">9.89309972e-003</span>  <span class="mf">1.20427974e-002</span>  <span class="mf">1.34322081e-002</span>  <span class="mf">9.30750360e-003</span>
+  <span class="mf">4.11818629e-003</span>  <span class="mf">1.60451980e-002</span>  <span class="mf">3.65662586e-003</span>  <span class="mf">4.95127759e-003</span>
+ <span class="o">-</span><span class="mf">1.21291185e+304</span> <span class="o">-</span><span class="mf">1.21724878e+304</span> <span class="o">-</span><span class="mf">5.00084339e+302</span> <span class="o">-</span><span class="mf">1.19073976e+293</span>
+  <span class="mf">3.64385300e+226</span> <span class="o">-</span><span class="mf">3.60334541e+266</span> <span class="o">-</span><span class="mf">3.85113882e+293</span>  <span class="mf">1.38678002e-003</span>
+ <span class="o">-</span><span class="mf">1.21291185e+304</span> <span class="o">-</span><span class="mf">1.21724878e+304</span> <span class="o">-</span><span class="mf">1.12834143e+303</span> <span class="o">-</span><span class="mf">2.91441558e+302</span>
+ <span class="o">-</span><span class="mf">3.06704357e+247</span>  <span class="mf">1.81048784e+303</span>  <span class="mf">1.65435470e+303</span>  <span class="mf">1.65414412e+303</span>
+ <span class="o">-</span><span class="mf">1.21291185e+304</span> <span class="o">-</span><span class="mf">1.21724542e+304</span>  <span class="mf">0.00000000e+000</span> <span class="o">-</span><span class="mf">2.91441558e+302</span>
+ <span class="o">-</span><span class="mf">1.57470695e+298</span>  <span class="mf">1.31441274e+302</span> <span class="o">-</span><span class="mf">2.39764884e+301</span> <span class="o">-</span><span class="mf">1.83316404e+302</span>
+ <span class="o">-</span><span class="mf">1.21290833e+304</span> <span class="o">-</span><span class="mf">1.21724481e+304</span>  <span class="mf">0.00000000e+000</span> <span class="o">-</span><span class="mf">2.91441558e+302</span>
+ <span class="o">-</span><span class="mf">3.15257597e+298</span> <span class="o">-</span><span class="mf">2.46423553e+301</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="task_types.html" class="btn btn-neutral float-right" title="Multiclass and multilabel classification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Blaz Skrlj, Matej Petkovic
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
