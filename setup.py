@@ -12,9 +12,9 @@ def parse_requirements(file):
 
 packages = [x for x in find_packages() if x != "test"]
 setup(name='reliefe',
-      version='0.14',
+      version='0.15',
       description="ReliefE: Feature ranking via manifold embeddings",
-      url='https://github.com/reliefe/reliefe',
+      url='https://github.com/skblaz/reliefe',
       python_requires='<3.9.0',
       author='Blaž Škrlj and Matej Petković',
       author_email='matej.petkovic@ijs.si',
