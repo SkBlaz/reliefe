@@ -7,7 +7,7 @@ y = mat_obj['target_space']  ## this is not one hot for scc
 wrange = []
 
 # Fully fledged MLC - ReliefE (with all functionality)
-reliefE_instance = reliefe.ReliefE(embedding_based_distances=False,
+reliefE_instance = reliefe.ReliefE(embedding_based_distances=True,
                                    verbose=True,
                                    use_average_neighbour=False,
                                    determine_k_automatically=False,
