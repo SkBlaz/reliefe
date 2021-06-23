@@ -17,6 +17,7 @@ except:
     )
 
 from sklearn.preprocessing import OneHotEncoder, normalize
+from sklearn.decomposition import TruncatedSVD
 from scipy.sparse import csr_matrix
 from typing import Union, List
 from numba import jit, prange
@@ -153,6 +154,7 @@ def _compiled_classification_update_weights(
     num_iter_position = 0
     kvec = np.zeros(len(samples) * len(class_first_indices[:-1]))
     kvx = 0
+    
     for i_sample, sample in enumerate(samples):
         considered_class = examples_to_class[sample]
         for c, number_of_samples in enumerate(class_first_indices[:-1]):
@@ -180,7 +182,7 @@ def _compiled_classification_update_weights(
             else:
                 offset = 0
                 prior = priors[c] / (1 - priors[considered_class])
-            top_neighbors = top_neighbour_indices[offset:k + offset]
+            top_neighbors = top_neighbour_indices[offset:k + offset] ## nnum added in >0.16 -> it's more stable.
             top_neighbor_members = members[top_neighbors]
             nearest_neighbours = np.zeros(
                 (len(top_neighbor_members), ndim_via_pointer))
@@ -345,15 +347,18 @@ class ReliefE:
     def __init__(self,
                  num_iter: Union[float, int, List[Union[float, int]]] = 1.0,
                  k=8,
+                 embedder_k = 10,
                  normalize_descriptive=True,
                  embedding_based_distances=False,
                  num_threads="all",
                  verbose=False,
                  mlc_distance="cosine",
+                 embedding_algorithm = "",
                  latent_dimension=128,
                  sparsity_threshold=0.15,
                  determine_k_automatically=False,
                  samples=2048,
+                 LD_friendly = True,
                  use_average_neighbour=False):
         """
         Initiate the Relief object. Some standard parameters can be assigned:
@@ -361,6 +366,7 @@ class ReliefE:
 
         :param num_iter: Number of iterations
         :param k: Number of neighbors
+        :param embedder_k: The embedding algorithm's hyperparameter
         :param normalize_descriptive:
         :param embedding_based_distances:
         :param num_threads: Number of parallel threads
@@ -370,6 +376,7 @@ class ReliefE:
         :param determine_k_automatically: Should k be determined automatically?
         :param use_average_neighbour: Should a) compute the average neighbour, and b) perform weight updates with it?
         Note that standard Relief a) uses all neighbours, b) performs updates, and c) averages the updates
+        :param LD_friendly: If data dimension is small, ReliefF implementation is more stable, switch to that. Note that ReliefE was built for very HD problems.
         update
         :return: None.
         """
@@ -378,6 +385,8 @@ class ReliefE:
         self.determine_k_automatically = determine_k_automatically
         self.latent_dimension = latent_dimension
         self.k = k
+        self.LD_friendly = LD_friendly
+        self.embedder_k = embedder_k
         self.normalize = normalize_descriptive
         self.embedding_based_distances = embedding_based_distances
         self.verbose = verbose
@@ -589,7 +598,7 @@ class ReliefE:
         if self.verbose:
             logging.info(message)
 
-    def fit(self, x, y, embedding_method=None, store_neighborhoods=None):
+    def fit(self, x, y, embedding_method="UMAP", store_neighborhoods=None):
         """
         Key idea of ReliefE:
         embed the instance space. Compute mean embedding for each of the classes.
@@ -603,6 +612,10 @@ class ReliefE:
         :return: None.
         """
 
+        if self.verbose:
+            if self.embedding_based_distances:
+                self.send_message(f"Running ReliefE with embedder: {embedding_method}.")
+        
         if self.verbose:
             self.send_message("Dataset shape X: {} Y: {}".format(
                 x.shape, y.shape))
@@ -644,7 +657,6 @@ class ReliefE:
 
             indices_sample = np.array(indices_sample)
             x_sampled = x[indices_sample]
-            #y = y[indices_sample]
 
         else:
             x_sampled = x
@@ -731,6 +743,14 @@ class ReliefE:
         self.timed["initialization"] = ts2 - ts
 
         ts = time.time()
+        
+        latent_dim_estimate = self.determine_latent_dim(x_sampled)
+
+        if latent_dim_estimate >= x_sampled.shape[1] and self.LD_friendly:
+            if self.verbose:
+                self.send_message(f"Estimated latent dimension ({latent_dim_estimate}) larger than the initial dimensionality ({x_sampled.shape[1]}) - using the origin space directly for more stable performance.")
+            self.embedding_based_distances = False
+            
         if self.embedding_based_distances:
 
             # Project to low dim
@@ -739,12 +759,26 @@ class ReliefE:
             if self.verbose:
                 logging.info(
                     "Latent dimension of the input space being computed .. ")
-            latent_dim = min(self.determine_latent_dim(x_sampled), 8)
-            if embedding_method is None:
+            latent_dim = min(latent_dim_estimate, x_sampled.shape[1]-1)
+
+            if self.verbose:
+                if latent_dim >= x_sampled.shape[1]-1:
+                    logging.info(f"Final latent dimension considered: {latent_dim}, as the estimated dimension > initial dimension. This data set has very few dimensions to begin with, note that ReliefE aims to solve the HD problem (LD is similar/worse due to compression loss).")
+
+                logging.info(f"Using the embedding method: {embedding_method}")  
+                    
+            if embedding_method is "UMAP":
+                if self.determine_k_automatically:
+                    self.embedder_k = int(np.cbrt(x_sampled.shape[0]))
+                    if self.verbose:
+                        logging.info(f"UMAP's k set to: {self.k}")
                 reducer = umap.UMAP(n_components=latent_dim,
-                                    n_neighbors=self.k,
+                                    n_neighbors=self.embedder_k,
                                     low_memory=True,
                                     init="spectral")
+                
+            elif embedding_method == "SVD":
+                reducer = TruncatedSVD(n_components = latent_dim)
 
             else:
                 if self.verbose:
@@ -839,7 +873,7 @@ class ReliefE:
                 # compute embedding of target space.
                 if embedding_method is None:
                     reducer = umap.UMAP(n_components=latent_dim,
-                                        n_neighbors=self.k,
+                                        n_neighbors=self.embedder_k,
                                         low_memory=True,
                                         init="spectral")
 
@@ -863,7 +897,7 @@ class ReliefE:
                 if embedding_method is None:
                     reducer = umap.UMAP(output_metric="hyperboloid",
                                         n_components=latent_dim,
-                                        n_neighbors=self.k,
+                                        n_neighbors=self.embedder_k,
                                         low_memory=True,
                                         init="spectral")
 
