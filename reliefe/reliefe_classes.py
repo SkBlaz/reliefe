@@ -481,11 +481,13 @@ class ReliefE:
                                                   rcond=None)
             latent_dim = int(round(-latent_dim[0]))
 
+            ## This algorithm under-estimates the LD -> 128 is not problematic, probably more could yield even better results (to check)
+            latent_dim = max(self.latent_dimension, latent_dim)
+
         except Exception as es:
             self.send_message(es)
-            latent_dim = min(128, xs.shape[0])
+            latent_dim = min(self.latent_dimension, xs.shape[0])
 
-        latent_dim = max(16, latent_dim)
 
         if self.verbose:
             logging.info(
@@ -756,9 +758,7 @@ class ReliefE:
             # Project to low dim
             self.send_message("Estimating embedding from {}.".format(
                 x_sampled.shape))
-            if self.verbose:
-                logging.info(
-                    "Latent dimension of the input space being computed .. ")
+
             latent_dim = min(latent_dim_estimate, x_sampled.shape[1]-1)
 
             if self.verbose:
