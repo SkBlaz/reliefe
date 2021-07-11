@@ -1,6 +1,6 @@
 # ReliefE: Feature Ranking via Manifold Embeddings
 
-This repository hosts the implementation of the ReliefE idea, suitable both for _multiclass_ and _multilabel_ **feature ranking** problems.
+This repository hosts the implementation of ReliefE idea, suitable both for _multiclass_ and _multilabel_ **feature ranking** problems.
 The paper can be cited as:
 
 ```
