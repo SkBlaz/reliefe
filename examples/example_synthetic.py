@@ -26,6 +26,7 @@ y = df.Class.astype(int).values
 
 ## ReliefE will revert to the core version in LD settings; the point of reducing the dimension makes no sense in LD; the core version is fast for this type of problems.
 reliefE_instance = reliefe.ReliefE(embedding_based_distances=True,
+                                   num_iter = 0.05, ## Few-shot?
                                    verbose=True,
                                    use_average_neighbour=True,
                                    determine_k_automatically=True)
