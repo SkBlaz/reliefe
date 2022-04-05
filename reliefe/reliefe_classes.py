@@ -19,7 +19,6 @@ except:
 from sklearn.preprocessing import OneHotEncoder, normalize
 from sklearn.decomposition import TruncatedSVD
 from scipy.sparse import csr_matrix
-from typing import Union, List
 from numba import jit, prange
 from sklearn import metrics
 from .utils import TaskTypes, MLCDistances
