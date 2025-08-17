@@ -6,12 +6,12 @@ import numpy as np
 import pytest
 from sklearn.decomposition import PCA
 
-testdata = glob.glob("../data/mlc/*")
+testdata = glob.glob("data/mlc/*")
 
 
 def test_custom_embedding():
 
-    mat_obj = sio.loadmat("../data/mcc/chess.mat")
+    mat_obj = sio.loadmat("data/mcc/chess.mat")
     x = mat_obj['input_space']
     y = mat_obj['target_space']  ## this is not one hot for scc
     y = y.reshape(-1)
@@ -86,7 +86,7 @@ def test_experiment_mlc_autok(dataset):
 
 def test_experiment_mcc():
 
-    mat_obj = sio.loadmat("../data/mcc/chess.mat")
+    mat_obj = sio.loadmat("data/mcc/chess.mat")
     x = mat_obj['input_space']
     y = mat_obj['target_space']  ## this is not one hot for scc
     y = y.reshape(-1)
@@ -112,7 +112,7 @@ def test_experiment_mcc():
 
 
 def test_experiment_arff_mlc():
-    ova = "../data/test.arff"
+    ova = "data/test.arff"
     features = [0, 1, 2, 3, 4]
     targets = [5, 6]
     x_train, y_train, _ = load_arff(ova, features, targets)
