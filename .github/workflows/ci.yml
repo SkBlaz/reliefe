@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9, '3.10', 3.11]
+      fail-fast: false
     
     steps:
     - uses: actions/checkout@v4
@@ -30,15 +31,20 @@ jobs:
       run: |
         pip install .
         
+    - name: Verify installation
+      run: |
+        python -c "import reliefe; print('ReliefE version:', reliefe.__version__ if hasattr(reliefe, '__version__') else 'unknown')"
+        
     - name: Run tests
       run: |
-        pytest tests/ -v
+        pytest tests/ -v --tb=short
         
     - name: Test main examples
       run: |
         cd examples
         export MPLBACKEND=Agg
         echo "Testing minimal_benchmark.py..."
-        python minimal_benchmark.py
+        timeout 300 python minimal_benchmark.py
         echo "Testing example_synthetic.py..."
-        python example_synthetic.py
+        timeout 300 python example_synthetic.py
+        echo "All examples completed successfully!"

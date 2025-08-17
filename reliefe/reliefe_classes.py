@@ -766,7 +766,7 @@ class ReliefE:
 
                 logging.info(f"Using the embedding method: {embedding_method}")  
                     
-            if embedding_method is "UMAP":
+            if embedding_method == "UMAP":
                 if self.determine_k_automatically:
                     self.embedder_k = int(np.cbrt(x_sampled.shape[0]))
                     if self.verbose:
