@@ -11,14 +11,14 @@ if str(ROOT) not in sys.path:
 import reliefe
 
 mat_obj = sio.loadmat(ROOT / "data" / "mcc" / "chess.mat")
-x = mat_obj['input_space'][:256]
-y = np.asarray(mat_obj['target_space']).reshape(-1)[:256]  ## this is not one hot for scc
+x = mat_obj['input_space'][:128]
+y = np.asarray(mat_obj['target_space']).reshape(-1)[:128]  ## this is not one hot for scc
 print(x.shape, y.shape)
 
 reliefe_instance = reliefe.ReliefE(embedding_based_distances=True,
                                    verbose=False,
-                                   num_iter=32,
-                                   samples=128)
+                                   num_iter=24,
+                                   samples=64)
 
 # Simply provide a sklearn-like transform object
 emb_custom = TruncatedSVD()  # Let's do SVD

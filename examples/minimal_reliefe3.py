@@ -9,18 +9,20 @@ if str(ROOT) not in sys.path:
 import reliefe
 
 x = np.array([[1.0, 0.0, 0.2, 0.0], [0.9, 0.1, 0.1, 0.0],
-              [0.0, 1.0, 0.0, 0.3], [0.1, 0.8, 0.0, 0.2],
-              [0.4, 0.4, 0.7, 0.1], [0.3, 0.5, 0.6, 0.2]])
-y = np.array([[1, 0, 1], [1, 0, 1], [0, 1, 1], [0, 1, 1], [1, 1, 0],
-              [1, 1, 0]])
+              [0.0, 1.0, 0.0, 0.0], [0.1, 0.9, 0.0, 0.0],
+              [0.0, 0.0, 1.0, 0.0], [0.0, 0.1, 0.9, 0.0],
+              [1.0, 1.0, 0.0, 0.0], [0.0, 1.0, 1.0, 0.0]])
+y = np.array([[1, 0, 0], [1, 0, 1], [0, 1, 0], [0, 1, 1], [0, 0, 1],
+              [1, 0, 1], [1, 1, 0], [0, 1, 1]])
 
 # Multi-label example with embedded input distances and embedded target space.
 reliefE_instance = reliefe.ReliefE(determine_k_automatically=False,
                                    embedding_based_distances=True,
-                                   num_iter=6,
+                                   num_iter=8,
                                    k=1,
                                    mlc_distance="cosine",
-                                   samples=6,
+                                   LD_friendly=False,
+                                   samples=8,
                                    verbose=False)
 
 reliefE_instance.fit(x, y, embedding_method="SVD")  # Compute rankings
@@ -29,10 +31,10 @@ print("Embedded input distances:",
 
 reliefE_instance = reliefe.ReliefE(determine_k_automatically=False,
                                    embedding_based_distances=False,
-                                   num_iter=6,
+                                   num_iter=8,
                                    k=1,
                                    mlc_distance="cosine",
-                                   samples=6,
+                                   samples=8,
                                    verbose=False)
 
 reliefE_instance.fit(x, y, embedding_method="SVD")

@@ -5,18 +5,18 @@ ReliefE is a Numba-accelerated feature ranking library for multiclass and multi-
 ## Install
 
 ```bash
-pip install -r requirements.txt
-pip install -e .
+uv sync
+uv sync --group dev
 ```
 
-`umap-learn` is optional at runtime if you pass `embedding_method="SVD"` or another sklearn-like embedder.
+This is a `uv`-first repository. Use the base sync for the library, and add the `dev` group when you want the test toolchain.
 
 ## Run
 
 ```bash
-python examples/minimal_reliefe2.py
-python examples/minimal_reliefe.py
-python examples/custom_embeddings.py
+uv run python examples/minimal_reliefe2.py
+uv run python examples/minimal_reliefe.py
+uv run python examples/custom_embeddings.py
 ```
 
 ## Test
@@ -32,6 +32,11 @@ make test
 - `data/`: bundled datasets used by examples and tests
 - `tests/`: standard-library smoke tests
 - `docs/`: published documentation assets
+
+## Notes
+
+- `ReliefE.fit(..., embedding_method="auto")` prefers UMAP and falls back to SVD when UMAP is unavailable.
+- The bundled examples are intentionally small enough to be used as smoke tests.
 
 ## Reference
 

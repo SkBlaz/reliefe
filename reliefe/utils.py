@@ -1,22 +1,16 @@
 # helper methods
-from typing import List, Callable, Union
-import scipy.stats
+from typing import Callable, List, Union
+import logging
+import time
+import glob
+
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 import re
 from scipy.sparse import csr_matrix
-import logging
-import warnings
-import glob
 
-warnings.filterwarnings(
-    "ignore", category=RuntimeWarning)  # aggregate_nom call causes it
 
-logging.basicConfig(format='%(asctime)s - %(message)s',
-                    datefmt='%d-%b-%y %H:%M:%S')
-logging.getLogger().setLevel(logging.INFO)
-
-import time
+logger = logging.getLogger(__name__)
 
 
 def make_one_hot_encoder(categories, sparse_output, dtype=np.float64):
@@ -38,6 +32,7 @@ def measure_time(f):
         result = f(*args, **kw)
         te = time.time()
         return result, te - ts
+    return timed
 
 
 class TaskTypes:
@@ -76,7 +71,8 @@ def aggregate_num(values):
 
 
 def aggregate_nom(values):
-    return scipy.stats.mode(values)[0][0]
+    unique, counts = np.unique(values, return_counts=True)
+    return unique[np.argmax(counts)]
 
 
 def impute_missing_values(column, possible_values, is_numeric,
@@ -124,7 +120,7 @@ def basic_parse_sparse_line(line, offset=0):
     if not line:
         return {}
     else:
-        pairs = [[c.strip() for c in re.split('\\s+', pair)]
+        pairs = [[c.strip() for c in re.split('\\s+', pair.strip()) if c.strip()]
                  for pair in line.split(',')]
         return {int(position) - offset: value for position, value in pairs}
 
@@ -202,7 +198,7 @@ def load_arff(path_to_data,
     For example, if the attribute was originally numeric, then start = end - 1.
     """
 
-    logging.info("Reading {}".format(path_to_data))
+    logger.info("Reading {}".format(path_to_data))
     numeric = "numeric"
     numeric_types = [numeric, "real", "integer"]  # define them in lower case
     nominal = "nominal"
@@ -219,92 +215,90 @@ def load_arff(path_to_data,
             "but is {}".format(intersection))
     # read meta data
     meta = []
-    f = open(path_to_data)
-    for line in f:
-        line = re.sub("[\"']", "", line)
-        if line.lower().startswith(data_tag):
-            break
-        elif line.lower().startswith(attribute_tag):
-            match = re.search(attribute_line, line, flags=re.IGNORECASE)
-            if match is None:
-                raise ValueError("Could not parse the line {}".format(line))
-            name = match.group(1)
-            values = match.group(2)
-            is_numeric = values.lower() in numeric_types
-            is_nominal = values[0] == '{' and values[-1] == '}'
-            is_kept = len(meta) in descriptive_indices or len(
-                meta) in target_indices
-            if not (is_numeric or is_nominal) and is_kept:
-                raise ValueError(
-                    "Exclude the attribute {}: "
-                    "its type was not recognized as nominal or numeric. "
-                    "If necessary, extend the numeric types {}.".format(
-                        line, numeric_types))
-            if is_numeric:
-                meta.append((name, numeric, []))
-            elif is_nominal:
-                parsed_values = sorted(
-                    [v.strip() for v in values[1:-1].split(',')])
-                meta.append((name, nominal, parsed_values))
-            else:
-                raise NotImplementedError("The load_arff code needs updates.")
-    maximal_index = max(max(descriptive_indices), max(target_indices))
-    n_attributes = len(meta)
-    if maximal_index >= len(meta):
-        raise ValueError(
-            "We must have every specified attribute index < {} (number of attributes), "
-            "but one of your indices is {}.".format(n_attributes,
-                                                    maximal_index))
-    indices_both = [descriptive_indices, target_indices]
-    are_numeric = [[meta[i][1] == numeric for i in indices]
-                   for indices in indices_both]
-    possible_values_projected = [[meta[i][-1] for i in indices]
-                                 for indices in indices_both]
-    # determine sparsity and task type
-    is_sparse, sparse_offset = is_one_based_sparse_arff(
-        path_to_data, n_attributes)
-    task_type = get_task_type([meta[i][-1] for i in target_indices])
-    if task_type not in [TaskTypes.CLASSIFICATION, TaskTypes.MLC]:
-        raise NotImplementedError(
-            "Processing of {} data not implemented.".format(task_type))
-    # read data
-    data = [[], []]  # [descriptive, target]
-    for line in f:
-        line = re.sub("[\"']", "", line).strip()
-        if not line:
-            continue
-        if is_sparse:
-            values_basic = basic_parse_sparse_line(line, sparse_offset)
-        else:
-            values_basic = [v.strip() for v in line.split(',')]
-        for indices, numeric, data_part in zip(indices_both, are_numeric,
-                                               data):
-            line = []
-            for i, is_numeric in zip(indices, numeric):
-                if is_sparse:
-                    if is_numeric:
-                        v = values_basic[i] if i in values_basic else "0.0"
-                    elif i in values_basic:
-                        v = values_basic[i]
-                    else:
-                        # raise KeyError("Value for the non-numeric attribute {} missing.".format(meta[i]))
-                        if "0" not in meta[i][-1]:
-                            raise ValueError(
-                                "Values of the sparse attribute {} must be given explicitly, "
-                                "since 0 is not among its possible values {}.".
-                                format(*meta[i][0::2]))
-                        v = "0"
-                else:
-                    v = values_basic[i]
+    with open(path_to_data) as f:
+        for line in f:
+            line = re.sub("[\"']", "", line)
+            if line.lower().startswith(data_tag):
+                break
+            elif line.lower().startswith(attribute_tag):
+                match = re.search(attribute_line, line, flags=re.IGNORECASE)
+                if match is None:
+                    raise ValueError("Could not parse the line {}".format(line))  # pragma: no cover
+                name = match.group(1)
+                values = match.group(2)
+                is_numeric = values.lower() in numeric_types
+                is_nominal = values[0] == '{' and values[-1] == '}'
+                is_kept = len(meta) in descriptive_indices or len(
+                    meta) in target_indices
+                if not (is_numeric or is_nominal) and is_kept:
+                    raise ValueError(
+                        "Exclude the attribute {}: "
+                        "its type was not recognized as nominal or numeric. "
+                        "If necessary, extend the numeric types {}.".format(
+                            line, numeric_types))
                 if is_numeric:
-                    if v != missing_character:
-                        v = float(v)
+                    meta.append((name, numeric, []))
+                elif is_nominal:
+                    parsed_values = sorted(
+                        [v.strip() for v in values[1:-1].split(',')])
+                    meta.append((name, nominal, parsed_values))
+                else:
+                    raise NotImplementedError("The load_arff code needs updates.")
+        maximal_index = max(max(descriptive_indices), max(target_indices))
+        n_attributes = len(meta)
+        if maximal_index >= len(meta):
+            raise ValueError(
+                "We must have every specified attribute index < {} (number of attributes), "
+                "but one of your indices is {}.".format(n_attributes,
+                                                        maximal_index))
+        indices_both = [descriptive_indices, target_indices]
+        are_numeric = [[meta[i][1] == numeric for i in indices]
+                       for indices in indices_both]
+        possible_values_projected = [[meta[i][-1] for i in indices]
+                                     for indices in indices_both]
+        # determine sparsity and task type
+        is_sparse, sparse_offset = is_one_based_sparse_arff(
+            path_to_data, n_attributes)
+        task_type = get_task_type([meta[i][-1] for i in target_indices])
+        if task_type not in [TaskTypes.CLASSIFICATION, TaskTypes.MLC]:
+            raise NotImplementedError(
+                "Processing of {} data not implemented.".format(task_type))
+        # read data
+        data = [[], []]  # [descriptive, target]
+        for line in f:
+            line = re.sub("[\"']", "", line).strip()
+            if not line:
+                continue
+            if is_sparse:
+                values_basic = basic_parse_sparse_line(line, sparse_offset)
+            else:
+                values_basic = [v.strip() for v in line.split(',')]
+            for indices, numeric, data_part in zip(indices_both, are_numeric,
+                                                   data):
+                parsed_line = []
+                for i, is_numeric in zip(indices, numeric):
+                    if is_sparse:
+                        if is_numeric:
+                            v = values_basic[i] if i in values_basic else "0.0"
+                        elif i in values_basic:
+                            v = values_basic[i]
+                        else:
+                            if "0" not in meta[i][-1]:
+                                raise ValueError(
+                                    "Values of the sparse attribute {} must be given explicitly, "
+                                    "since 0 is not among its possible values {}.".
+                                    format(*meta[i][0::2]))
+                            v = "0"
                     else:
-                        v = np.NaN
-                line.append(v)
-            data_part.append(line)
-    f.close()
-    logging.info("Read. Processing the data.")
+                        v = values_basic[i]
+                    if is_numeric:
+                        if v != missing_character:
+                            v = float(v)
+                        else:
+                            v = np.nan
+                    parsed_line.append(v)
+                data_part.append(parsed_line)
+    logger.info("Read. Processing the data.")
     # transpose
     for i in range(len(data)):
         data[i] = [list(column) for column in zip(*data[i])]
@@ -318,7 +312,7 @@ def load_arff(path_to_data,
                                                   possible_values):
                 n_imputed += impute_missing_values(column, values, is_numeric,
                                                    missing_character)
-        logging.info("Values imputed: {}".format(n_imputed))
+        logger.info("Values imputed: {}".format(n_imputed))
     # sparse for target
     if task_type == TaskTypes.CLASSIFICATION:
         possible_values = possible_values_projected[1][0]
@@ -331,10 +325,10 @@ def load_arff(path_to_data,
                                  dtype=np.int8)
     elif task_type == TaskTypes.MLC:
         target_data = [[
-            int(v) if v != missing_character else np.NaN for v in column
+            int(v) if v != missing_character else np.nan for v in column
         ] for column in zip(*data[1])]
         target_data = csr_matrix(target_data, dtype=np.int8)
-    else:
+    else:  # pragma: no cover
         raise ValueError("Wrong task")
     # 1-hot for descriptive
     attribute_ranges = {
@@ -355,7 +349,7 @@ def load_arff(path_to_data,
             attribute_ranges[j] = (len(descriptive_data),
                                    len(descriptive_data) + 1)
             descriptive_data.append(column)
-    logging.info("Finished processing the data.")
+    logger.info("Finished processing the data.")
     return np.array(descriptive_data).T, target_data, attribute_ranges
 
 
@@ -396,13 +390,14 @@ def feature_ranking_wrapper(path_to_arff: str,
                                         target_index)
     scores = feature_ranking(xs, y, *args)
     if descriptive_indices is None:
-        descriptive_indices = list(range(len(scores)))
+        descriptive_indices = sorted(attribute_ranges)
     assert isinstance(descriptive_indices, list)
     # sum up the one-hot encoded scores
     feature_importance = {i: 0 for i in descriptive_indices}
     for i in descriptive_indices:
+        attribute_index = i if i in attribute_ranges else i - 1
         feature_importance[i] = sum(
-            [scores[j] for j in range(*attribute_ranges[i - 1])])
+            [scores[j] for j in range(*attribute_ranges[attribute_index])])
     return feature_importance
 
 

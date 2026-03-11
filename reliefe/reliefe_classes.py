@@ -3,13 +3,16 @@ ReliefE algorithm : Skrlj and Petkovic, 2021
 """
 
 from typing import List, Union
+import logging
+import time
+
 import numpy as np
 from scipy import sparse
 
 ## Umap is only one of the possible embedding methods. See the tutorial for more.
 try:
     import umap.umap_ as umap
-except ImportError:
+except ImportError:  # pragma: no cover
     umap = None
 
 from sklearn.preprocessing import OneHotEncoder, normalize
@@ -18,12 +21,9 @@ from scipy.sparse import csr_matrix
 from numba import jit, prange
 from sklearn import metrics
 from .utils import TaskTypes, MLCDistances
-import time
 
-import logging
-logging.basicConfig(format='%(asctime)s - %(message)s',
-                    datefmt='%d-%b-%y %H:%M:%S')
-logging.getLogger().setLevel(logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 @jit(nopython=True)
@@ -52,20 +52,21 @@ def _sparsify_matrix_kernel(matrix_input, epsilon=1):
     :return: a sparsified matrix
     """
 
-    matrix_input = matrix_input
     n = matrix_input.shape[1]
+    sqrt_n = np.sqrt(n)
+    threshold = epsilon / sqrt_n
+    scale = sqrt_n / epsilon
     for i in prange(n):
-        for j in prange(n):
+        for j in range(n):
             matrix_el = matrix_input[i, j]
-            sqrt_n = np.sqrt(n)
-            if matrix_el > epsilon / sqrt_n:
+            if matrix_el > threshold:
                 continue
             else:
                 coin = np.random.random()
-                probability = (np.sqrt(n) * np.abs(matrix_el)) / (epsilon)
+                probability = scale * np.abs(matrix_el)
                 placeholder = 0
                 if coin <= probability:
-                    placeholder = sgn(matrix_el) * (epsilon) / sqrt_n
+                    placeholder = sgn(matrix_el) * epsilon / sqrt_n
                 matrix_input[i, j] = placeholder
     return matrix_input
 
@@ -86,13 +87,18 @@ def _numba_distance(u, v, dist):
     elif dist == "cityblock":
         return np.sum(np.abs(v - u))
     elif dist == "cosine":
-        return 1.0 - np.dot(u, v) / ((np.dot(u, u)**.5) * (np.dot(v, v)**.5))
+        norm_u = np.dot(u, u)**0.5
+        norm_v = np.dot(v, v)**0.5
+        denominator = norm_u * norm_v
+        if denominator == 0.0:
+            return 0.0 if norm_u == 0.0 and norm_v == 0.0 else 1.0
+        return 1.0 - np.dot(u, v) / denominator
     else:
         raise ValueError()
 
 
 @jit(nopython=True)
-def _get_sparse_row(row_index, data, pointers, indices):
+def _get_sparse_row(row_index, data, pointers, indices, output_dim=-1):
     """
     Unfolder csr indexing. See CSR format for more details.
 
@@ -104,7 +110,9 @@ def _get_sparse_row(row_index, data, pointers, indices):
     :return: extract a given row.
     """
 
-    placeholder = np.zeros(np.max(indices) + 1, dtype=np.float64)
+    if output_dim < 0:
+        output_dim = np.max(indices) + 1
+    placeholder = np.zeros(output_dim, dtype=np.float64)
     crange_from = pointers[row_index]
     crange_to = pointers[row_index + 1]
     for j in range(crange_from, crange_to):
@@ -142,26 +150,29 @@ def _compiled_classification_update_weights(
     """
 
     number_of_columns = ncol_all
-    ndim_via_pointer = np.max(indices.astype(np.int64)) + 1
+    ndim_via_pointer = ncol_all
     weights_final = np.zeros((len(num_iter), number_of_columns),
                              dtype=np.float64)
     weights = np.zeros(number_of_columns, dtype=np.float64)  # current weights
     num_iter_position = 0
-    kvec = np.zeros(len(samples) * len(class_first_indices[:-1]))
-    kvx = 0
+    kvec = np.zeros(len(samples) * len(class_first_indices[:-1]),
+                    dtype=np.int64)
+    kvx = -1
     
     for i_sample, sample in enumerate(samples):
         considered_class = examples_to_class[sample]
+        sample_row = _get_sparse_row(sample, data, pointers, indices,
+                                     ndim_via_pointer)
         for c, number_of_samples in enumerate(class_first_indices[:-1]):
             kvx += 1
             first_index = class_first_indices[c]
             last_index = class_first_indices[c + 1]
             members = class_members[first_index:last_index]
             distances = np.zeros(len(members), dtype=np.float64)
-            ith_sample_row = _get_sparse_row(sample, data, pointers, indices)
             for i_neighbor, neighbour in enumerate(members):
-                neigh_row = _get_sparse_row(neighbour, data, pointers, indices)
-                internal_distance = _numba_distance(ith_sample_row, neigh_row,
+                neigh_row = _get_sparse_row(neighbour, data, pointers, indices,
+                                            ndim_via_pointer)
+                internal_distance = _numba_distance(sample_row, neigh_row,
                                                     pairwise_distances)
                 distances[i_neighbor] = internal_distance
             top_neighbour_indices = np.argsort(distances)
@@ -179,21 +190,28 @@ def _compiled_classification_update_weights(
                 prior = priors[c] / (1 - priors[considered_class])
             top_neighbors = top_neighbour_indices[offset:k + offset] ## nnum added in >0.16 -> it's more stable.
             top_neighbor_members = members[top_neighbors]
-            nearest_neighbours = np.zeros(
-                (len(top_neighbor_members), ndim_via_pointer))
-            for enx, tnm in enumerate(top_neighbor_members):
-                rx = _get_sparse_row(tnm, data, pointers, indices)
-                assert rx.shape[0] == nearest_neighbours.shape[1]
-                nearest_neighbours[enx] = rx
-            sample_row = _get_sparse_row(sample, data, pointers, indices)
+            n_neighbors = len(top_neighbor_members)
+            if n_neighbors == 0:
+                continue
+            if use_average_neighbour:
+                neighbour_sums = np.zeros(number_of_columns, dtype=np.float64)
+                for tnm in top_neighbor_members:
+                    rx = _get_sparse_row(tnm, data, pointers, indices,
+                                         ndim_via_pointer)
+                    neighbour_sums += rx
+            else:
+                diff_sums = np.zeros(number_of_columns, dtype=np.float64)
+                for tnm in top_neighbor_members:
+                    rx = _get_sparse_row(tnm, data, pointers, indices,
+                                         ndim_via_pointer)
+                    diff_sums += np.abs(sample_row - rx)
             for j in range(number_of_columns):
                 # Difference between near hits/misses for the j-th feature
                 if use_average_neighbour:
                     diff = np.abs(sample_row[j] -
-                                  np.mean(nearest_neighbours[:, j]))
+                                  neighbour_sums[j] / n_neighbors)
                 else:
-                    diff = np.mean(
-                        np.abs(sample_row[j] - nearest_neighbours[:, j]))
+                    diff = diff_sums[j] / n_neighbors
                 if np.isnan(diff):
                     update = 0
                 else:
@@ -240,8 +258,12 @@ def _numba_distance_target(row1, row2, dist):
         return np.abs(row1 - row2).sum() / len(row1)
 
     elif dist == "cosine":
-        return 1 - np.dot(row1,
-                          row2) / (np.linalg.norm(row1) * np.linalg.norm(row2))
+        norm_row1 = np.linalg.norm(row1)
+        norm_row2 = np.linalg.norm(row2)
+        denominator = norm_row1 * norm_row2
+        if denominator == 0.0:
+            return 0.0 if norm_row1 == 0.0 and norm_row2 == 0.0 else 1.0
+        return 1 - np.dot(row1, row2) / denominator
 
     elif dist == "hyperbolic":
         return np.arccosh(np.sum(-(row1 * row2)))
@@ -253,7 +275,7 @@ def _numba_distance_target(row1, row2, dist):
 @jit(nopython=True)
 def _compiled_multi_label_classification_update_weights(
         samples, num_iter, data, pointers, indices, data_y, pointers_y,
-        indices_y, k, pairwise_distances, mlc_distance, nrow, ncol,
+        indices_y, n_targets, k, pairwise_distances, mlc_distance, nrow, ncol,
         determine_k_automatically, use_average_neighbour):
     """
     A compiled kernel for the weight update step.
@@ -275,7 +297,7 @@ def _compiled_multi_label_classification_update_weights(
 
     number_of_columns = ncol
     n_examples = nrow
-    ndim_via_pointer = np.max(indices.astype(np.int64)) + 1
+    ndim_via_pointer = ncol
     weights_final = np.zeros((len(num_iter), number_of_columns),
                              dtype=np.float64)
     weights = np.zeros(number_of_columns, dtype=np.float64)  # current weights
@@ -283,11 +305,15 @@ def _compiled_multi_label_classification_update_weights(
     for i_sample, sample in enumerate(samples):
         # extract distances
         distances = np.zeros(n_examples)
-        ith_sample_row = _get_sparse_row(sample, data, pointers, indices)
+        sample_row = _get_sparse_row(sample, data, pointers, indices,
+                                     ndim_via_pointer)
+        y_sample_row = _get_sparse_row(sample, data_y, pointers_y, indices_y,
+                                       n_targets)
         for i_neighbour in range(n_examples):
-            neigh_row = _get_sparse_row(i_neighbour, data, pointers, indices)
+            neigh_row = _get_sparse_row(i_neighbour, data, pointers, indices,
+                                        ndim_via_pointer)
             internal_distance = _numba_distance(
-                ith_sample_row, neigh_row,
+                sample_row, neigh_row,
                 pairwise_distances)  # Distance computation
             distances[i_neighbour] = internal_distance
         top_neighbour_indices = np.argsort(distances)
@@ -297,37 +323,44 @@ def _compiled_multi_label_classification_update_weights(
             if len(diffs) > 0:
                 k = np.argmax(diffs) + 1
         top_neighbour_indices = top_neighbour_indices[1:k + 1]
-        nearest_neighbours = np.zeros(
-            (len(top_neighbour_indices), ndim_via_pointer))
-        for enx, tnm in enumerate(
-                top_neighbour_indices):  # Traverse the neighbor index map
-            rx = _get_sparse_row(tnm, data, pointers, indices)
-            assert rx.shape[0] == nearest_neighbours.shape[1]
-            nearest_neighbours[enx] = rx
-        target_diffs = np.zeros(k)  # Update weights
-        y_sample_row = _get_sparse_row(sample, data_y, pointers_y, indices_y)
-        for i in range(k):
+        n_neighbors = len(top_neighbour_indices)
+        if n_neighbors == 0:
+            continue
+        if use_average_neighbour:
+            neighbour_sums = np.zeros(number_of_columns, dtype=np.float64)
+        else:
+            descriptive_diff_sums = np.zeros(number_of_columns,
+                                             dtype=np.float64)
+        weighted_diff_sums = np.zeros(number_of_columns, dtype=np.float64)
+        target_diff_sum = 0.0
+        for i in range(n_neighbors):
             col_idx = top_neighbour_indices[i]
-            ith_y_row = _get_sparse_row(col_idx, data_y, pointers_y, indices_y)
+            neigh_row = _get_sparse_row(col_idx, data, pointers, indices,
+                                        ndim_via_pointer)
+            ith_y_row = _get_sparse_row(col_idx, data_y, pointers_y, indices_y,
+                                        n_targets)
             tdist = _numba_distance_target(y_sample_row, ith_y_row,
                                            mlc_distance)
-            target_diffs[i] = tdist
-        t_diff = np.mean(target_diffs)
+            descriptive_diffs = np.abs(sample_row - neigh_row)
+            target_diff_sum += tdist
+            weighted_diff_sums += tdist * descriptive_diffs
+            if use_average_neighbour:
+                neighbour_sums += neigh_row
+            else:
+                descriptive_diff_sums += descriptive_diffs
+        t_diff = target_diff_sum / n_neighbors
         if not (0 < t_diff < 1):
             # skipping those for which the update is ill defined
             continue
-        sample_row = _get_sparse_row(sample, data, pointers, indices)
         for j in range(number_of_columns):  # The update step
-            descriptive_diffs = np.abs(sample_row[j] -
-                                       nearest_neighbours[:, j])
             if use_average_neighbour:
                 d_diff = np.abs(sample_row[j] -
-                                np.mean(nearest_neighbours[:, j]))
+                                neighbour_sums[j] / n_neighbors)
 
             else:
-                d_diff = np.mean(descriptive_diffs)
+                d_diff = descriptive_diff_sums[j] / n_neighbors
             # Difference between near hits/misses for the j-th feature
-            t_d_diff = np.mean(target_diffs * descriptive_diffs)
+            t_d_diff = weighted_diff_sums[j] / n_neighbors
             weights[j] += t_d_diff / t_diff - (d_diff - t_diff) / (1.0 -
                                                                    t_diff)
 
@@ -437,7 +470,10 @@ class ReliefE:
             self.send_message("Distances computed.")
 
         # compute r2 / r1
-        mu = dists[:, 1] / dists[:, 0]
+        mu = np.divide(dists[:, 1],
+                       dists[:, 0],
+                       out=np.ones(dists.shape[0], dtype=np.float64),
+                       where=dists[:, 0] != 0)
         mu = np.nan_to_num(mu)
 
         # Cumulative Femp
@@ -460,10 +496,12 @@ class ReliefE:
             f_empirical = np.array(f_empirical) / xs.shape[0]
 
         # X - axis
+        mu = np.maximum(mu, np.finfo(np.float64).tiny)
         mu_first = np.log(mu)
 
         # Y - axis
-        mu_second = np.log(1 - f_empirical)
+        mu_second = np.log(np.maximum(1 - f_empirical,
+                                      np.finfo(np.float64).tiny))
 
         # some technicalities
         mu_first = mu_first.reshape(-1, 1)
@@ -485,19 +523,19 @@ class ReliefE:
 
 
         if self.verbose:
-            logging.info(
+            logger.info(
                 "Estimated latent dimension is: {}".format(latent_dim))
 
         return latent_dim
 
     def _check_parameters(self, n_examples, class_counts):
         message = "Number of {} ({}) was not between {} and {} ({}). Now, it is set to {}."
-        min_iter = 128
+        min_iter = 1
         for i, iterations in enumerate(self.num_iter):
             self.num_iter[i] = max(iterations, min_iter)
-            self.num_iter[i] = min(iterations, n_examples)
-            if self.num_iter[i] != iterations:
-                logging.info(
+            self.num_iter[i] = min(self.num_iter[i], n_examples)
+            if self.num_iter[i] != iterations and self.verbose:
+                logger.info(
                     message.format("iterations", iterations, min_iter,
                                    "number samples", n_examples,
                                    self.num_iter[i]))
@@ -505,7 +543,7 @@ class ReliefE:
         self.num_iter = np.unique(np.array(self.num_iter, dtype=np.int64))
         self.num_iter = self.num_iter[self.num_iter > 0]
         if self.verbose:
-            logging.info("Number of iterations set to {}".format(
+            logger.info("Number of iterations set to {}".format(
                 self.num_iter))
 
         # k
@@ -515,14 +553,14 @@ class ReliefE:
         self.k = max(self.k, 1)
         self.k = min(min_class - 1, self.k)
         if self.verbose:
-            logging.info("Checked the neighbor specification.")
+            logger.info("Checked the neighbor specification.")
         if self.k < 1:
             raise ValueError(
                 "All classes should have size at least 2! (class sizes: {})".
                 format(class_counts))
 
-        if k != self.k:
-            logging.info(
+        if k != self.k and self.verbose:
+            logger.info(
                 message.format("neighbours", k, min_k, "smallest class size",
                                min_class, self.k))
 
@@ -536,7 +574,7 @@ class ReliefE:
                 TaskTypes.CLASSIFICATION, TaskTypes.REGRESSION, TaskTypes.MLC
         ] and self.use_average_neighbour:
             self.use_average_neighbour = False
-            logging.info(
+            logger.info(
                 "Cannot use average neighbour for {}. Setting the parameter to False."
                 .format(self.task_type))
 
@@ -571,6 +609,9 @@ class ReliefE:
     @staticmethod
     def _transform_x_y(x, y):
 
+        if isinstance(x, list):
+            x = np.array(x)
+
         if isinstance(x, np.ndarray):
             x = sparse.csr_matrix(x)
 
@@ -593,9 +634,15 @@ class ReliefE:
 
     def send_message(self, message):
         if self.verbose:
-            logging.info(message)
+            logger.info(message)
 
-    def fit(self, x, y, embedding_method="UMAP", store_neighborhoods=None):
+    @staticmethod
+    def _resolve_embedding_method(embedding_method):
+        if embedding_method == "auto":
+            return "UMAP" if umap is not None else "SVD"
+        return embedding_method
+
+    def fit(self, x, y, embedding_method="auto", store_neighborhoods=None):
         """
         Key idea of ReliefE:
         embed the instance space. Compute mean embedding for each of the classes.
@@ -608,6 +655,8 @@ class ReliefE:
         :param store_neighborhoods: File to store adaptive k values to for ablation.
         :return: None.
         """
+
+        embedding_method = self._resolve_embedding_method(embedding_method)
 
         if self.verbose:
             if self.embedding_based_distances:
@@ -627,7 +676,8 @@ class ReliefE:
             if y.ndim > 1:
                 # MLC
                 for j in range(y.shape[0]):
-                    nzc = np.nonzero(y[j])[1]
+                    nzc = np.nonzero(y[j])
+                    nzc = nzc[1] if len(nzc) > 1 else nzc[0]
                     nze = np.array2string(nzc)
 
                     if not nze in unique_indice_maps:
@@ -675,7 +725,7 @@ class ReliefE:
         if sparsity_var > self.sparsity_threshold:
 
             if self.verbose:
-                logging.info("Sparsification .. ")
+                logger.info("Sparsification .. ")
 
             if self.normalize:
                 x_sampled = normalize(x_sampled)
@@ -702,7 +752,8 @@ class ReliefE:
         self.timed["sparsification"] = ts2 - ts
 
         # do some preprocessing
-        if self.verbose: logging.info("Transforming the data .. ")
+        if self.verbose:
+            logger.info("Transforming the data .. ")
 
         x, y = ReliefE._transform_x_y(x, y)
 
@@ -717,7 +768,7 @@ class ReliefE:
         if self.task_type == TaskTypes.CLASSIFICATION:
 
             if self.verbose:
-                logging.info("Ranking (MCC) .. ")
+                logger.info("Ranking (MCC) .. ")
 
             class_counts = np.array(np.sum(y, axis=0).tolist())[0]
             class_priors = np.array(class_counts) / n_examples
@@ -729,8 +780,8 @@ class ReliefE:
                 [n_examples])  # needed so that resetting parameters works
             class_priors, class_members, examples_to_class, class_first_indices = None, None, None, None
 
-        else:
-            raise ValueError("Unsupported task type.")
+        else:  # pragma: no cover
+            raise ValueError("Unsupported task type.")  # pragma: no cover
 
         # check the parameters
         self._compute_iterations(n_examples)
@@ -760,9 +811,9 @@ class ReliefE:
 
             if self.verbose:
                 if latent_dim >= x_sampled.shape[1]-1:
-                    logging.info(f"Final latent dimension considered: {latent_dim}, as the estimated dimension > initial dimension. This data set has very few dimensions to begin with, note that ReliefE aims to solve the HD problem (LD is similar/worse due to compression loss).")
+                    logger.info(f"Final latent dimension considered: {latent_dim}, as the estimated dimension > initial dimension. This data set has very few dimensions to begin with, note that ReliefE aims to solve the HD problem (LD is similar/worse due to compression loss).")
 
-                logging.info(f"Using the embedding method: {embedding_method}")  
+                logger.info(f"Using the embedding method: {embedding_method}")  
                     
             if embedding_method == "UMAP":
                 if umap is None:
@@ -774,7 +825,7 @@ class ReliefE:
                 if self.determine_k_automatically:
                     self.embedder_k = int(np.cbrt(x_sampled.shape[0]))
                     if self.verbose:
-                        logging.info(f"UMAP's k set to: {self.k}")
+                        logger.info(f"UMAP's k set to: {self.k}")
                 reducer = umap.UMAP(n_components=latent_dim,
                                     n_neighbors=self.embedder_k,
                                     low_memory=True,
@@ -785,24 +836,24 @@ class ReliefE:
 
             else:
                 if self.verbose:
-                    logging.info(
+                    logger.info(
                         f"Using custom embedding algorithm: {embedding_method}"
                     )
                 reducer = embedding_method
             try:
                 if self.verbose:
-                    logging.info("Computing embedding of the input space.")
+                    logger.info("Computing embedding of the input space.")
 
                 x_sampled = sparse.csr_matrix(x_sampled)
                 reducer.fit(x_sampled)
 
                 if self.verbose:
-                    logging.info("Transforming the origin space.")
+                    logger.info("Transforming the origin space.")
                 try:
                     # In most cases this works with sparse.csr fine.
                     transf_um = reducer.transform(x)
                 except Exception as es:
-                    logging.info(
+                    logger.info(
                         f"Umap datatype not recognized, reverting to dense matrix algebra for the .transform(), exception: {es}"
                     )
                     transf_um = reducer.transform(x.todense())
@@ -853,7 +904,7 @@ class ReliefE:
         data, pointers, indices = x_embedded.data, x_embedded.indptr, x_embedded.indices
         if self.task_type == TaskTypes.CLASSIFICATION:
             if self.verbose:
-                logging.info("Ranking (MCC) .. ")
+                logger.info("Ranking (MCC) .. ")
             weights, neighborhoods = _compiled_classification_update_weights(
                 samples, self.num_iter, data, pointers, indices, class_priors,
                 self.k, pairwise_distances, class_members, examples_to_class,
@@ -868,7 +919,7 @@ class ReliefE:
             if self.mlc_distance == "cosine":
 
                 if self.verbose:
-                    logging.info(
+                    logger.info(
                         "Latent dimension of the output space being computed .. "
                     )
                 latent_dim = self.determine_latent_dim(y)
@@ -891,7 +942,7 @@ class ReliefE:
                 else:
                     reducer = embedding_method
                 if self.verbose:
-                    logging.info(
+                    logger.info(
                         f"Computing embedding of the output space ({self.mlc_distance})"
                     )
                 y = sparse.csr_matrix(
@@ -900,7 +951,7 @@ class ReliefE:
             elif self.mlc_distance == "hyperbolic":
 
                 if self.verbose:
-                    logging.info(
+                    logger.info(
                         "Latent dimension of the output space being computed .. "
                     )
                 latent_dim = self.determine_latent_dim(y)
@@ -923,20 +974,20 @@ class ReliefE:
                 else:
                     reducer = embedding_method
                 if self.verbose:
-                    logging.info("Computing embedding of the output space.")
+                    logger.info("Computing embedding of the output space.")
                 y = sparse.csr_matrix(
                     reducer.fit(y[indices_sample]).transform(y))
 
             data_y, pointers_y, indices_y = y.data, y.indptr, y.indices
             if self.verbose:
-                logging.info("Ranking (MLC) .. ")
+                logger.info("Ranking (MLC) .. ")
             weights = _compiled_multi_label_classification_update_weights(
                 samples, self.num_iter, data, pointers, indices, data_y,
-                pointers_y, indices_y, self.k, pairwise_distances,
+                pointers_y, indices_y, y.shape[1], self.k, pairwise_distances,
                 self.mlc_distance, nrow_raw, ncol_raw,
                 self.determine_k_automatically, self.use_average_neighbour)
-        else:
-            raise ValueError("Unsupported task type.")
+        else:  # pragma: no cover
+            raise ValueError("Unsupported task type.")  # pragma: no cover
 
         weights = np.nan_to_num(weights)
         for i, iterations in enumerate(self.num_iter):

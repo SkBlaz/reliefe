@@ -26,10 +26,12 @@ This repo packages `reliefe`, a feature-ranking library centered on the `ReliefE
 - Prefer small, deterministic smoke tests over long benchmark-style tests.
 - When changing examples, keep them runnable from the repository root and avoid hidden working-directory assumptions.
 - Treat `docs/` as generated/static output unless the task explicitly asks for documentation-site edits.
+- Prefer `uv` for local workflows. Reach for `uv sync`, `uv run ...`, and `make test` before ad hoc environment setup.
+- Use `uv sync --group dev` when you need coverage or other test-only tooling.
 
 ## Commands
 
-- Install runtime dependencies: `pip install -r requirements.txt`
-- Install in editable mode: `pip install -e .`
+- Sync the project environment: `uv sync`
+- Sync with test tooling: `uv sync --group dev`
 - Run tests: `make test`
-- Run a representative example: `python examples/minimal_reliefe2.py`
+- Run a representative example: `uv run python examples/minimal_reliefe2.py`
