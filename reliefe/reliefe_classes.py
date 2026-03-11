@@ -9,12 +9,8 @@ from scipy import sparse
 ## Umap is only one of the possible embedding methods. See the tutorial for more.
 try:
     import umap.umap_ as umap
-
-except:
-
-    print(
-        "UMAP not found! This means that you need to provide your own embedding method for ReliefE to work."
-    )
+except ImportError:
+    umap = None
 
 from sklearn.preprocessing import OneHotEncoder, normalize
 from sklearn.decomposition import TruncatedSVD
@@ -671,8 +667,10 @@ class ReliefE:
 
         ts = time.time()
 
-        if not isinstance(x_sampled, np.ndarray):
-            x_sampled = x_sampled.todense()
+        if sparse.issparse(x_sampled):
+            x_sampled = x_sampled.toarray()
+        else:
+            x_sampled = np.asarray(x_sampled)
 
         if sparsity_var > self.sparsity_threshold:
 
@@ -767,6 +765,12 @@ class ReliefE:
                 logging.info(f"Using the embedding method: {embedding_method}")  
                     
             if embedding_method == "UMAP":
+                if umap is None:
+                    raise ImportError(
+                        "UMAP embedding requested but `umap-learn` is not installed. "
+                        "Install the package or pass `embedding_method=\"SVD\"` "
+                        "or a custom sklearn-like embedder."
+                    )
                 if self.determine_k_automatically:
                     self.embedder_k = int(np.cbrt(x_sampled.shape[0]))
                     if self.verbose:
@@ -868,14 +872,22 @@ class ReliefE:
                         "Latent dimension of the output space being computed .. "
                     )
                 latent_dim = self.determine_latent_dim(y)
+                latent_dim = min(latent_dim, y.shape[1] - 1)
 
                 # compute embedding of target space.
-                if embedding_method is None:
+                if embedding_method == "UMAP":
+                    if umap is None:
+                        raise ImportError(
+                            "UMAP embedding requested but `umap-learn` is not installed. "
+                            "Install the package or pass `embedding_method=\"SVD\"` "
+                            "or a custom sklearn-like embedder."
+                        )
                     reducer = umap.UMAP(n_components=latent_dim,
                                         n_neighbors=self.embedder_k,
                                         low_memory=True,
                                         init="spectral")
-
+                elif embedding_method == "SVD":
+                    reducer = TruncatedSVD(n_components=latent_dim)
                 else:
                     reducer = embedding_method
                 if self.verbose:
@@ -892,14 +904,22 @@ class ReliefE:
                         "Latent dimension of the output space being computed .. "
                     )
                 latent_dim = self.determine_latent_dim(y)
+                latent_dim = min(latent_dim, y.shape[1] - 1)
 
-                if embedding_method is None:
+                if embedding_method == "UMAP":
+                    if umap is None:
+                        raise ImportError(
+                            "UMAP embedding requested but `umap-learn` is not installed. "
+                            "Install the package or pass `embedding_method=\"SVD\"` "
+                            "or a custom sklearn-like embedder."
+                        )
                     reducer = umap.UMAP(output_metric="hyperboloid",
                                         n_components=latent_dim,
                                         n_neighbors=self.embedder_k,
                                         low_memory=True,
                                         init="spectral")
-
+                elif embedding_method == "SVD":
+                    reducer = TruncatedSVD(n_components=latent_dim)
                 else:
                     reducer = embedding_method
                 if self.verbose:

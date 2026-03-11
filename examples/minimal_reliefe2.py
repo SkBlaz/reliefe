@@ -1,19 +1,26 @@
 import scipy.io as sio
 import numpy as np
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import reliefe
 
-mat_obj = sio.loadmat("../data/mcc/chess.mat")
-x = mat_obj['input_space']
-y = mat_obj['target_space']  ## this is not one hot for scc
-y = np.array(y).reshape(-1)
-wrange = []
+mat_obj = sio.loadmat(ROOT / "data" / "mcc" / "chess.mat")
+x = mat_obj['input_space'][:256]
+y = np.asarray(mat_obj['target_space']).reshape(-1)[:256]  ## this is not one hot for scc
 
-# Fully fledged ReliefE (with all functionality)
+# Small multiclass example with embedded input distances.
 reliefE_instance = reliefe.ReliefE(embedding_based_distances=True,
-                                   verbose=True,
+                                   verbose=False,
                                    use_average_neighbour=True,
                                    determine_k_automatically=True,
-                                   num_iter=[100])
+                                   num_iter=[32],
+                                   samples=128)
 
-reliefE_instance.fit(x, y)
-print(reliefE_instance.feature_importances_)
+reliefE_instance.fit(x, y, embedding_method="SVD")
+top = np.argsort(reliefE_instance.feature_importances_)[-5:][::-1]
+print("Top features:", top.tolist())

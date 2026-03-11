@@ -19,6 +19,19 @@ logging.getLogger().setLevel(logging.INFO)
 import time
 
 
+def make_one_hot_encoder(categories, sparse_output, dtype=np.float64):
+    """Build a OneHotEncoder across sklearn versions."""
+
+    try:
+        return OneHotEncoder(categories=categories,
+                             sparse_output=sparse_output,
+                             dtype=dtype)
+    except TypeError:
+        return OneHotEncoder(categories=categories,
+                             sparse=sparse_output,
+                             dtype=dtype)
+
+
 def measure_time(f):
     def timed(*args, **kw):
         ts = time.time()
@@ -126,25 +139,24 @@ def is_one_based_sparse_arff(path_to_data, n_attributes):
     (equals True).
     """
     data_tag = "@data"
-    f = open(path_to_data)
-    for line in f:
-        if line.lower().startswith(data_tag):
-            break
-    is_sparse = None
-    for line in f:
-        if len(line) <= 1:
-            continue
-        line = line.strip()
-        if is_sparse is None:
-            is_sparse = line[0] == '{' and line[-1] == '}'
-        if not is_sparse:
-            return False, 0
-        parsed = basic_parse_sparse_line(line)
-        if 0 in parsed:
-            return True, 0
-        elif n_attributes in parsed:
-            return True, 1
-    f.close()
+    with open(path_to_data) as f:
+        for line in f:
+            if line.lower().startswith(data_tag):
+                break
+        is_sparse = None
+        for line in f:
+            if len(line) <= 1:
+                continue
+            line = line.strip()
+            if is_sparse is None:
+                is_sparse = line[0] == '{' and line[-1] == '}'
+            if not is_sparse:
+                return False, 0
+            parsed = basic_parse_sparse_line(line)
+            if 0 in parsed:
+                return True, 0
+            elif n_attributes in parsed:
+                return True, 1
     raise ValueError("Neither 0 nor", n_attributes,
                      "(n_attributes) found. Minimal possible index unknown.")
 
@@ -311,9 +323,9 @@ def load_arff(path_to_data,
     if task_type == TaskTypes.CLASSIFICATION:
         possible_values = possible_values_projected[1][0]
 
-        encoder = OneHotEncoder(categories=[possible_values],
-                                sparse=True,
-                                dtype=np.int8)
+        encoder = make_one_hot_encoder(categories=[possible_values],
+                                       sparse_output=True,
+                                       dtype=np.int8)
         target_data = csr_matrix(encoder.fit_transform([[v]
                                                         for v in data[1][0]]),
                                  dtype=np.int8)
@@ -332,7 +344,8 @@ def load_arff(path_to_data,
     for j, column in enumerate(columns):
         if not are_numeric[0][j]:
             possible_values = possible_values_projected[0][j]
-            encoder = OneHotEncoder(categories=[possible_values], sparse=False)
+            encoder = make_one_hot_encoder(categories=[possible_values],
+                                           sparse_output=False)
             transformed = encoder.fit_transform([[v]
                                                  for v in column]).T.tolist()
             attribute_ranges[j] = (len(descriptive_data),
