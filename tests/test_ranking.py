@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
+from scipy import sparse
 
 from reliefe import ReliefE, rank_features
 
@@ -67,6 +68,14 @@ class RankingTests(unittest.TestCase):
             model = ReliefE(num_iter=4, k=1, embedding_based_distances=False, sparsity_threshold=1.)
             model.fit(np.array(X), np.array(Y))
         np.testing.assert_allclose(model.feature_importances_, [1., -1., 1.])
+
+    def test_native_dense_and_sparse_inputs_agree(self):
+        for x in (np.array(X), sparse.csr_matrix(X), sparse.csc_matrix(X), sparse.coo_matrix(X)):
+            with self.subTest(format=type(x).__name__):
+                model = ReliefE(num_iter=4, k=1, embedding_based_distances=False,
+                                sparsity_threshold=1.)
+                model.fit(x, np.array(Y))
+                np.testing.assert_allclose(model.feature_importances_, [1., -1., 1.])
 
     def test_invalid_data(self):
         invalid = [
