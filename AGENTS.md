@@ -139,3 +139,11 @@ independent of network access. Check that the CI job fails when tests fail.
 - Work only inside `/home/blazs/reliefe` on this machine. Put temporary files,
   isolated checkouts, benchmark outputs, and campaign logs under `.agent-local/`
   (locally ignored). Do not edit other repositories or generated `docs/`.
+
+## Local verification only
+
+The user is billed for GitHub Actions runs. Do not run or rerun GitHub CI.
+Validate on this machine, inside this repository folder, with the local test and
+coverage commands above. Include `[skip ci]` in every new commit that will be
+pushed, especially each PR branch head, to prevent push/pull-request workflows
+from running. Keep CI definitions reviewable, but do not dispatch workflows.
