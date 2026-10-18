@@ -794,7 +794,10 @@ class ReliefE:
 
         ts = time.time()
         
-        latent_dim_estimate = self.determine_latent_dim(x_sampled)
+        # Direct distances do not need a latent dimension. Besides wasted work,
+        # its nearest-distance estimator is undefined for some duplicate rows.
+        latent_dim_estimate = (self.determine_latent_dim(x_sampled)
+                               if self.embedding_based_distances else x_sampled.shape[1])
 
         if latent_dim_estimate >= x_sampled.shape[1] and self.LD_friendly:
             if self.verbose:

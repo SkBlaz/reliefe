@@ -1,4 +1,5 @@
 import scipy.io as sio
+from scipy.sparse import csr_matrix
 import numpy as np
 from pathlib import Path
 import sys
@@ -10,7 +11,7 @@ if str(ROOT) not in sys.path:
 import reliefe
 
 mat_obj = sio.loadmat(ROOT / "data" / "mcc" / "chess.mat")
-x = mat_obj['input_space'][:128]
+x = csr_matrix(mat_obj['input_space'])[:128]
 y = np.asarray(mat_obj['target_space']).reshape(-1)[:128]  ## this is not one hot for scc
 
 # Small multiclass example with embedded input distances.
