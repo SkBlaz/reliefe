@@ -320,3 +320,17 @@ original ARFF attribute index to its half-open range of encoded columns.
 or nonconsecutive attributes. Native `ReliefE.fit(..., task_type="multilabel")`
 preserves multilabel semantics even in a fold where each row happens to have
 exactly one positive label.
+
+### Reproducible benchmark
+
+Run `uv run python benchmarks/ranking_study.py` on Linux for seven seeded
+workloads. Each case starts a fresh Python process. Timings separate the first
+fit (including kernel compilation) from two subsequent fits. Peak RSS includes
+the interpreter, numerical libraries and downstream evaluation. Workloads use
+one thread per numerical backend. The real-data comparisons use 144 sampled
+rows and four selected columns over three folds. On that run, direct ReliefF
+obtained balanced accuracy 1.000 on XOR and 0.519 on Madelon. On multilabel
+Medical the four-column ReliefE model obtained micro-F1 0.087 and the all-column
+model obtained 0.459. The raw data include all baselines, folds, stability,
+hardware and package versions. These timings were collected on a shared machine.
+[Benchmark results](benchmarks/ranking_study_results.json)
