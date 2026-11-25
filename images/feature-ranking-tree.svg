@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2170" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2218" role="img" aria-labelledby="title description">
 <title id="title">How features earn their rank</title>
-<desc id="description">Tree of 125 public ranking methods. Read from scoring family to rule to method ID. The README contains the same catalogue as text.</desc>
+<desc id="description">Tree of 128 public ranking methods. Read from scoring family to rule to method ID. The README contains the same catalogue as text.</desc>
 <rect width="100%" height="100%" fill="#fcfbf7"/>
 <g font-family="DejaVu Sans, sans-serif" xml:space="preserve">
 <text x="66" y="59" font-size="17" fill="#126b60" letter-spacing="3" font-weight="bold">RELIEFE   /   METHOD ATLAS</text>
 <text x="64" y="121" font-size="54" fill="#1a302f" font-family="Georgia, serif">How features earn their rank</text>
-<text x="66" y="162" font-size="23" fill="#1a302f" >125 public method IDs grouped by the evidence each ranker uses.</text>
+<text x="66" y="162" font-size="23" fill="#1a302f" >128 public method IDs grouped by the evidence each ranker uses.</text>
 <path d="M65 186 L1535 186" stroke="#84918d" fill="none"/>
 <text x="83" y="222" font-size="15" fill="#455b57" font-weight="bold" letter-spacing="2">SCORING FAMILY</text>
 <text x="366" y="222" font-size="15" fill="#455b57" font-weight="bold" letter-spacing="2">SCORING RULE</text>
@@ -53,14 +53,14 @@
 <path d="M688 688 L722 688" stroke="#925125" fill="none"/>
 <text x="735" y="694" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-impurityeuclid   core-impurityhellinger   core-equalhellinger</text>
 <text x="735" y="721" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-disthellinger   core-distauc   core-distangle   core-disteuclid</text>
-<rect x="54" y="748" width="1488" height="846" fill="#126b60" opacity=".045"/>
+<rect x="54" y="748" width="1488" height="894" fill="#126b60" opacity=".045"/>
 <path d="M45 771 L75 771" stroke="#126b60" fill="none"/>
 <circle cx="75" cy="771" r="4" fill="#126b60"/>
 <text x="87" y="778" font-size="24" fill="#126b60" font-weight="bold">Neighborhoods</text>
 <text x="87" y="806" font-size="16" fill="#415652" >Build neighbors across</text>
 <text x="87" y="825" font-size="16" fill="#415652" >features, then measure each</text>
 <text x="87" y="844" font-size="16" fill="#415652" >column’s local contribution.</text>
-<path d="M341 772 L341 1570" stroke="#126b60" fill="none"/>
+<path d="M341 772 L341 1618" stroke="#126b60" fill="none"/>
 <path d="M334 772 L341 772" stroke="#126b60" fill="none"/>
 <path d="M341 772 L356 772" stroke="#126b60" fill="none"/>
 <text x="366" y="778" font-size="18" fill="#1a302f" font-weight="bold">k-NN hits and misses</text>
@@ -113,77 +113,81 @@
 <path d="M688 1474 L722 1474" stroke="#126b60" fill="none"/>
 <text x="735" y="1480" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">turf   numba-turf   vls   numba-vls   ec-relieff</text>
 <path d="M341 1522 L356 1522" stroke="#126b60" fill="none"/>
-<text x="366" y="1528" font-size="18" fill="#1a302f" font-weight="bold">Embedding neighborhoods</text>
+<text x="366" y="1528" font-size="18" fill="#1a302f" font-weight="bold">Hit/miss variance</text>
 <path d="M688 1522 L722 1522" stroke="#126b60" fill="none"/>
-<text x="735" y="1528" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">reliefe</text>
+<text x="735" y="1528" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">stir-relieff   stir-surf   stir-multisurf</text>
 <path d="M341 1570 L356 1570" stroke="#126b60" fill="none"/>
-<text x="366" y="1576" font-size="18" fill="#1a302f" font-weight="bold">Neighbor graph smoothness</text>
+<text x="366" y="1576" font-size="18" fill="#1a302f" font-weight="bold">Embedding neighborhoods</text>
 <path d="M688 1570 L722 1570" stroke="#126b60" fill="none"/>
-<text x="735" y="1576" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">laplacian</text>
-<rect x="54" y="1603" width="1488" height="148" fill="#68529a" opacity=".045"/>
-<path d="M45 1626 L75 1626" stroke="#68529a" fill="none"/>
-<circle cx="75" cy="1626" r="4" fill="#68529a"/>
-<text x="87" y="1633" font-size="24" fill="#68529a" font-weight="bold">Conditional</text>
-<text x="87" y="1659" font-size="24" fill="#68529a" font-weight="bold">information</text>
-<text x="87" y="1687" font-size="16" fill="#415652" >Update candidate scores as</text>
-<text x="87" y="1706" font-size="16" fill="#415652" >the selected feature set</text>
-<text x="87" y="1725" font-size="16" fill="#415652" >grows.</text>
-<path d="M341 1627 L341 1627" stroke="#68529a" fill="none"/>
-<path d="M334 1627 L341 1627" stroke="#68529a" fill="none"/>
-<path d="M341 1627 L356 1627" stroke="#68529a" fill="none"/>
-<text x="366" y="1633" font-size="18" fill="#1a302f" font-weight="bold">Greedy subset construction</text>
-<path d="M688 1627 L722 1627" stroke="#68529a" fill="none"/>
-<text x="735" y="1633" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">mrmr   jmi   cmim   cife</text>
-<rect x="54" y="1760" width="1488" height="192" fill="#255c8a" opacity=".045"/>
-<path d="M45 1783 L75 1783" stroke="#255c8a" fill="none"/>
-<circle cx="75" cy="1783" r="4" fill="#255c8a"/>
-<text x="87" y="1790" font-size="24" fill="#255c8a" font-weight="bold">Predictive models</text>
-<text x="87" y="1818" font-size="16" fill="#415652" >Use a fitted predictor, a</text>
-<text x="87" y="1837" font-size="16" fill="#415652" >change in loss, or a</text>
-<text x="87" y="1856" font-size="16" fill="#415652" >comparison to shuffled</text>
-<text x="87" y="1875" font-size="16" fill="#415652" >features.</text>
-<path d="M341 1784 L341 1928" stroke="#255c8a" fill="none"/>
-<path d="M334 1784 L341 1784" stroke="#255c8a" fill="none"/>
-<path d="M341 1784 L356 1784" stroke="#255c8a" fill="none"/>
-<text x="366" y="1790" font-size="18" fill="#1a302f" font-weight="bold">Fitted model importance</text>
-<path d="M688 1784 L722 1784" stroke="#255c8a" fill="none"/>
-<text x="735" y="1790" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">linear   forest   estimator</text>
+<text x="735" y="1576" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">reliefe</text>
+<path d="M341 1618 L356 1618" stroke="#126b60" fill="none"/>
+<text x="366" y="1624" font-size="18" fill="#1a302f" font-weight="bold">Neighbor graph smoothness</text>
+<path d="M688 1618 L722 1618" stroke="#126b60" fill="none"/>
+<text x="735" y="1624" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">laplacian</text>
+<rect x="54" y="1651" width="1488" height="148" fill="#68529a" opacity=".045"/>
+<path d="M45 1674 L75 1674" stroke="#68529a" fill="none"/>
+<circle cx="75" cy="1674" r="4" fill="#68529a"/>
+<text x="87" y="1681" font-size="24" fill="#68529a" font-weight="bold">Conditional</text>
+<text x="87" y="1707" font-size="24" fill="#68529a" font-weight="bold">information</text>
+<text x="87" y="1735" font-size="16" fill="#415652" >Update candidate scores as</text>
+<text x="87" y="1754" font-size="16" fill="#415652" >the selected feature set</text>
+<text x="87" y="1773" font-size="16" fill="#415652" >grows.</text>
+<path d="M341 1675 L341 1675" stroke="#68529a" fill="none"/>
+<path d="M334 1675 L341 1675" stroke="#68529a" fill="none"/>
+<path d="M341 1675 L356 1675" stroke="#68529a" fill="none"/>
+<text x="366" y="1681" font-size="18" fill="#1a302f" font-weight="bold">Greedy subset construction</text>
+<path d="M688 1675 L722 1675" stroke="#68529a" fill="none"/>
+<text x="735" y="1681" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">mrmr   jmi   cmim   cife</text>
+<rect x="54" y="1808" width="1488" height="192" fill="#255c8a" opacity=".045"/>
+<path d="M45 1831 L75 1831" stroke="#255c8a" fill="none"/>
+<circle cx="75" cy="1831" r="4" fill="#255c8a"/>
+<text x="87" y="1838" font-size="24" fill="#255c8a" font-weight="bold">Predictive models</text>
+<text x="87" y="1866" font-size="16" fill="#415652" >Use a fitted predictor, a</text>
+<text x="87" y="1885" font-size="16" fill="#415652" >change in loss, or a</text>
+<text x="87" y="1904" font-size="16" fill="#415652" >comparison to shuffled</text>
+<text x="87" y="1923" font-size="16" fill="#415652" >features.</text>
+<path d="M341 1832 L341 1976" stroke="#255c8a" fill="none"/>
+<path d="M334 1832 L341 1832" stroke="#255c8a" fill="none"/>
 <path d="M341 1832 L356 1832" stroke="#255c8a" fill="none"/>
-<text x="366" y="1838" font-size="18" fill="#1a302f" font-weight="bold">Error after splitting</text>
+<text x="366" y="1838" font-size="18" fill="#1a302f" font-weight="bold">Fitted model importance</text>
 <path d="M688 1832 L722 1832" stroke="#255c8a" fill="none"/>
-<text x="735" y="1838" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-mseofmodel   core-maeofmodel</text>
+<text x="735" y="1838" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">linear   forest   estimator</text>
 <path d="M341 1880 L356 1880" stroke="#255c8a" fill="none"/>
-<text x="366" y="1886" font-size="18" fill="#1a302f" font-weight="bold">Recursive elimination</text>
+<text x="366" y="1886" font-size="18" fill="#1a302f" font-weight="bold">Error after splitting</text>
 <path d="M688 1880 L722 1880" stroke="#255c8a" fill="none"/>
-<text x="735" y="1886" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">rfe</text>
+<text x="735" y="1886" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-mseofmodel   core-maeofmodel</text>
 <path d="M341 1928 L356 1928" stroke="#255c8a" fill="none"/>
-<text x="366" y="1934" font-size="18" fill="#1a302f" font-weight="bold">Perturbation and shadows</text>
+<text x="366" y="1934" font-size="18" fill="#1a302f" font-weight="bold">Recursive elimination</text>
 <path d="M688 1928 L722 1928" stroke="#255c8a" fill="none"/>
-<text x="735" y="1934" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">permutation   shadow-forest   boruta</text>
-<rect x="54" y="1961" width="1488" height="148" fill="#785366" opacity=".045"/>
-<path d="M45 1984 L75 1984" stroke="#785366" fill="none"/>
-<circle cx="75" cy="1984" r="4" fill="#785366"/>
-<text x="87" y="1991" font-size="24" fill="#785366" font-weight="bold">Aggregation and</text>
-<text x="87" y="2017" font-size="24" fill="#785366" font-weight="bold">controls</text>
-<text x="87" y="2045" font-size="16" fill="#415652" >Combine target-specific</text>
-<text x="87" y="2064" font-size="16" fill="#415652" >rankings or establish a</text>
-<text x="87" y="2083" font-size="16" fill="#415652" >chance baseline.</text>
-<path d="M341 1985 L341 2033" stroke="#785366" fill="none"/>
-<path d="M334 1985 L341 1985" stroke="#785366" fill="none"/>
-<path d="M341 1985 L356 1985" stroke="#785366" fill="none"/>
-<text x="366" y="1991" font-size="18" fill="#1a302f" font-weight="bold">Rank across target columns</text>
-<path d="M688 1985 L722 1985" stroke="#785366" fill="none"/>
-<text x="735" y="1991" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">per-target</text>
+<text x="735" y="1934" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">rfe</text>
+<path d="M341 1976 L356 1976" stroke="#255c8a" fill="none"/>
+<text x="366" y="1982" font-size="18" fill="#1a302f" font-weight="bold">Perturbation and shadows</text>
+<path d="M688 1976 L722 1976" stroke="#255c8a" fill="none"/>
+<text x="735" y="1982" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">permutation   shadow-forest   boruta</text>
+<rect x="54" y="2009" width="1488" height="148" fill="#785366" opacity=".045"/>
+<path d="M45 2032 L75 2032" stroke="#785366" fill="none"/>
+<circle cx="75" cy="2032" r="4" fill="#785366"/>
+<text x="87" y="2039" font-size="24" fill="#785366" font-weight="bold">Aggregation and</text>
+<text x="87" y="2065" font-size="24" fill="#785366" font-weight="bold">controls</text>
+<text x="87" y="2093" font-size="16" fill="#415652" >Combine target-specific</text>
+<text x="87" y="2112" font-size="16" fill="#415652" >rankings or establish a</text>
+<text x="87" y="2131" font-size="16" fill="#415652" >chance baseline.</text>
+<path d="M341 2033 L341 2081" stroke="#785366" fill="none"/>
+<path d="M334 2033 L341 2033" stroke="#785366" fill="none"/>
 <path d="M341 2033 L356 2033" stroke="#785366" fill="none"/>
-<text x="366" y="2039" font-size="18" fill="#1a302f" font-weight="bold">Random ordering</text>
+<text x="366" y="2039" font-size="18" fill="#1a302f" font-weight="bold">Rank across target columns</text>
 <path d="M688 2033 L722 2033" stroke="#785366" fill="none"/>
-<text x="735" y="2039" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">random</text>
-<path d="M45 264 L45 1984" stroke="#81938f" fill="none"/>
+<text x="735" y="2039" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">per-target</text>
+<path d="M341 2081 L356 2081" stroke="#785366" fill="none"/>
+<text x="366" y="2087" font-size="18" fill="#1a302f" font-weight="bold">Random ordering</text>
+<path d="M688 2081 L722 2081" stroke="#785366" fill="none"/>
+<text x="735" y="2087" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">random</text>
+<path d="M45 264 L45 2032" stroke="#81938f" fill="none"/>
 <circle cx="45" cy="264" r="4" fill="#47615c"/>
 <circle cx="45" cy="771" r="4" fill="#47615c"/>
-<circle cx="45" cy="1626" r="4" fill="#47615c"/>
-<circle cx="45" cy="1783" r="4" fill="#47615c"/>
-<circle cx="45" cy="1984" r="4" fill="#47615c"/>
-<text x="66" y="2142" font-size="17" fill="#1a302f" >Each ID appears at its primary scoring rule. Several algorithms have both native and reference implementations.</text>
+<circle cx="45" cy="1674" r="4" fill="#47615c"/>
+<circle cx="45" cy="1831" r="4" fill="#47615c"/>
+<circle cx="45" cy="2032" r="4" fill="#47615c"/>
+<text x="66" y="2190" font-size="17" fill="#1a302f" >Each ID appears at its primary scoring rule. Several algorithms have both native and reference implementations.</text>
 </g>
 </svg>
