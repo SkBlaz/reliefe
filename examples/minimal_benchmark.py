@@ -1,68 +1,27 @@
-## perform a simple benchmark 
-from scipy import sparse
-import numpy as np
+"""Compare feature budgets on identical training folds (run from the repo root)."""
 from sklearn.datasets import load_breast_cancer
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.feature_selection import mutual_info_classif  # chi2, f_classif
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score
-import tqdm
-import reliefe
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
-def test_simple_benchmark():
-    sns.set_style("whitegrid")
-    data_obj = load_breast_cancer()
-    x = data_obj['data']
-    y = data_obj['target']
-    names = data_obj['feature_names']
+from reliefe import FeatureRanker
 
-    # let's overfit, just for demo purposes
 
-    reliefE_instance = reliefe.ReliefE(embedding_based_distances=True,
-                                   verbose=True,
-                                   use_average_neighbour=False,
-                                   determine_k_automatically=False,
-                                   mlc_distance="hamming")
-    reliefE_instance.fit(x, y)
-    reliefe_importances = reliefE_instance.feature_importances_
-    rf_model = RandomForestClassifier()
-    rf_model.fit(x, y)
-    rf = rf_model.feature_importances_
-    mutual_information = mutual_info_classif(x,y)
-    sorted_rf = np.argsort(rf)
-    sorted_mi = np.argsort(mutual_information)
-    sorted_re = np.argsort(reliefe_importances)
-    
-    names = ["RF","MI","ReliefE"]
-    indices = [sorted_rf,sorted_mi,sorted_re]
+def benchmark():
+    x, y = load_breast_cancer(return_X_y=True)
+    # Small demo with a fixed subset. Keep the same rows and folds for every method.
+    x, y = x[::4], y[::4]
+    splits = list(StratifiedKFold(3, shuffle=True, random_state=42).split(x, y))
+    for method in ("all", "random", "relieff", "f", "forest"):
+        budgets = (x.shape[1],) if method == "all" else (3, 8)
+        for k in budgets:
+            steps = [] if method == "all" else [FeatureRanker(method, top_k=k)]
+            pipeline = make_pipeline(*steps, StandardScaler(), LogisticRegression(max_iter=1000))
+            scores = cross_val_score(pipeline, x, y, cv=splits, scoring="balanced_accuracy",
+                                     error_score="raise")
+            print(f"{method:8s} k={k:2d} balanced accuracy={scores.mean():.3f}")
 
-    output_struct = {}
-    for name, indice_set in zip(names, indices):
-        scores = []
-        indice_set = indice_set.tolist()
-        print("Computing evaluations for: {}".format(name))
-        for j in tqdm.tqdm(range(len(indice_set))):        
-            selected_features = indice_set[0:j+1]
-            subset = x[:,selected_features]
-            clf = LogisticRegression(max_iter = 10000000, solver = "lbfgs")
-            score = np.mean(cross_val_score(clf, subset, y, cv  = 10))
-            scores.append((score,j+1))
-        output_struct[name] = scores
-        
-    print("Plotting ..")
-    for k,v in output_struct.items():
-        indices = []
-        scores = []
-        for x,y in v:
-            indices.append(y)
-            scores.append(x)
-        plt.plot(indices, scores, label = k)
-    plt.xlabel("Top features")
-    plt.ylabel("Performance  (Accuracy)")
-    plt.legend()
-    plt.show()
 
 if __name__ == "__main__":
-    test_simple_benchmark()
+    benchmark()

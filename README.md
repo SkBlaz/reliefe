@@ -128,3 +128,58 @@ retain accumulated weights across skipped updates, and subset distance is zero
 for equal label sets and one otherwise. The sparsifier operates on the sampled
 rectangular CSR matrix. Use `random_state` to control sampling and built-in
 embeddings. Inspect `effective_embedding_`, `k_` and `num_iter_` after fitting.
+
+## Rank and select features in Python
+
+`FeatureRanker` fits on a numeric table, returns a full ranking in input-feature
+coordinates, and selects columns in their original order. It works as a step
+in a scikit-learn pipeline. Use an explicit regression task for integer-valued
+responses. Fit the entire pipeline inside each training fold.
+
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from reliefe import FeatureRanker, list_methods
+
+X, y = load_breast_cancer(return_X_y=True)
+pipeline = make_pipeline(FeatureRanker("relieff", top_k=5), StandardScaler(),
+                         LogisticRegression(max_iter=1000))
+fold_scores = cross_val_score(pipeline, X, y, cv=3)
+pipeline.fit(X, y)
+print(pipeline[0].ranking()[:5])
+print(list_methods()["rrelieff"])
+```
+
+| Method | Targets | Inputs | Meaning |
+| --- | --- | --- | --- |
+| `relief` | Binary | Dense | Original range-normalized, squared-difference update using every query |
+| `relieff`, `reliefe` | Classification, plus multilabel for ReliefE | Dense, sparse | Signed feature weights, with direct or embedding-based neighborhoods |
+| `rrelieff` | Regression | Dense | Rank-weighted conditional difference in feature changes |
+| `variance`, `random` | Unsupervised | Dense, sparse | Population variance or seeded random baseline |
+| `f`, `mi` | Classification, regression | Dense, sparse | F statistic or mutual information. For sparse MI sklearn expects discrete predictors |
+| `chi2` | Classification | Nonnegative dense or sparse | Chi-square statistic |
+| `mrmr` | Classification | Dense | Greedy relevance-minus-redundancy selection order with quantile discretization |
+| `linear`, `forest` | Classification, regression | Dense, sparse | Absolute standardized coefficients averaged across classes, or impurity decrease |
+| `rfe` | Classification, regression | Dense, sparse | Elimination rank from a cloned estimator |
+| `permutation` | Classification, regression | Dense | Score decrease on an internal validation split. Inspect `validation_indices_`, `estimator_`, `scoring_` and `permutation_std_` |
+| ReBATE methods below | Classification, regression | Dense | Upstream feature weights, including wrapper elimination tiers for TuRF |
+
+Install the optional **ReBATE** integration on Python 3.9+ with
+`pip install 'reliefe[rebate]'` (from a checkout, `uv sync --extra rebate`).
+The catalog includes `rebate-relieff`, `surf`, `surf-star`, `multisurf`,
+`multisurf-star`, `swrf`, `swrf-star`, `multiswrf`, `multiswrf-star`,
+`multiswrfdb`, `multiswrfdb-star`, `mu-relief`, `turf`, `vls`, and `iter`.
+Set backend options with `method_params`. For wrappers, `base_method` selects
+a ReBATE core method and `base_params` configures it. The Python ranking
+interface accepts finite encoded numeric features. ReBATE distance methods
+can require quadratic memory in sample count. See the
+[upstream implementations](https://github.com/UrbsLab/scikit-rebate).
+
+`scores_` preserves native units in original column order. Ordinal methods
+expose `scores_=None`. `ranks_` starts at one and permits ties. Equal values
+retain column order at the top-k boundary. Undefined univariate statistics sort
+last. Labeled tables retain their original names. Run
+`uv run python examples/minimal_benchmark.py` for fold-local comparisons.
