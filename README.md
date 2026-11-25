@@ -11,6 +11,54 @@ Use `from reliefe import FeatureRanker, list_methods` and inspect
 score semantics. The bounded `rank_features` function remains available for
 small classification tables and MCP clients.
 
+## Feature ranking taxonomy
+
+[![Feature ranking methods grouped by the evidence they use](images/feature-ranking-tree.svg)](images/feature-ranking-tree.svg)
+
+Read the tree from left to right. A **myopic** filter evaluates one input column at a time. A **neighborhood** method constructs distances across columns before assigning credit to each feature, so a feature can matter through an interaction. In the conditional-information branch, earlier selections change the score of the next candidate. A model-based rank depends on the learner, loss and data. Each public ID appears once under its primary scoring rule. Alternate implementations have separate IDs.
+
+### Complete method catalogue
+
+<!-- algorithm-catalog -->
+| Scoring family | Scoring rule | Public method IDs |
+|---|---|---|
+| Marginal filters | Dispersion | `variance`, `numba-variance` |
+| Marginal filters | Association and group tests | `pearson`, `numba-pearson`, `spearman`, `numba-spearman`, `kendall`, `kruskal`, `f`, `numba-f`, `chi2`, `numba-chi2` |
+| Marginal filters | Censored outcome ordering | `survival-concordance` |
+| Marginal filters | Information and impurity | `mi`, `numba-info-gain`, `numba-gain-ratio`, `numba-symmetrical-uncertainty`, `numba-gini`, `core-infgain`, `core-gainratio`, `core-mdl`, `core-gini`, `core-dkm` |
+| Marginal filters | Split accuracy and error | `core-accuracy`, `core-mseofmean`, `core-myopicrelieff` |
+| Marginal filters | Costs and split weighting | `core-dkmcost`, `core-gainratiocost`, `core-mdlsmp`, `core-uniformdkm`, `core-uniformgini`, `core-uniforminf`, `core-uniformaccuracy`, `core-equaldkm`, `core-equalgini`, `core-equalinf` |
+| Marginal filters | Class distribution distance | `core-impurityeuclid`, `core-impurityhellinger`, `core-equalhellinger`, `core-disthellinger`, `core-distauc`, `core-distangle`, `core-disteuclid` |
+| Neighborhoods | k-NN hits and misses | `relief`, `relieff`, `rebate-relieff`, `core-relief`, `core-relieffequalk` |
+| Neighborhoods | Historical categorical Relief | `relief-1994-a`, `relief-1994-b`, `relief-1994-c`, `relief-1994-d`, `relief-1994-e`, `relief-1994-f` |
+| Neighborhoods | Neighbor and update weights | `core-relieffexprank`, `core-relieffdistance`, `core-relieffsqrdistance`, `core-relieffmerit`, `reliefmss`, `numba-reliefmss`, `mu-relief`, `numba-mu-relief` |
+| Neighborhoods | Adaptive neighbor count | `reliefseq`, `core-relieffbestk`, `core-rrelieffbestk` |
+| Neighborhoods | Continuous target updates | `rrelieff`, `core-rrelieffequalk`, `core-rrelieffexprank`, `core-rrelieffdistance`, `core-rrelieffsqrdistance`, `core-rrelieffwithmse` |
+| Neighborhoods | Cost-sensitive neighbors | `core-relieffexpc`, `core-relieffavgc`, `core-relieffpe`, `core-relieffpa`, `core-relieffsmp`, `core-reliefkukar` |
+| Neighborhoods | Global distance threshold | `surf`, `numba-surf`, `surf-star`, `numba-surf-star`, `swrf`, `numba-swrf`, `swrf-star`, `numba-swrf-star` |
+| Neighborhoods | Per-observation threshold | `multisurf`, `numba-multisurf`, `multisurf-star`, `numba-multisurf-star`, `multiswrf`, `numba-multiswrf`, `multiswrf-star`, `numba-multiswrf-star`, `multiswrfdb`, `numba-multiswrfdb`, `multiswrfdb-star`, `numba-multiswrfdb-star` |
+| Neighborhoods | Learned distance weights | `irelief`, `numba-irelief`, `iterative-relief`, `numba-iterative-relief`, `boostedsurf`, `iter` |
+| Neighborhoods | Feature subsets and pruning | `turf`, `numba-turf`, `vls`, `numba-vls`, `ec-relieff` |
+| Neighborhoods | Embedding neighborhoods | `reliefe` |
+| Neighborhoods | Neighbor graph smoothness | `laplacian` |
+| Conditional information | Greedy subset construction | `mrmr`, `jmi`, `cmim`, `cife` |
+| Predictive models | Fitted model importance | `linear`, `forest`, `estimator` |
+| Predictive models | Error after splitting | `core-mseofmodel`, `core-maeofmodel` |
+| Predictive models | Recursive elimination | `rfe` |
+| Predictive models | Perturbation and shadows | `permutation`, `shadow-forest`, `boruta` |
+| Aggregation and controls | Rank across target columns | `per-target` |
+| Aggregation and controls | Random ordering | `random` |
+<!-- /algorithm-catalog -->
+
+### Implementations and attribution
+
+All `numba-` methods use scoring kernels maintained in this repository and compiled by Numba. Original Relief, ReliefF, ReliefE, RReliefF, ReliefSeq, the six 1994 methods, the four greedy information criteria and survival concordance also use native kernels. The estimator handles input validation, task dispatch and subset bookkeeping in Python. For a dense continuous table, `FeatureRanker("numba-multisurf")` runs with the base install. The radius methods accept explicit zero-based `categorical_features` in `method_params`. The native margin and subspace methods operate on range-scaled numeric features.
+
+* Original Relief and the categorical, regression, adaptive-neighborhood and embedding extensions follow the corresponding publications. [Kira and Rendell](https://cdn.aaai.org/AAAI/1992/AAAI92-020.pdf) · [Kononenko’s RELIEF-A through F](https://doi.org/10.1007/3-540-57868-4_57) · [ReliefF and RReliefF](https://doi.org/10.1023/A:1025667309714) · [ReliefSeq](https://pubmed.ncbi.nlm.nih.gov/24339943/) · [ReliefE](https://doi.org/10.1007/s10994-021-05998-5)
+* ReBATE supplies the reference IDs for the SURF and SWRF families, μ-Relief, TuRF, VLS, Iter and rebate-relieff. Relief.jl supplies reliefmss, boostedsurf, iterative-relief, irelief and ec-relieff. Native counterparts have their own IDs and defaults. [ReBATE source](https://github.com/UrbsLab/scikit-rebate) · [original method citations](https://epistasislab.github.io/scikit-rebate/citing/) · [Relief.jl source and bibliography](https://github.com/jernejvivod/Relief.jl)
+* The core-prefixed methods call the CORElearn authors’ R/C++ evaluators. Boruta uses BorutaPy. Model-based estimators and permutation use scikit-learn. Kendall and Kruskal use SciPy. [CORElearn source archive](https://cran.r-project.org/src/contrib/Archive/CORElearn/) · [BorutaPy](https://github.com/scikit-learn-contrib/boruta_py) · [scikit-learn](https://scikit-learn.org/stable/modules/feature_selection.html) · [SciPy](https://docs.scipy.org/doc/scipy/reference/stats.html)
+* Native information criteria use discretized training columns. Laplacian Score evaluates local smoothness on an unsupervised neighbor graph. [Brown et al. on information selection criteria](https://jmlr.org/papers/v13/brown12a.html) · [He, Cai and Niyogi on Laplacian Score](https://proceedings.neurips.cc/paper/2005/hash/b5b03f06271f8917685d14cea7c6c50a-Abstract.html)
+
 ## Install
 
 ```bash

@@ -18,9 +18,11 @@ from sklearn.utils.validation import check_array, check_consistent_length, check
 
 from .catalog import REBATE, list_methods
 from .julia_relief import JULIA_OPTIONS, julia_scores
+from .native import RADIUS_METHODS, categorical_impurity, native_margin, native_radius, native_subset, native_univariate
 from .historical import METHODS_1994, categorical_relief
 from .corelearn import CORE_METHODS, core_scores
-from .filters import laplacian_score, information_order, rank_association, original_relief, rrelieff, survival_concordance
+from .filters import (laplacian_score, information_order, quantile_codes, rank_association,
+                      original_relief, rrelieff, survival_concordance)
 from .reliefe_classes import ReliefE
 
 
@@ -118,7 +120,7 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         values = np.asarray(raw, dtype=float)
         if values.shape != (x.shape[1],):
             raise ValueError("Backend returned an incorrect number of feature values")
-        ordinal = self.method in ("mrmr", "jmi", "cmim", "cife", "rfe", "ec-relieff", "boruta")
+        ordinal = self.method in ("mrmr", "jmi", "cmim", "cife", "rfe", "ec-relieff", "boruta", "numba-turf")
         # Undefined statistics (e.g. F for a constant column) sort last.
         ascending = ordinal or self.method in ("laplacian", "per-target")
         order_values = values if ascending else -values
@@ -137,6 +139,18 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
     def _fit_scores(self, x, y, task, params):
         m = self.method
         classification = task == "classification"
+        if m.startswith("numba-"):
+            variant = m[6:]
+            if variant in ("iterative-relief", "mu-relief", "turf", "vls"):
+                return native_subset(variant, x, y, self.random_state, **params)
+            if variant in ("variance", "f", "chi2", "pearson", "spearman"):
+                return native_univariate(variant, x, y, task, **params)
+            if variant in RADIUS_METHODS:
+                return native_radius(variant, x, y, task == "regression", **params)
+            if variant in ("irelief", "reliefmss"):
+                return native_margin(variant, x, y, **params)
+            codes = quantile_codes(x, **dict({"bins": 8}, **params))
+            return categorical_impurity(codes, y, int(codes.max()) + 1, int(y.max()) + 1, variant)
         if m == "survival-concordance":
             self.concordance_ = survival_concordance(x, y, **params)
             return np.abs(2 * self.concordance_ - 1)
