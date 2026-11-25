@@ -24,7 +24,7 @@ jobs:
       - name: Compile and verify native ranking kernels
         run: NUMBA_DISABLE_JIT=0 NUMBA_NUM_THREADS=1 uv run --no-sync python -m unittest discover -s tests -p test_native_kernels.py -v
       - name: Compare compiled ports to frozen reference scores
-        run: NUMBA_NUM_THREADS=1 uv run --no-sync python -m unittest discover -s tests -p test_reference_parity.py -v
+        run: NUMBA_NUM_THREADS=1 uv run --no-sync python -m unittest discover -s tests -p "test_*parity.py" -v
       - run: uv run --no-sync python examples/minimal_reliefe2.py
 
   coverage-and-mcp:

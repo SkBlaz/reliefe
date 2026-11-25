@@ -16,13 +16,17 @@ from sklearn.utils import check_random_state
 from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.validation import check_array, check_consistent_length, check_is_fitted
 
+from .dependence import dependence_scores
+from .information import CRITERIA, rank_discrete
 from .catalog import REBATE, classification_strategies, list_methods
 from .legacy_relief import OPTIONS as RELIEF_OPTIONS, legacy_scores
+from .robust import robust_scores
+from .spectral import spectral_scores
 from .stir import stir_scores
 from .native import RADIUS_METHODS, categorical_impurity, native_margin, native_radius, native_subset, native_univariate
 from .historical import METHODS_1994, categorical_relief
 from .corelearn import CORE_METHODS, core_scores
-from .filters import (laplacian_score, information_order, quantile_codes, rank_association,
+from .filters import (separation_scores, laplacian_score, information_order, quantile_codes, rank_association,
                       original_relief, rrelieff, survival_concordance)
 from .reliefe_classes import ReliefE
 
@@ -159,9 +163,12 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         values = np.asarray(raw, dtype=float)
         if values.shape != (x.shape[1],):
             raise ValueError("Backend returned an incorrect number of feature values")
-        ordinal = not reduced and self.method in ("mrmr", "jmi", "cmim", "cife", "rfe", "ec-relieff", "boruta", "numba-turf")
+        ordinal = not reduced and (
+            self.method in CRITERIA or self.method in
+            ("mrmr", "jmi", "cmim", "cife", "rfe", "ec-relieff", "boruta", "numba-turf")
+        )
         # Undefined statistics (e.g. F for a constant column) sort last.
-        ascending = reduced or ordinal or self.method in ("laplacian", "per-target")
+        ascending = reduced or ordinal or self.method in ("laplacian", "spec", "spec-energy", "per-target")
         order_values = values if ascending else -values
         order_values = np.where(np.isnan(order_values), np.inf, order_values)
         self.order_ = np.argsort(order_values, kind="stable")
@@ -246,8 +253,19 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
             return original_relief(x, y, **params)
         if m == "rrelieff":
             return rrelieff(x, y, **params)
+        if m == "rfs":
+            return robust_scores(x, y, task, **params)
+        if m in ("spec", "spec-energy", "spec-cluster"):
+            return spectral_scores(x, m, **params)
+        if m in ("dc-sis", "hsic"):
+            return dependence_scores(x, y, task, m, **params)
+        if m in CRITERIA:
+            codes = quantile_codes(x, params.pop("bins", 8))
+            return rank_discrete(codes, y, m, **params)
         if m in ("mrmr", "jmi", "cmim", "cife"):
             return information_order(x, y, m, **params)
+        if m in ("t-score", "fisher-score"):
+            return separation_scores(x, y, m, **params)
         if m in ("pearson", "spearman", "kendall", "kruskal"):
             return rank_association(x, y, m, **params)
         if m == "boruta":

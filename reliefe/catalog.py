@@ -1,6 +1,7 @@
 """Discover rankers and the targets and input formats accepted by each."""
 from typing import NamedTuple
 
+from .information import CRITERIA
 from .native import RADIUS_METHODS
 from .legacy_relief import OPTIONS as RELIEF_OPTIONS
 from .historical import METHODS_1994
@@ -48,12 +49,20 @@ _METHODS = {
     "relieff": Method(C, True, "direct multiclass ReliefF weight"),
     "reliefe": Method(C + ("multilabel",), True, "embedding-neighborhood ReliefE weight"),
     "rrelieff": Method(R, False, "regression ReliefF weight"),
+    "spec": Method(("unsupervised",), False, "SPEC normalized nonconstant graph energy (lower is better)"),
+    "spec-energy": Method(("unsupervised",), False, "SPEC graph energy (lower is better)"),
+    "spec-cluster": Method(("unsupervised",), False, "SPEC low-frequency cluster alignment"),
     "laplacian": Method(("unsupervised",), False, "normalized graph energy (lower is better)"),
     "per-target": Method(("multioutput", "multilabel"), True, "mean per-target rank (lower is better)"),
     "shadow-forest": Method(CR, False, "fraction of repetitions beating the strongest shuffled feature"),
     "reliefseq": Method(C, True, "maximum ReliefF weight across neighborhood sizes"),
+    "rfs": Method(CR + ("multilabel", "multioutput"), False, "robust joint L2,1 squared coefficient norm"),
+    "dc-sis": Method(CR + ("multilabel", "multioutput"), False, "squared distance correlation"),
+    "hsic": Method(CR + ("multilabel", "multioutput"), False, "biased empirical Hilbert-Schmidt independence criterion"),
     "survival-concordance": Method(("survival",), False, "absolute Somers D from censored concordance"),
     "variance": Method(("unsupervised",), True, "population variance"),
+    "t-score": Method(C, False, "absolute two-group t score"),
+    "fisher-score": Method(C, False, "between-class over within-class scatter"),
     "pearson": Method(R, False, "absolute Pearson correlation"),
     "spearman": Method(R, False, "absolute Spearman rank correlation"),
     "kendall": Method(R, False, "absolute Kendall tau-b"),
@@ -73,6 +82,7 @@ _METHODS = {
     "permutation": Method(CR, False, "validation score decrease"),
     "random": Method(("unsupervised",), True, "seeded random baseline"),
 }
+_METHODS.update({name: Method(C, False, meaning + " selection rank") for name, meaning in CRITERIA.items()})
 _METHODS.update({key: Method(CR, False, "ReBATE " + name + " weight") for key, name in REBATE.items()})
 _METHODS.update({key: Method(C if name in CLASSIFICATION else R, False,
                              "CORElearn " + name + " attribute evaluation")
@@ -96,7 +106,7 @@ def classification_strategies(target):
     """Map compatible method IDs to their multiclass or multilabel scoring strategy."""
     if target not in ("multiclass", "multilabel"):
         raise ValueError("target must be multiclass or multilabel")
-    binary_only = {"relief", *METHODS_1994[:4], "stir-relieff", "stir-surf", "stir-multisurf"}
+    binary_only = {"relief", "t-score", *METHODS_1994[:4], "stir-relieff", "stir-surf", "stir-multisurf"}
     result = {}
     for name, spec in _METHODS.items():
         if target == "multilabel" and "multilabel" in spec.tasks:
