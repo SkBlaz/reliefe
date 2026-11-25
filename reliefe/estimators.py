@@ -16,6 +16,8 @@ from sklearn.utils import check_random_state
 from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.validation import check_array, check_consistent_length, check_is_fitted
 
+from .dependence import dependence_scores
+from .information import CRITERIA, rank_discrete
 from .catalog import REBATE, classification_strategies, list_methods
 from .legacy_relief import OPTIONS as RELIEF_OPTIONS, legacy_scores
 from .stir import stir_scores
@@ -159,7 +161,10 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         values = np.asarray(raw, dtype=float)
         if values.shape != (x.shape[1],):
             raise ValueError("Backend returned an incorrect number of feature values")
-        ordinal = not reduced and self.method in ("mrmr", "jmi", "cmim", "cife", "rfe", "ec-relieff", "boruta", "numba-turf")
+        ordinal = not reduced and (
+            self.method in CRITERIA or self.method in
+            ("mrmr", "jmi", "cmim", "cife", "rfe", "ec-relieff", "boruta", "numba-turf")
+        )
         # Undefined statistics (e.g. F for a constant column) sort last.
         ascending = reduced or ordinal or self.method in ("laplacian", "per-target")
         order_values = values if ascending else -values
@@ -246,6 +251,11 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
             return original_relief(x, y, **params)
         if m == "rrelieff":
             return rrelieff(x, y, **params)
+        if m in ("dc-sis", "hsic"):
+            return dependence_scores(x, y, task, m, **params)
+        if m in CRITERIA:
+            codes = quantile_codes(x, params.pop("bins", 8))
+            return rank_discrete(codes, y, m, **params)
         if m in ("mrmr", "jmi", "cmim", "cife"):
             return information_order(x, y, m, **params)
         if m in ("pearson", "spearman", "kendall", "kruskal"):

@@ -1,6 +1,7 @@
 """Discover rankers and the targets and input formats accepted by each."""
 from typing import NamedTuple
 
+from .information import CRITERIA
 from .native import RADIUS_METHODS
 from .legacy_relief import OPTIONS as RELIEF_OPTIONS
 from .historical import METHODS_1994
@@ -52,6 +53,8 @@ _METHODS = {
     "per-target": Method(("multioutput", "multilabel"), True, "mean per-target rank (lower is better)"),
     "shadow-forest": Method(CR, False, "fraction of repetitions beating the strongest shuffled feature"),
     "reliefseq": Method(C, True, "maximum ReliefF weight across neighborhood sizes"),
+    "dc-sis": Method(CR + ("multilabel", "multioutput"), False, "squared distance correlation"),
+    "hsic": Method(CR + ("multilabel", "multioutput"), False, "biased empirical Hilbert-Schmidt independence criterion"),
     "survival-concordance": Method(("survival",), False, "absolute Somers D from censored concordance"),
     "variance": Method(("unsupervised",), True, "population variance"),
     "pearson": Method(R, False, "absolute Pearson correlation"),
@@ -73,6 +76,7 @@ _METHODS = {
     "permutation": Method(CR, False, "validation score decrease"),
     "random": Method(("unsupervised",), True, "seeded random baseline"),
 }
+_METHODS.update({name: Method(C, False, meaning + " selection rank") for name, meaning in CRITERIA.items()})
 _METHODS.update({key: Method(CR, False, "ReBATE " + name + " weight") for key, name in REBATE.items()})
 _METHODS.update({key: Method(C if name in CLASSIFICATION else R, False,
                              "CORElearn " + name + " attribute evaluation")
