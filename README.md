@@ -84,8 +84,8 @@ All `numba-` methods use scoring kernels maintained in this repository and compi
 
 * STIR computes a native Numba pooled pseudo-t statistic for binary case-control data with fixed-k, global-radius or per-observation neighborhoods. It uses range-scaled Manhattan distance and the untransformed feature difference. A constant feature or an empty radius neighborhood can yield an undefined statistic. [STIR paper](https://doi.org/10.1093/bioinformatics/bty788) · [authors’ R implementation](https://github.com/insilico/stir)
 * Original Relief and the categorical, regression, adaptive-neighborhood and embedding extensions follow the corresponding publications. [Kira and Rendell](https://cdn.aaai.org/AAAI/1992/AAAI92-020.pdf) · [Kononenko’s RELIEF-A through F](https://doi.org/10.1007/3-540-57868-4_57) · [ReliefF and RReliefF](https://doi.org/10.1023/A:1025667309714) · [ReliefSeq](https://pubmed.ncbi.nlm.nih.gov/24339943/) · [ReliefE](https://doi.org/10.1007/s10994-021-05998-5)
-* ReBATE supplies the reference IDs for the SURF and SWRF families, μ-Relief, TuRF, VLS, Iter and rebate-relieff. Relief.jl supplies reliefmss, boostedsurf, iterative-relief, irelief and ec-relieff. Native counterparts have their own IDs and defaults. [ReBATE source](https://github.com/UrbsLab/scikit-rebate) · [original method citations](https://epistasislab.github.io/scikit-rebate/citing/) · [Relief.jl source and bibliography](https://github.com/jernejvivod/Relief.jl)
-* The core-prefixed methods call the CORElearn authors’ R/C++ evaluators. Boruta uses BorutaPy. Model-based estimators and permutation use scikit-learn. Kendall and Kruskal use SciPy. [CORElearn source archive](https://cran.r-project.org/src/contrib/Archive/CORElearn/) · [BorutaPy](https://github.com/scikit-learn-contrib/boruta_py) · [scikit-learn](https://scikit-learn.org/stable/modules/feature_selection.html) · [SciPy](https://docs.scipy.org/doc/scipy/reference/stats.html)
+* ReBATE supplies the reference IDs for the SURF and SWRF families, μ-Relief, TuRF, VLS, Iter and rebate-relieff. Relief.jl supplies the published comparison implementations for reliefmss, boostedsurf, iterative-relief, irelief and ec-relieff. Native counterparts have their own IDs and defaults. [ReBATE source](https://github.com/UrbsLab/scikit-rebate) · [original method citations](https://epistasislab.github.io/scikit-rebate/citing/) · [Relief.jl source and bibliography](https://github.com/jernejvivod/Relief.jl)
+* The core-prefixed methods use native Numba scoring kernels verified against the CORElearn authors’ evaluators. Boruta uses BorutaPy. Model-based estimators and permutation use scikit-learn. Kendall and Kruskal use SciPy. [CORElearn source archive](https://cran.r-project.org/src/contrib/Archive/CORElearn/) · [BorutaPy](https://github.com/scikit-learn-contrib/boruta_py) · [scikit-learn](https://scikit-learn.org/stable/modules/feature_selection.html) · [SciPy](https://docs.scipy.org/doc/scipy/reference/stats.html)
 * Native information criteria use discretized training columns. Laplacian Score evaluates local smoothness on an unsupervised neighbor graph. [Brown et al. on information selection criteria](https://jmlr.org/papers/v13/brown12a.html) · [He, Cai and Niyogi on Laplacian Score](https://proceedings.neurips.cc/paper/2005/hash/b5b03f06271f8917685d14cea7c6c50a-Abstract.html)
 
 ## Install
@@ -272,34 +272,13 @@ last. Labeled tables retain their original names. Run
 
 ### CORElearn methods
 
-An optional local R backend exposes all 37 classification and nine regression
-attribute evaluators in CORElearn 1.56.0. This includes equal-k, exponential
-rank, best-k, distance and squared-distance neighborhoods, merit and cost
-sensitive ReliefF variants, myopic ReliefF, Kukar's Relief, RReliefF with MSE,
-information gain, gain ratio, MDL, Gini, Hellinger and other split criteria.
-Use `[m for m in list_methods() if m.startswith("core-")]` for exact identifiers.
-Method names refer to implementations. Several backends implement the same
-published algorithm.
-
-Install R with `Rscript` on PATH and install CORElearn in that R environment.
-The version used by CI is available in the [CRAN archive](https://cran.r-project.org/src/contrib/Archive/CORElearn/).
-For example, in R:
-
-```r
-install.packages(c("cluster", "nnet", "plotrix", "rpart.plot"))
-install.packages("https://cran.r-project.org/src/contrib/Archive/CORElearn/CORElearn_1.56.0.tar.gz",
-                 repos = NULL, type = "source")
-```
+All 37 classification and nine regression IDs originally exposed through CORElearn use Python and Numba. Kernels use the reference split, class-weight, neighborhood and score conventions. Numeric split criteria search ordered thresholds. Supply zero-based `categorical_features` for categorical columns and a `cost_matrix` in sorted class order for cost-sensitive methods.
 
 ```python
 ranker = FeatureRanker("core-relieffexprank", method_params={"kNearestExpRank": 5})
-ranker.fit(X, y)
 ```
 
-The bridge launches a local R process per fit and exchanges finite dense numeric
-arrays in a temporary directory. Declare encoded categorical columns with
-`categorical_features=[0, 3]`, supply a misclassification `cost_matrix` in
-sorted class order, or pass named scalar CORElearn options via `method_params`.
+The Python entry point accepts explicit scoring options. See the [option signature](reliefe/corelearn.py) and [original CORElearn source](https://cran.r-project.org/src/contrib/Archive/CORElearn/).
 
 ### Comparing rankings and repeated measurements
 
@@ -341,19 +320,7 @@ The separate `reliefe` method implements the 2021 embedding algorithm.
 ### Complementary Relief.jl methods
 
 `reliefmss`, `boostedsurf`, `iterative-relief`, `irelief`, and `ec-relieff`
-run the corresponding implementations in Relief.jl 0.2.0. Iterative Relief and
-I-Relief have distinct neighborhood and update rules. Evaporative Cooling
-returns an elimination rank. These methods accept dense numeric classification
-tables and start a local Julia process for each fit. Select
-`method_params={"f_type": "discrete"}` for discrete attributes.
-Use Julia 1.10 with a Python environment that contains sklearn:
-
-```bash
-PYTHON="$PWD/.venv/bin/python" julia -e 'using Pkg; Pkg.add(PackageSpec(name="Relief", version="0.2.0")); using Relief'
-```
-
-Set `JULIA_PROJECT` when using a non-default Julia environment. See the
-[Relief.jl reference implementations](https://github.com/jernejvivod/Relief.jl).
+run in-process Numba kernels following the Relief.jl 0.2.0 scoring conventions. Iterative Relief and I-Relief use different updates. Evaporative Cooling returns elimination ranks. These methods accept dense numeric classification tables and support `method_params={"f_type": "discrete"}`. [Original implementations](https://github.com/jernejvivod/Relief.jl)
 
 ### Survival and temporal evaluation
 

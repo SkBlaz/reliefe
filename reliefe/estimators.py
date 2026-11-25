@@ -17,7 +17,7 @@ from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.validation import check_array, check_consistent_length, check_is_fitted
 
 from .catalog import REBATE, classification_strategies, list_methods
-from .julia_relief import JULIA_OPTIONS, julia_scores
+from .legacy_relief import OPTIONS as RELIEF_OPTIONS, legacy_scores
 from .stir import stir_scores
 from .native import RADIUS_METHODS, categorical_impurity, native_margin, native_radius, native_subset, native_univariate
 from .historical import METHODS_1994, categorical_relief
@@ -198,8 +198,8 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         if m == "survival-concordance":
             self.concordance_ = survival_concordance(x, y, **params)
             return np.abs(2 * self.concordance_ - 1)
-        if m in JULIA_OPTIONS:
-            return julia_scores(m, x, y, self.random_state, **params)
+        if m in RELIEF_OPTIONS:
+            return legacy_scores(m, x, y, self.random_state, **params)
         if m in METHODS_1994:
             return categorical_relief(x, y, m[-1], **params)
         if m == "laplacian":

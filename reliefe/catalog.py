@@ -2,7 +2,7 @@
 from typing import NamedTuple
 
 from .native import RADIUS_METHODS
-from .julia_relief import JULIA_OPTIONS
+from .legacy_relief import OPTIONS as RELIEF_OPTIONS
 from .historical import METHODS_1994
 from .corelearn import CLASSIFICATION, CORE_METHODS
 
@@ -79,8 +79,8 @@ _METHODS.update({key: Method(C if name in CLASSIFICATION else R, False,
                  for key, name in CORE_METHODS.items()})
 _METHODS.update({key: Method(C, False, "1994 categorical " + key + " weight")
                  for key in METHODS_1994})
-_METHODS.update({key: Method(C, False, "Relief.jl " + key + (" rank" if key == "ec-relieff" else " weight"))
-                 for key in JULIA_OPTIONS})
+_METHODS.update({key: Method(C, False, "native " + key + (" rank" if key == "ec-relieff" else " weight"))
+                 for key in RELIEF_OPTIONS})
 
 
 _METHODS.update({"numba-" + key: Method(CR, False, "native " + key + " neighborhood weight")
@@ -96,7 +96,7 @@ def classification_strategies(target):
     """Map compatible method IDs to their multiclass or multilabel scoring strategy."""
     if target not in ("multiclass", "multilabel"):
         raise ValueError("target must be multiclass or multilabel")
-    binary_only = {"relief", "core-relief", *METHODS_1994[:4], "stir-relieff", "stir-surf", "stir-multisurf"}
+    binary_only = {"relief", *METHODS_1994[:4], "stir-relieff", "stir-surf", "stir-multisurf"}
     result = {}
     for name, spec in _METHODS.items():
         if target == "multilabel" and "multilabel" in spec.tasks:
