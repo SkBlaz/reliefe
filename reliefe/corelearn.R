@@ -1,7 +1,9 @@
 # Run in a fresh process. Only fixed program text is executed.
 args <- commandArgs(trailingOnly = TRUE)
-if (!requireNamespace("CORElearn", quietly = TRUE))
-    stop("Install the R package CORElearn to use core-* methods")
+if (!requireNamespace("CORElearn", quietly = TRUE)) {
+    message("Install the R package CORElearn to use core-* methods")
+    quit(status = 42)
+}
 root <- args[1]
 method <- args[2]
 classification <- args[3] == "classification"

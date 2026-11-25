@@ -78,3 +78,13 @@ class TargetTests(unittest.TestCase):
                     fitted = FeatureRanker(method, target_strategy="auto").fit(x, y)
                     np.testing.assert_array_equal(np.sort(fitted.order_), np.arange(x.shape[1]))
                     self.assertEqual(fitted.target_strategy_, strategy)
+
+    def test_missing_optional_packages(self):
+        import subprocess
+        from unittest.mock import patch
+        x, y = dataset("multiclass")
+        missing = subprocess.CompletedProcess([], 42, stdout="", stderr="Install the reference package")
+        with patch("shutil.which", return_value="runtime"), patch("subprocess.run", return_value=missing):
+            for method in ("irelief", "core-relief"):
+                with self.assertRaisesRegex(ImportError, "Install the reference package"):
+                    FeatureRanker(method, target_strategy="auto").fit(x, y)

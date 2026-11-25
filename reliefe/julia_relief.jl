@@ -1,3 +1,7 @@
+if Base.find_package("Relief") === nothing
+    println(stderr, "Install Julia package Relief 0.2.0")
+    exit(42)
+end
 using Relief
 using Random
 

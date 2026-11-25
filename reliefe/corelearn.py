@@ -46,6 +46,8 @@ def core_scores(method, x, y, task, random_state, cost_matrix=None, categorical_
                 raise ValueError("Expected a scalar CORElearn option: " + name)
             args.extend([name, ("Y" if value else "N") if isinstance(value, bool) else str(value)])
         result = subprocess.run(args, capture_output=True, text=True)
+        if result.returncode == 42:
+            raise ImportError(result.stderr.strip())
         if result.returncode:
             raise RuntimeError("CORElearn failed: " + result.stderr.strip())
         return np.fromfile(path / "scores.bin", dtype="<f8")

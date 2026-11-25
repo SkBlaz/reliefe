@@ -42,6 +42,8 @@ def julia_scores(method, x, y, seed, f_type="continuous", **params):
         args = [executable, "--startup-file=no", str(Path(__file__).with_name("julia_relief.jl")),
                 folder, method, str(x.shape[1]), str(seed), f_type] + options
         run = subprocess.run(args, capture_output=True, text=True)
+        if run.returncode == 42:
+            raise ImportError(run.stderr.strip())
         if run.returncode:
             raise RuntimeError("Relief.jl failed: " + run.stderr.strip())
         return np.fromfile(path / "scores", dtype="<f8")

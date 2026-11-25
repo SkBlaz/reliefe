@@ -133,10 +133,12 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
                 raise ValueError("Regression requires a one-dimensional response")
         if task == "multilabel" and type_of_target(y) != "multilabel-indicator":
             raise ValueError("Expected a binary indicator matrix for multilabel ranking")
-        # Per-target diagnostics belong to the current fit, including after a refit.
-        self.__dict__.pop("per_target_ranks_", None)
-        self.__dict__.pop("target_names_", None)
-        self.__dict__.pop("label_combinations_", None)
+        # Fitted attributes, including backend diagnostics, belong to this fit.
+        for attr in list(vars(self)):
+            if attr.endswith("_"):
+                delattr(self, attr)
+        if self.method == "per-target":
+            self.target_names_ = np.arange(y.shape[1]) if target_columns is None else np.asarray(target_columns)
         if strategy == "label-powerset":
             combinations, encoded = np.unique(y, axis=0, return_inverse=True)
             self.label_combinations_ = combinations
@@ -152,7 +154,9 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
             raw = self._mean_target_ranks(x, targets, self.method, "classification", self.method_params)
         else:
             raw = self._fit_scores(x, y, task, dict(self.method_params or {}))
-        self.target_strategy_ = "binary-relevance" if self.method == "per-target" and task == "multilabel" else strategy
+        self.target_strategy_ = strategy
+        if self.method == "per-target":
+            self.target_strategy_ = "binary-relevance" if task == "multilabel" else "per-target"
         values = np.asarray(raw, dtype=float)
         if values.shape != (x.shape[1],):
             raise ValueError("Backend returned an incorrect number of feature values")
