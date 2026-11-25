@@ -33,3 +33,21 @@ jobs:
       - run: uv sync --locked --extra mcp --group dev
       - name: Require full coverage, MCP round trips, and compiled numerical checks
         run: make test
+
+  corelearn:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - name: Install reference attribute evaluators
+        shell: Rscript {0}
+        run: |
+          install.packages(c("plotrix", "rpart.plot", "cluster", "nnet"))
+          install.packages("https://cran.r-project.org/src/contrib/Archive/CORElearn/CORElearn_1.56.0.tar.gz", repos=NULL, type="source")
+          stopifnot(requireNamespace("CORElearn"))
+      - run: NUMBA_DISABLE_JIT=1 uv run --locked python -m unittest discover -s tests -p test_corelearn.py -v

@@ -1,6 +1,8 @@
 """Discover rankers and the targets and input formats accepted by each."""
 from typing import NamedTuple
 
+from .corelearn import CLASSIFICATION, CORE_METHODS
+
 
 class Method(NamedTuple):
     tasks: tuple
@@ -37,6 +39,11 @@ _METHODS = {
     "random": Method(("unsupervised",), True, "seeded random baseline"),
 }
 _METHODS.update({key: Method(CR, False, "ReBATE " + name + " weight") for key, name in REBATE.items()})
+
+
+_METHODS.update({key: Method(C if name in CLASSIFICATION else R, False,
+                             "CORElearn " + name + " attribute evaluation")
+                 for key, name in CORE_METHODS.items()})
 
 
 def list_methods():
