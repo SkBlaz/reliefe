@@ -51,3 +51,18 @@ jobs:
           install.packages("https://cran.r-project.org/src/contrib/Archive/CORElearn/CORElearn_1.56.0.tar.gz", repos=NULL, type="source")
           stopifnot(requireNamespace("CORElearn"))
       - run: NUMBA_DISABLE_JIT=1 uv run --locked python -m unittest discover -s tests -p test_corelearn.py -v
+
+  julia-relief:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.10'
+      - run: uv sync --locked
+      - name: Install Relief.jl with the project Python interpreter
+        run: PYTHON="$PWD/.venv/bin/python" julia -e 'using Pkg; Pkg.add(PackageSpec(name="Relief", version="0.2.0")); using Relief'
+      - run: RELIEFE_TEST_JULIA=1 NUMBA_DISABLE_JIT=1 uv run --no-sync python -m unittest discover -s tests -p test_julia_relief.py -v

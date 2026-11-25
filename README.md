@@ -237,3 +237,34 @@ for group or time-series evaluation. Choose hyperparameters inside training fold
 Use `grouped_permutation_importance(fitted_estimator, X_test, y_test, groups)`
 to shuffle correlated or one-hot columns together on held-out data. The returned
 mapping contains one score decrease per repeat for each named group.
+
+### The 1994 RELIEF series
+
+`relief-1994-a` through `relief-1994-f` implement the six historical variants
+on **discrete, numeric-coded attributes**. Use `method_params={"k": 3}` to
+average over neighbors. A averages multiple hits and misses. B assigns uniform
+mismatch probability to missing values. C uses B's search distance and omits
+unobserved pairs from each attribute's hit/miss averages. D uses empirical
+class-conditional mismatch probabilities. E extends D with pooled multiclass
+misses. F draws misses per class and weights them by the unconditional class
+priors in the 1994 equation. B–F accept NaN. Entirely missing columns score
+zero; a class with no observed values uses the pooled training distribution.
+The separate `reliefe` method implements the 2021 embedding algorithm.
+[Kononenko, 1994](https://doi.org/10.1007/3-540-57868-4_57)
+
+### Complementary Relief.jl methods
+
+`reliefmss`, `boostedsurf`, `iterative-relief`, `irelief`, and `ec-relieff`
+run the corresponding implementations in Relief.jl 0.2.0. Iterative Relief and
+I-Relief have distinct neighborhood and update rules. Evaporative Cooling
+returns an elimination rank. These methods accept dense numeric classification
+tables and start a local Julia process for each fit. Select
+`method_params={"f_type": "discrete"}` for discrete attributes.
+Use Julia 1.10 with a Python environment that contains sklearn:
+
+```bash
+PYTHON="$PWD/.venv/bin/python" julia -e 'using Pkg; Pkg.add(PackageSpec(name="Relief", version="0.2.0")); using Relief'
+```
+
+Set `JULIA_PROJECT` when using a non-default Julia environment. See the
+[Relief.jl reference implementations](https://github.com/jernejvivod/Relief.jl).

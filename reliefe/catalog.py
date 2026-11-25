@@ -1,6 +1,8 @@
 """Discover rankers and the targets and input formats accepted by each."""
 from typing import NamedTuple
 
+from .julia_relief import JULIA_OPTIONS
+from .historical import METHODS_1994
 from .corelearn import CLASSIFICATION, CORE_METHODS
 
 
@@ -48,6 +50,14 @@ _METHODS.update({key: Method(CR, False, "ReBATE " + name + " weight") for key, n
 _METHODS.update({key: Method(C if name in CLASSIFICATION else R, False,
                              "CORElearn " + name + " attribute evaluation")
                  for key, name in CORE_METHODS.items()})
+
+
+_METHODS.update({key: Method(C, False, "1994 categorical " + key + " weight")
+                 for key in METHODS_1994})
+
+
+_METHODS.update({key: Method(C, False, "Relief.jl " + key + (" rank" if key == "ec-relieff" else " weight"))
+                 for key in JULIA_OPTIONS})
 
 
 def list_methods():
