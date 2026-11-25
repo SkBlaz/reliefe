@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reliefe"
-version = "0.18"
-description = "ReliefE: feature ranking via manifold embeddings"
+version = "0.19"
+description = "Tabular feature ranking, Relief algorithms and selection stability"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "BSD-3-Clause-Clear" }
@@ -35,6 +35,9 @@ mcp = [
 ]
 rebate = [
     "skrebate==0.8.4 ; python_full_version >= '3.9'",
+]
+all-relevant = [
+    "boruta==0.4.3",
 ]
 
 [dependency-groups]

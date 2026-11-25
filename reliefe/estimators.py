@@ -20,7 +20,7 @@ from .catalog import REBATE, list_methods
 from .julia_relief import JULIA_OPTIONS, julia_scores
 from .historical import METHODS_1994, categorical_relief
 from .corelearn import CORE_METHODS, core_scores
-from .filters import laplacian_score, mrmr_order, original_relief, rrelieff
+from .filters import laplacian_score, information_order, rank_association, original_relief, rrelieff, survival_concordance
 from .reliefe_classes import ReliefE
 
 
@@ -92,8 +92,8 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
             y = y.toarray() if sparse.issparse(y) else np.asarray(y)
             check_consistent_length(x, y)
         if task == "auto":
-            if spec.tasks == ("unsupervised",):
-                task = "unsupervised"
+            if spec.tasks in (("unsupervised",), ("survival",)):
+                task = spec.tasks[0]
             else:
                 kind = type_of_target(y) if y is not None else "missing"
                 task = {"binary": "classification", "multiclass": "classification",
@@ -101,8 +101,8 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
                         "multiclass-multioutput": "multioutput", "continuous-multioutput": "multioutput"}.get(kind)
         if task not in spec.tasks or (task != "unsupervised" and y is None):
             raise ValueError(f"{self.method} supports {spec.tasks}; received task {task}")
-        if self.estimator is not None and self.method not in ("rfe", "permutation"):
-            raise ValueError("estimator is supported by rfe and permutation")
+        if self.estimator is not None and self.method not in ("rfe", "permutation", "boruta", "estimator"):
+            raise ValueError("estimator is supported by estimator, rfe, permutation and boruta")
         if task == "classification":
             if type_of_target(y) not in ("binary", "multiclass") or len(np.unique(y)) < 2:
                 raise ValueError("Classification requires at least two distinct classes")
@@ -118,13 +118,13 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         values = np.asarray(raw, dtype=float)
         if values.shape != (x.shape[1],):
             raise ValueError("Backend returned an incorrect number of feature values")
-        ordinal = self.method in ("mrmr", "rfe", "ec-relieff")
+        ordinal = self.method in ("mrmr", "jmi", "cmim", "cife", "rfe", "ec-relieff", "boruta")
         # Undefined statistics (e.g. F for a constant column) sort last.
         ascending = ordinal or self.method in ("laplacian", "per-target")
         order_values = values if ascending else -values
         order_values = np.where(np.isnan(order_values), np.inf, order_values)
         self.order_ = np.argsort(order_values, kind="stable")
-        self.ranks_ = rankdata(order_values, method="min").astype(int)
+        self.ranks_ = values.astype(int) if ordinal else rankdata(order_values, method="min").astype(int)
         self.scores_ = None if ordinal else values
         self.support_ = np.zeros(x.shape[1], dtype=bool)
         self.support_[self.order_[:k]] = True
@@ -137,6 +137,9 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
     def _fit_scores(self, x, y, task, params):
         m = self.method
         classification = task == "classification"
+        if m == "survival-concordance":
+            self.concordance_ = survival_concordance(x, y, **params)
+            return np.abs(2 * self.concordance_ - 1)
         if m in JULIA_OPTIONS:
             return julia_scores(m, x, y, self.random_state, **params)
         if m in METHODS_1994:
@@ -189,13 +192,27 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
             embedding = params.pop("embedding_method", "auto")
             model = ReliefE(embedding_based_distances=m == "reliefe",
                             random_state=self.random_state, **params)
-            return model.fit(x, y, embedding_method=embedding).feature_importances_
+            return model.fit(x, y, embedding_method=embedding, task_type=task).feature_importances_
         if m == "relief":
             return original_relief(x, y, **params)
         if m == "rrelieff":
             return rrelieff(x, y, **params)
-        if m == "mrmr":
-            return mrmr_order(x, y, **params)
+        if m in ("mrmr", "jmi", "cmim", "cife"):
+            return information_order(x, y, m, **params)
+        if m in ("pearson", "spearman", "kendall", "kruskal"):
+            return rank_association(x, y, m, **params)
+        if m == "boruta":
+            try:
+                from boruta import BorutaPy
+            except ImportError as exc:
+                raise ImportError("Install reliefe[all-relevant] for Boruta") from exc
+            forest = RandomForestClassifier if classification else RandomForestRegressor
+            base = forest(max_depth=5) if self.estimator is None else clone(self.estimator)
+            params.setdefault("n_estimators", "auto")
+            selector = BorutaPy(base, random_state=self.random_state, **params).fit(x, y)
+            self.confirmed_ = selector.support_.copy()
+            self.tentative_ = selector.support_weak_.copy()
+            return selector.ranking_
         if m == "mi":
             score = mutual_info_classif if classification else mutual_info_regression
             return score(x, y, random_state=self.random_state, **params)
@@ -207,6 +224,21 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         if m == "random":
             return check_random_state(self.random_state).uniform(size=x.shape[1], **params)
         forest = RandomForestClassifier if classification else RandomForestRegressor
+        if m == "estimator":
+            getter = params.pop("importance_getter", None)
+            if self.estimator is None:
+                raise ValueError("Supply a cloneable estimator for method='estimator'")
+            model = clone(self.estimator).set_params(**params).fit(x, y)
+            if getter is not None:
+                values = getter(model)
+            elif hasattr(model, "feature_importances_"):
+                values = model.feature_importances_
+            elif hasattr(model, "coef_"):
+                values = np.abs(np.atleast_2d(model.coef_)).mean(axis=0)
+            else:
+                raise ValueError("Supply importance_getter for a model without native feature weights")
+            self.estimator_ = model
+            return values
         if m == "forest":
             return forest(random_state=self.random_state, **params).fit(x, y).feature_importances_
         if m == "linear":

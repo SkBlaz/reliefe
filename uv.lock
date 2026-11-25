@@ -44,6 +44,29 @@ wheels = [
 ]
 
 [[package]]
+name = "boruta"
+version = "0.4.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "1.24.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "numpy", version = "2.4.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "scikit-learn", version = "1.3.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "scikit-learn", version = "1.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "scikit-learn", version = "1.7.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "scikit-learn", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "scipy", version = "1.10.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "scipy", version = "1.13.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/83/ab/103f819f83e9e2833f95f3dfb5e6d162ad1616b136b96c683ad4d7de224c/Boruta-0.4.3.tar.gz", hash = "sha256:abd67119bb88c7d1675b0dfc78072e50b5ba1d32b7cc7664258a640ad3a495a4", size = 57656, upload-time = "2024-08-13T19:54:38.755Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/30/de/37bb80bba7fb7baa703b78fab37487b21b43fe4bb5d5a1ab09ecab9b76c6/Boruta-0.4.3-py3-none-any.whl", hash = "sha256:58cc1d7f180d0ee3aace5b171a25f00b7fd8e323a749954d899cc983b2924085", size = 57909, upload-time = "2024-08-13T19:54:37.359Z" },
+]
+
+[[package]]
 name = "certifi"
 version = "2026.7.22"
 source = { registry = "https://pypi.org/simple" }
@@ -1734,7 +1757,7 @@ wheels = [
 
 [[package]]
 name = "reliefe"
-version = "0.18"
+version = "0.19"
 source = { editable = "." }
 dependencies = [
     { name = "numba", version = "0.58.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
@@ -1758,6 +1781,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+all-relevant = [
+    { name = "boruta" },
+]
 mcp = [
     { name = "mcp", marker = "python_full_version >= '3.10'" },
 ]
@@ -1777,6 +1803,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "boruta", marker = "extra == 'all-relevant'", specifier = "==0.4.3" },
     { name = "mcp", marker = "python_full_version >= '3.10' and extra == 'mcp'", specifier = ">=1.30,<2" },
     { name = "numba", specifier = ">=0.52.0" },
     { name = "numpy", specifier = ">=1.19" },
@@ -1786,7 +1813,7 @@ requires-dist = [
     { name = "tqdm", specifier = ">=4.30.0" },
     { name = "umap-learn", specifier = ">=0.5.0" },
 ]
-provides-extras = ["mcp", "rebate"]
+provides-extras = ["mcp", "rebate", "all-relevant"]
 
 [package.metadata.requires-dev]
 dev = [

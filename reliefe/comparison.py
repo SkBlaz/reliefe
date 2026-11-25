@@ -17,15 +17,19 @@ def compare_rankings(X, y, rankers, estimator, splits, *, scoring=None):
     splits as needed. The returned arrays retain paired fold order.
     """
     check_consistent_length(X, y)
-    folds = list(splits)
+    folds = []
+    row_ids = np.arange(X.shape[0])
+    for train, test in splits:
+        train, test = row_ids[train], row_ids[test]
+        if not len(train) or not len(test) or np.intersect1d(train, test).size:
+            raise ValueError("Training and evaluation rows must be nonempty and disjoint")
+        folds.append((train, test))
     if len(folds) < 2:
         raise ValueError("At least two evaluation folds are required for stability")
     result = {}
     for name, ranker in rankers.items():
         scores, supports = [], []
         for train, test in folds:
-            if np.intersect1d(train, test).size:
-                raise ValueError("Training and evaluation rows must be disjoint")
             x_train, x_test = _safe_indexing(X, train), _safe_indexing(X, test)
             y_train, y_test = _safe_indexing(y, train), _safe_indexing(y, test)
             if ranker is None:
@@ -41,6 +45,7 @@ def compare_rankings(X, y, rankers, estimator, splits, *, scoring=None):
                     for a, b in combinations(supports, 2)]
         result[name] = {"fold_scores": np.array(scores),
                         "selection_frequency": np.mean(supports, axis=0),
+                        "fold_support": np.asarray(supports),
                         "mean_jaccard": float(np.mean(overlaps))}
     return result
 

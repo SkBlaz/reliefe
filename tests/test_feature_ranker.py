@@ -7,8 +7,9 @@ from unittest.mock import patch
 import numpy as np
 from scipy import sparse
 from sklearn.base import clone
-from sklearn.feature_selection import f_classif
-from sklearn.linear_model import LogisticRegression
+from sklearn.feature_selection import RFE, f_classif
+from sklearn.linear_model import LogisticRegression, Ridge
+from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import make_pipeline
 
@@ -38,14 +39,20 @@ class RankerTests(unittest.TestCase):
         for m, spec in list_methods().items():
             if m.startswith("core-") or m in JULIA_OPTIONS:
                 continue  # Covered by the optional R integration suite.
+            if m == "boruta" and importlib.util.find_spec("boruta") is None:
+                continue
             if m in REBATE and importlib.util.find_spec("skrebate") is None:
                 continue
             for task in spec.tasks:
                 with self.subTest(m=m, task=task):
                     target = {"classification": self.y, "multilabel": np.c_[self.y, self.x[:, 0] > .5],
+                              "survival": np.c_[self.y, self.response],
                               "multioutput": np.c_[self.response, self.x[:, 1]], "regression": self.response, "unsupervised": None}[task]
                     params = {"mlc_distance": "hamming", "embedding_method": "SVD"} if m == "reliefe" else {}
-                    model = FeatureRanker(m, task=task, method_params=params, top_k=3).fit(self.x, target)
+                    if m == "boruta":
+                        params = {"max_iter": 12}
+                    estimator = Ridge() if m == "estimator" else None
+                    model = FeatureRanker(m, estimator=estimator, task=task, method_params=params, top_k=3).fit(self.x, target)
                     np.testing.assert_array_equal(np.sort(model.order_), np.arange(6))
                     self.assertEqual(len(model.ranking()), 6)
                     self.assertEqual(model.transform(self.x).shape, (30, 3))
@@ -116,3 +123,38 @@ class RankerTests(unittest.TestCase):
         if importlib.util.find_spec("skrebate") is not None:
             with self.assertRaises(ValueError):
                 FeatureRanker("turf", method_params={"base_method": "turf"}).fit(self.x, self.y)
+
+    def test_information_filters_and_nonparametric_associations(self):
+        # After one informative variable, prefer the other independent piece of
+        # class information to a redundant copy. y encodes the two input bits.
+        a, b = np.tile([0, 0, 1, 1], 8), np.tile([0, 1, 0, 1], 8)
+        x = np.column_stack((a, a, b))
+        for method in ("mrmr", "jmi", "cmim", "cife"):
+            ranker = FeatureRanker(method).fit(x, 2 * a + b)
+            np.testing.assert_array_equal(ranker.order_, [0, 2, 1])
+        continuous = np.arange(12, dtype=float)
+        x = np.c_[continuous, -continuous, np.ones(12)]
+        for method in ("pearson", "spearman", "kendall"):
+            np.testing.assert_allclose(FeatureRanker(method, task="regression").fit(x, continuous).scores_,
+                                       [1, 1, 0])
+        with patch.dict(sys.modules, {"boruta": None}), self.assertRaises(ImportError):
+            FeatureRanker("boruta").fit(self.x, self.y)
+
+    def test_custom_estimator(self):
+        from sklearn.tree import DecisionTreeClassifier
+        tree = DecisionTreeClassifier(random_state=42)
+        ranker = FeatureRanker("estimator", estimator=tree).fit(self.x, self.y)
+        np.testing.assert_allclose(ranker.scores_, clone(tree).fit(self.x, self.y).feature_importances_)
+        self.assertFalse(hasattr(tree, "tree_"))
+        ranker.set_params(method_params={"importance_getter": lambda model: model.feature_importances_})
+        self.assertEqual(ranker.fit(self.x, self.y).order_[0], 5)
+        for estimator in (None, DummyClassifier()):
+            with self.assertRaises(ValueError):
+                FeatureRanker("estimator", estimator=estimator).fit(self.x, self.y)
+
+    def test_native_elimination_tiers_are_preserved(self):
+        base = LogisticRegression()
+        params = {"n_features_to_select": 3}
+        expected = RFE(base, **params).fit(self.x, self.y).ranking_
+        model = FeatureRanker("rfe", estimator=base, method_params=params).fit(self.x, self.y)
+        np.testing.assert_array_equal(model.ranks_, expected)
