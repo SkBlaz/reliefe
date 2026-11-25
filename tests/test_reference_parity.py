@@ -112,6 +112,29 @@ class ParityTests(unittest.TestCase):
                     f_type="discrete" if case == "discrete" else "continuous",
                 )
 
+    def test_boostedsurf_initializes_distances_before_first_query(self):
+        # Relief.jl 0.2.0, rand(MersenneTwister(18), 48, 5), Random.seed!(3).
+        # phi=1 initializes the upstream distance buffer before every query.
+        # Its refresh always assigns unit weights, so later refreshes are identical.
+        x = np.loadtxt(
+            Path(__file__).parent / "fixtures/boostedsurf_seed3.csv", delimiter=","
+        )
+        y = np.tile([1, 2, 3], 16)
+        expected = [
+            0.1247273758087881,
+            0.10534782123787005,
+            0.11492547315103457,
+            0.1385367735923368,
+            0.07985779799274981,
+        ]
+
+        def fit():
+            return FeatureRanker("boostedsurf", random_state=3).fit(x, y).scores_
+
+        scores = fit()
+        np.testing.assert_array_equal(scores, fit())
+        np.testing.assert_allclose(scores, expected, atol=1e-10, rtol=1e-9)
+
     def test_validations_and_degenerate_inputs(self):
         from reliefe.legacy_relief import _Sampler
 

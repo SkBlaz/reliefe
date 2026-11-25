@@ -3,3 +3,4 @@ include images/feature-ranking-tree.svg
 include tools/draw_taxonomy.py
 include examples/try_rankers.py
 include tests/fixtures/reference_scores.json
+include tests/fixtures/boostedsurf_seed3.csv
