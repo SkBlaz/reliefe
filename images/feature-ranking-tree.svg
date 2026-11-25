@@ -1,114 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 1185" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 348" role="img" aria-labelledby="title desc">
 <title id="title">Feature ranking</title>
-<desc id="desc">Scoring families branch into rules and their algorithms. The README lists each public implementation.</desc>
+<desc id="desc">Branches group ranking methods by their scoring rule. Expand the corresponding family in the README for all method IDs.</desc>
 <rect width="100%" height="100%" fill="white"/>
-<g fill="black" font-family="Arial, Helvetica, sans-serif">
-<text x="18" y="36" font-size="26" font-weight="bold">Feature ranking</text>
-<text x="44" y="72" font-size="20" font-weight="bold">Marginal filters</text>
-<text x="72" y="100" font-size="16" font-weight="bold">Dispersion</text>
-<text x="336" y="100" font-size="15" data-methods="variance numba-variance">variance</text>
-<text x="72" y="128" font-size="16" font-weight="bold">Association and group tests</text>
-<text x="336" y="128" font-size="15" data-methods="pearson numba-pearson spearman numba-spearman kendall kruskal f numba-f chi2 numba-chi2">pearson, spearman, kendall, kruskal, f, chi2</text>
-<text x="72" y="156" font-size="16" font-weight="bold">Censored outcome ordering</text>
-<text x="336" y="156" font-size="15" data-methods="survival-concordance">survival-concordance</text>
-<text x="72" y="184" font-size="16" font-weight="bold">Information and impurity</text>
-<text x="336" y="184" font-size="15" data-methods="mi numba-info-gain numba-gain-ratio numba-symmetrical-uncertainty">mi, numba-info-gain, numba-gain-ratio, numba-symmetrical-uncertainty</text>
-<text x="336" y="205" font-size="15" data-methods="numba-gini core-infgain core-gainratio core-mdl core-gini core-dkm">numba-gini, core-infgain, core-gainratio, core-mdl, core-gini, core-dkm</text>
-<text x="72" y="233" font-size="16" font-weight="bold">Split accuracy and error</text>
-<text x="336" y="233" font-size="15" data-methods="core-accuracy core-mseofmean core-myopicrelieff">core-accuracy, core-mseofmean, core-myopicrelieff</text>
-<text x="72" y="261" font-size="16" font-weight="bold">Costs and split weighting</text>
-<text x="336" y="261" font-size="15" data-methods="core-dkmcost core-gainratiocost core-mdlsmp core-uniformdkm">core-dkmcost, core-gainratiocost, core-mdlsmp, core-uniformdkm</text>
-<text x="336" y="282" font-size="15" data-methods="core-uniformgini core-uniforminf core-uniformaccuracy core-equaldkm">core-uniformgini, core-uniforminf, core-uniformaccuracy, core-equaldkm</text>
-<text x="336" y="303" font-size="15" data-methods="core-equalgini core-equalinf">core-equalgini, core-equalinf</text>
-<text x="72" y="331" font-size="16" font-weight="bold">Class distribution distance</text>
-<text x="336" y="331" font-size="15" data-methods="core-impurityeuclid core-impurityhellinger core-equalhellinger">core-impurityeuclid, core-impurityhellinger, core-equalhellinger</text>
-<text x="336" y="352" font-size="15" data-methods="core-disthellinger core-distauc core-distangle core-disteuclid">core-disthellinger, core-distauc, core-distangle, core-disteuclid</text>
-<path d="M54 79 V326" stroke="black" fill="none"/>
-<path d="M54 95 h12" stroke="black"/>
-<path d="M54 123 h12" stroke="black"/>
-<path d="M54 151 h12" stroke="black"/>
-<path d="M54 179 h12" stroke="black"/>
-<path d="M54 228 h12" stroke="black"/>
-<path d="M54 256 h12" stroke="black"/>
-<path d="M54 326 h12" stroke="black"/>
-<text x="44" y="388" font-size="20" font-weight="bold">Neighborhoods</text>
-<text x="72" y="416" font-size="16" font-weight="bold">k-NN hits and misses</text>
-<text x="336" y="416" font-size="15" data-methods="relief relieff rebate-relieff core-relief core-relieffequalk">relief, relieff, core-relief, core-relieffequalk</text>
-<text x="72" y="444" font-size="16" font-weight="bold">Historical categorical Relief</text>
-<text x="336" y="444" font-size="15" data-methods="relief-1994-a relief-1994-b relief-1994-c relief-1994-d relief-1994-e">relief-1994-a, relief-1994-b, relief-1994-c, relief-1994-d, relief-1994-e</text>
-<text x="336" y="465" font-size="15" data-methods="relief-1994-f">relief-1994-f</text>
-<text x="72" y="493" font-size="16" font-weight="bold">Neighbor and update weights</text>
-<text x="336" y="493" font-size="15" data-methods="core-relieffexprank core-relieffdistance core-relieffsqrdistance">core-relieffexprank, core-relieffdistance, core-relieffsqrdistance</text>
-<text x="336" y="514" font-size="15" data-methods="core-relieffmerit reliefmss numba-reliefmss mu-relief numba-mu-relief">core-relieffmerit, reliefmss, mu-relief</text>
-<text x="72" y="542" font-size="16" font-weight="bold">Adaptive neighbor count</text>
-<text x="336" y="542" font-size="15" data-methods="reliefseq core-relieffbestk core-rrelieffbestk">reliefseq, core-relieffbestk, core-rrelieffbestk</text>
-<text x="72" y="570" font-size="16" font-weight="bold">Continuous target updates</text>
-<text x="336" y="570" font-size="15" data-methods="rrelieff core-rrelieffequalk core-rrelieffexprank core-rrelieffdistance">rrelieff, core-rrelieffequalk, core-rrelieffexprank, core-rrelieffdistance</text>
-<text x="336" y="591" font-size="15" data-methods="core-rrelieffsqrdistance core-rrelieffwithmse">core-rrelieffsqrdistance, core-rrelieffwithmse</text>
-<text x="72" y="619" font-size="16" font-weight="bold">Cost-sensitive neighbors</text>
-<text x="336" y="619" font-size="15" data-methods="core-relieffexpc core-relieffavgc core-relieffpe core-relieffpa">core-relieffexpc, core-relieffavgc, core-relieffpe, core-relieffpa</text>
-<text x="336" y="640" font-size="15" data-methods="core-relieffsmp core-reliefkukar">core-relieffsmp, core-reliefkukar</text>
-<text x="72" y="668" font-size="16" font-weight="bold">Global distance threshold</text>
-<text x="336" y="668" font-size="15" data-methods="surf numba-surf surf-star numba-surf-star swrf numba-swrf swrf-star numba-swrf-star">surf, surf-star, swrf, swrf-star</text>
-<text x="72" y="696" font-size="16" font-weight="bold">Per-observation threshold</text>
-<text x="336" y="696" font-size="15" data-methods="multisurf numba-multisurf multisurf-star numba-multisurf-star multiswrf numba-multiswrf multiswrf-star numba-multiswrf-star multiswrfdb numba-multiswrfdb">multisurf, multisurf-star, multiswrf, multiswrf-star, multiswrfdb</text>
-<text x="336" y="717" font-size="15" data-methods="multiswrfdb-star numba-multiswrfdb-star">multiswrfdb-star</text>
-<text x="72" y="745" font-size="16" font-weight="bold">Learned distance weights</text>
-<text x="336" y="745" font-size="15" data-methods="irelief numba-irelief iterative-relief numba-iterative-relief boostedsurf iter">irelief, iterative-relief, boostedsurf, iter</text>
-<text x="72" y="773" font-size="16" font-weight="bold">Feature subsets and pruning</text>
-<text x="336" y="773" font-size="15" data-methods="turf numba-turf vls numba-vls ec-relieff">turf, vls, ec-relieff</text>
-<text x="72" y="801" font-size="16" font-weight="bold">Hit/miss variance</text>
-<text x="336" y="801" font-size="15" data-methods="stir-relieff stir-surf stir-multisurf">stir-relieff, stir-surf, stir-multisurf</text>
-<text x="72" y="829" font-size="16" font-weight="bold">Embedding neighborhoods</text>
-<text x="336" y="829" font-size="15" data-methods="reliefe">reliefe</text>
-<text x="72" y="857" font-size="16" font-weight="bold">Neighbor graph smoothness</text>
-<text x="336" y="857" font-size="15" data-methods="laplacian">laplacian</text>
-<path d="M54 395 V852" stroke="black" fill="none"/>
-<path d="M54 411 h12" stroke="black"/>
-<path d="M54 439 h12" stroke="black"/>
-<path d="M54 488 h12" stroke="black"/>
-<path d="M54 537 h12" stroke="black"/>
-<path d="M54 565 h12" stroke="black"/>
-<path d="M54 614 h12" stroke="black"/>
-<path d="M54 663 h12" stroke="black"/>
-<path d="M54 691 h12" stroke="black"/>
-<path d="M54 740 h12" stroke="black"/>
-<path d="M54 768 h12" stroke="black"/>
-<path d="M54 796 h12" stroke="black"/>
-<path d="M54 824 h12" stroke="black"/>
-<path d="M54 852 h12" stroke="black"/>
-<text x="44" y="893" font-size="20" font-weight="bold">Conditional information</text>
-<text x="72" y="921" font-size="16" font-weight="bold">Greedy subset construction</text>
-<text x="336" y="921" font-size="15" data-methods="mrmr jmi cmim cife">mrmr, jmi, cmim, cife</text>
-<path d="M54 900 V916" stroke="black" fill="none"/>
-<path d="M54 916 h12" stroke="black"/>
-<text x="44" y="957" font-size="20" font-weight="bold">Predictive models</text>
-<text x="72" y="985" font-size="16" font-weight="bold">Fitted model importance</text>
-<text x="336" y="985" font-size="15" data-methods="linear forest estimator">linear, forest, estimator</text>
-<text x="72" y="1013" font-size="16" font-weight="bold">Error after splitting</text>
-<text x="336" y="1013" font-size="15" data-methods="core-mseofmodel core-maeofmodel">core-mseofmodel, core-maeofmodel</text>
-<text x="72" y="1041" font-size="16" font-weight="bold">Recursive elimination</text>
-<text x="336" y="1041" font-size="15" data-methods="rfe">rfe</text>
-<text x="72" y="1069" font-size="16" font-weight="bold">Perturbation and shadows</text>
-<text x="336" y="1069" font-size="15" data-methods="permutation shadow-forest boruta">permutation, shadow-forest, boruta</text>
-<path d="M54 964 V1064" stroke="black" fill="none"/>
-<path d="M54 980 h12" stroke="black"/>
-<path d="M54 1008 h12" stroke="black"/>
-<path d="M54 1036 h12" stroke="black"/>
-<path d="M54 1064 h12" stroke="black"/>
-<text x="44" y="1105" font-size="20" font-weight="bold">Aggregation and controls</text>
-<text x="72" y="1133" font-size="16" font-weight="bold">Rank across target columns</text>
-<text x="336" y="1133" font-size="15" data-methods="per-target">per-target</text>
-<text x="72" y="1161" font-size="16" font-weight="bold">Random ordering</text>
-<text x="336" y="1161" font-size="15" data-methods="random">random</text>
-<path d="M54 1112 V1156" stroke="black" fill="none"/>
-<path d="M54 1128 h12" stroke="black"/>
-<path d="M54 1156 h12" stroke="black"/>
-<path d="M26 45 V1099" stroke="black" fill="none"/>
-<path d="M26 66 h12" stroke="black"/>
-<path d="M26 382 h12" stroke="black"/>
-<path d="M26 887 h12" stroke="black"/>
-<path d="M26 951 h12" stroke="black"/>
-<path d="M26 1099 h12" stroke="black"/>
+<g fill="black" font-family="Georgia, Times New Roman, serif" font-size="16">
+<path d="M8 39 H28" stroke="black" fill="none"/>
+<text x="34" y="44">One feature at a time</text>
+<path d="M219 39 H234 M234 18 V60" stroke="black" fill="none"/>
+<path d="M234 18 H248" stroke="black" fill="none"/>
+<text x="254" y="23" data-methods="variance numba-variance pearson numba-pearson spearman numba-spearman kendall kruskal f numba-f chi2 numba-chi2 survival-concordance"><title>variance, numba-variance, pearson, numba-pearson, spearman, numba-spearman, kendall, kruskal, f, numba-f, chi2, numba-chi2, survival-concordance</title>Variance, correlation and rank tests</text>
+<path d="M234 39 H248" stroke="black" fill="none"/>
+<text x="254" y="44" data-methods="mi numba-info-gain numba-gain-ratio numba-symmetrical-uncertainty numba-gini core-infgain core-gainratio core-mdl core-gini core-dkm core-accuracy core-mseofmean core-myopicrelieff core-dkmcost core-gainratiocost core-mdlsmp core-uniformdkm core-uniformgini core-uniforminf core-uniformaccuracy core-equaldkm core-equalgini core-equalinf"><title>mi, numba-info-gain, numba-gain-ratio, numba-symmetrical-uncertainty, numba-gini, core-infgain, core-gainratio, core-mdl, core-gini, core-dkm, core-accuracy, core-mseofmean, core-myopicrelieff, core-dkmcost, core-gainratiocost, core-mdlsmp, core-uniformdkm, core-uniformgini, core-uniforminf, core-uniformaccuracy, core-equaldkm, core-equalgini, core-equalinf</title>Information gain and split impurity</text>
+<path d="M234 60 H248" stroke="black" fill="none"/>
+<text x="254" y="65" data-methods="core-impurityeuclid core-impurityhellinger core-equalhellinger core-disthellinger core-distauc core-distangle core-disteuclid"><title>core-impurityeuclid, core-impurityhellinger, core-equalhellinger, core-disthellinger, core-distauc, core-distangle, core-disteuclid</title>Distance between class distributions</text>
+<path d="M8 147 H28" stroke="black" fill="none"/>
+<text x="34" y="152">Sample neighborhoods</text>
+<path d="M219 147 H234 M234 95 V200" stroke="black" fill="none"/>
+<path d="M234 95 H248" stroke="black" fill="none"/>
+<text x="254" y="100" data-methods="relief relieff rebate-relieff core-relief core-relieffequalk relief-1994-a relief-1994-b relief-1994-c relief-1994-d relief-1994-e relief-1994-f core-relieffexprank core-relieffdistance core-relieffsqrdistance core-relieffmerit reliefmss numba-reliefmss mu-relief numba-mu-relief reliefseq core-relieffbestk core-rrelieffbestk rrelieff core-rrelieffequalk core-rrelieffexprank core-rrelieffdistance core-rrelieffsqrdistance core-rrelieffwithmse core-relieffexpc core-relieffavgc core-relieffpe core-relieffpa core-relieffsmp core-reliefkukar"><title>relief, relieff, rebate-relieff, core-relief, core-relieffequalk, relief-1994-a, relief-1994-b, relief-1994-c, relief-1994-d, relief-1994-e, relief-1994-f, core-relieffexprank, core-relieffdistance, core-relieffsqrdistance, core-relieffmerit, reliefmss, numba-reliefmss, mu-relief, numba-mu-relief, reliefseq, core-relieffbestk, core-rrelieffbestk, rrelieff, core-rrelieffequalk, core-rrelieffexprank, core-rrelieffdistance, core-rrelieffsqrdistance, core-rrelieffwithmse, core-relieffexpc, core-relieffavgc, core-relieffpe, core-relieffpa, core-relieffsmp, core-reliefkukar</title>Nearest hits and misses (Relief, ReliefF, RReliefF)</text>
+<path d="M234 116 H248" stroke="black" fill="none"/>
+<text x="254" y="121" data-methods="surf numba-surf surf-star numba-surf-star swrf numba-swrf swrf-star numba-swrf-star multisurf numba-multisurf multisurf-star numba-multisurf-star multiswrf numba-multiswrf multiswrf-star numba-multiswrf-star multiswrfdb numba-multiswrfdb multiswrfdb-star numba-multiswrfdb-star"><title>surf, numba-surf, surf-star, numba-surf-star, swrf, numba-swrf, swrf-star, numba-swrf-star, multisurf, numba-multisurf, multisurf-star, numba-multisurf-star, multiswrf, numba-multiswrf, multiswrf-star, numba-multiswrf-star, multiswrfdb, numba-multiswrfdb, multiswrfdb-star, numba-multiswrfdb-star</title>Global or local radius (SURF, SWRF, MultiSURF)</text>
+<path d="M234 137 H248" stroke="black" fill="none"/>
+<text x="254" y="142" data-methods="irelief numba-irelief iterative-relief numba-iterative-relief boostedsurf iter turf numba-turf vls numba-vls ec-relieff"><title>irelief, numba-irelief, iterative-relief, numba-iterative-relief, boostedsurf, iter, turf, numba-turf, vls, numba-vls, ec-relieff</title>Iterative weighting and feature pruning</text>
+<path d="M234 158 H248" stroke="black" fill="none"/>
+<text x="254" y="163" data-methods="stir-relieff stir-surf stir-multisurf"><title>stir-relieff, stir-surf, stir-multisurf</title>Hit/miss variance (STIR)</text>
+<path d="M234 179 H248" stroke="black" fill="none"/>
+<text x="254" y="184" data-methods="reliefe"><title>reliefe</title>Embedding distance (ReliefE)</text>
+<path d="M234 200 H248" stroke="black" fill="none"/>
+<text x="254" y="205" data-methods="laplacian"><title>laplacian</title>Graph smoothness (Laplacian Score)</text>
+<path d="M8 235 H28" stroke="black" fill="none"/>
+<text x="34" y="240">Conditional information</text>
+<path d="M219 235 H234 M234 235 V235" stroke="black" fill="none"/>
+<path d="M234 235 H248" stroke="black" fill="none"/>
+<text x="254" y="240" data-methods="mrmr jmi cmim cife"><title>mrmr, jmi, cmim, cife</title>Relevance given prior selections (mRMR, JMI, CMIM, CIFE)</text>
+<path d="M8 280 H28" stroke="black" fill="none"/>
+<text x="34" y="285">Fitted models</text>
+<path d="M219 280 H234 M234 270 V291" stroke="black" fill="none"/>
+<path d="M234 270 H248" stroke="black" fill="none"/>
+<text x="254" y="275" data-methods="linear forest estimator core-mseofmodel core-maeofmodel"><title>linear, forest, estimator, core-mseofmodel, core-maeofmodel</title>Coefficients, tree importance and split error</text>
+<path d="M234 291 H248" stroke="black" fill="none"/>
+<text x="254" y="296" data-methods="rfe permutation shadow-forest boruta"><title>rfe, permutation, shadow-forest, boruta</title>Elimination, permutation and shadow features</text>
+<path d="M8 326 H28" stroke="black" fill="none"/>
+<text x="34" y="331">Ranks and baselines</text>
+<path d="M219 326 H234 M234 326 V326" stroke="black" fill="none"/>
+<path d="M234 326 H248" stroke="black" fill="none"/>
+<text x="254" y="331" data-methods="random per-target"><title>random, per-target</title>Random order and per-target ranks</text>
+<path d="M8 39 V326" stroke="black" fill="none"/>
 </g>
 </svg>
