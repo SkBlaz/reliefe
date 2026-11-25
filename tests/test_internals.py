@@ -103,7 +103,7 @@ class ReliefeInternalTests(unittest.TestCase):
         b = np.array([1.0, 1.0, 0.0])
         self.assertAlmostEqual(rc._numba_distance_target(a, b, "f1"), 0.5)
         self.assertAlmostEqual(rc._numba_distance_target(a, b, "accuracy"), 2 / 3)
-        self.assertEqual(rc._numba_distance_target(a, a, "subset"), 3)
+        self.assertEqual(rc._numba_distance_target(a, a, "subset"), 0)
         self.assertAlmostEqual(rc._numba_distance_target(a, b, "hamming"), 2 / 3)
         self.assertAlmostEqual(rc._numba_distance_target(a, b, "cosine"), 0.5)
         self.assertEqual(rc._numba_distance_target(np.zeros(2), np.array([1.0, 0.0]),
@@ -171,7 +171,7 @@ class ReliefeInternalTests(unittest.TestCase):
     def test_reliefe_helpers_and_parameter_checks(self):
         model = rc.ReliefE(num_iter=[0.5, 2], verbose=True)
         model._compute_iterations(10)
-        self.assertEqual(model.num_iter[0], 5)
+        self.assertEqual(model.num_iter_[0], 5)
 
         self.assertEqual(model.determine_latent_dim(np.ones((3, 3))), 3)
 
@@ -185,20 +185,22 @@ class ReliefeInternalTests(unittest.TestCase):
         model.use_average_neighbour = True
         model.mlc_distance = "hamming"
         model.k = 10
-        model.num_iter = [0, 10]
+        model.num_iter_ = [0, 10]
         model._check_parameters(4, np.array([2, 2]))
-        self.assertFalse(model.use_average_neighbour)
-        self.assertEqual(model.k, 1)
+        self.assertFalse(model.use_average_neighbour_)
+        self.assertEqual(model.k_, 1)
 
         bad = rc.ReliefE()
         bad.task_type = ru.TaskTypes.CLASSIFICATION
         bad.mlc_distance = "bad"
         with self.assertRaises(ValueError):
+            bad._compute_iterations(4)
             bad._check_parameters(4, np.array([2, 2]))
 
         too_small = rc.ReliefE(k=1)
         too_small.task_type = ru.TaskTypes.CLASSIFICATION
         with self.assertRaises(ValueError):
+            too_small._compute_iterations(2)
             too_small._check_parameters(2, np.array([1, 1]))
 
         y = sparse.csr_matrix(np.array([[1, 0], [0, 1], [1, 0]]))
@@ -413,7 +415,7 @@ class ReliefeInternalTests(unittest.TestCase):
 
         self.assertEqual(rc._numba_distance_target(np.array([1, 0]),
                                                   np.array([0, 1]),
-                                                  "subset"), 2)
+                                                  "subset"), 1)
 
         x2 = sparse.csr_matrix(np.array([[1.0, 0.0], [0.0, 1.0], [0.8, 0.2],
                                          [0.2, 0.8]]))

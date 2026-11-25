@@ -118,3 +118,13 @@ MCP messages. The first compiled call can take longer while Numba initializes.
 `make test` now checks 100% statement coverage, a real stdio MCP exchange, and
 separate numerical tests with Numba JIT enabled. On Python 3.8/3.9 the optional
 server tests are skipped; use Python 3.10+ for the full coverage gate.
+
+### Changes to native ReliefE rankings
+
+Embedded fits use the embedding to find neighbors and attribute their feature
+differences to original input columns. Earlier versions could put a latent
+coordinate's score under an unrelated input column. Multilabel checkpoints now
+retain accumulated weights across skipped updates, and subset distance is zero
+for equal label sets and one otherwise. The sparsifier operates on the sampled
+rectangular CSR matrix. Use `random_state` to control sampling and built-in
+embeddings. Inspect `effective_embedding_`, `k_` and `num_iter_` after fitting.
