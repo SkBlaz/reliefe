@@ -27,7 +27,7 @@ X_selected = ranker.transform(X_test)
 <details>
 <summary>One feature at a time</summary>
 
-- **Variance, correlation and rank tests** — `variance`, `numba-variance`, `pearson`, `numba-pearson`, `spearman`, `numba-spearman`, `kendall`, `kruskal`, `f`, `numba-f`, `chi2`, `numba-chi2`, `survival-concordance`
+- **Variance, correlation and rank tests** — `variance`, `numba-variance`, `pearson`, `numba-pearson`, `spearman`, `numba-spearman`, `kendall`, `kruskal`, `t-score`, `fisher-score`, `f`, `numba-f`, `chi2`, `numba-chi2`, `survival-concordance`
 - **Information gain and split impurity** — `mi`, `numba-info-gain`, `numba-gain-ratio`, `numba-symmetrical-uncertainty`, `numba-gini`, `core-infgain`, `core-gainratio`, `core-mdl`, `core-gini`, `core-dkm`, `core-accuracy`, `core-mseofmean`, `core-myopicrelieff`, `core-dkmcost`, `core-gainratiocost`, `core-mdlsmp`, `core-uniformdkm`, `core-uniformgini`, `core-uniforminf`, `core-uniformaccuracy`, `core-equaldkm`, `core-equalgini`, `core-equalinf`
 - **Distance correlation and kernel dependence** — `dc-sis`, `hsic`
 - **Distance between class distributions** — `core-impurityeuclid`, `core-impurityhellinger`, `core-equalhellinger`, `core-disthellinger`, `core-distauc`, `core-distangle`, `core-disteuclid`
@@ -42,7 +42,7 @@ X_selected = ranker.transform(X_test)
 - **Iterative weighting and feature pruning** — `irelief`, `numba-irelief`, `iterative-relief`, `numba-iterative-relief`, `boostedsurf`, `iter`, `turf`, `numba-turf`, `vls`, `numba-vls`, `ec-relieff`
 - **Hit/miss variance (STIR)** — `stir-relieff`, `stir-surf`, `stir-multisurf`
 - **Embedding distance (ReliefE)** — `reliefe`
-- **Graph smoothness (Laplacian Score)** — `laplacian`
+- **Graph smoothness and spectral alignment** — `laplacian`, `spec`, `spec-energy`, `spec-cluster`
 
 </details>
 
@@ -57,7 +57,7 @@ X_selected = ranker.transform(X_test)
 <details>
 <summary>Fitted models</summary>
 
-- **Coefficients, tree importance and split error** — `linear`, `forest`, `estimator`, `core-mseofmodel`, `core-maeofmodel`
+- **Coefficients, tree importance and split error** — `linear`, `forest`, `estimator`, `rfs`, `core-mseofmodel`, `core-maeofmodel`
 - **Elimination, permutation and shadow features** — `rfe`, `permutation`, `shadow-forest`, `boruta`
 
 </details>
@@ -73,4 +73,4 @@ X_selected = ranker.transform(X_test)
 
 Škrlj et al. (2021). [ReliefE: feature ranking in high-dimensional spaces via manifold embeddings](https://doi.org/10.1007/s10994-021-05998-5). *Machine Learning*.
 
-Original algorithms and implementations: [Relief](https://cdn.aaai.org/AAAI/1992/AAAI92-020.pdf), [Relief A–F](https://doi.org/10.1007/3-540-57868-4_57), [ReliefF and RReliefF](https://doi.org/10.1023/A:1025667309714), [ReliefSeq](https://pubmed.ncbi.nlm.nih.gov/24339943/), [ReBATE](https://github.com/UrbsLab/scikit-rebate), [CORElearn](https://cran.r-project.org/src/contrib/Archive/CORElearn/), [Relief.jl](https://github.com/jernejvivod/Relief.jl), [STIR](https://github.com/insilico/stir), [DC-SIS](https://pubmed.ncbi.nlm.nih.gov/25249709/), [HSIC](https://www.jmlr.org/papers/v13/song12a.html), [FEAST](https://github.com/Craigacp/FEAST), [praznik](https://gitlab.com/mbq/praznik), [information criteria](https://jmlr.org/papers/v13/brown12a.html), [Laplacian Score](https://proceedings.neurips.cc/paper/2005/hash/b5b03f06271f8917685d14cea7c6c50a-Abstract.html), [BorutaPy](https://github.com/scikit-learn-contrib/boruta_py), [scikit-learn](https://scikit-learn.org/stable/modules/feature_selection.html), [SciPy](https://docs.scipy.org/doc/scipy/reference/stats.html).
+Original algorithms and implementations: [Relief](https://cdn.aaai.org/AAAI/1992/AAAI92-020.pdf), [Relief A–F](https://doi.org/10.1007/3-540-57868-4_57), [ReliefF and RReliefF](https://doi.org/10.1023/A:1025667309714), [ReliefSeq](https://pubmed.ncbi.nlm.nih.gov/24339943/), [ReBATE](https://github.com/UrbsLab/scikit-rebate), [CORElearn](https://cran.r-project.org/src/contrib/Archive/CORElearn/), [Relief.jl](https://github.com/jernejvivod/Relief.jl), [STIR](https://github.com/insilico/stir), [RFS](https://proceedings.neurips.cc/paper/2010/hash/09c6c3783b4a70054da74f2538ed47c6-Abstract.html), [scikit-feature](https://github.com/jundongl/scikit-feature), [SPEC](https://www.public.asu.edu/~huanliu/papers/icml07.pdf), [DC-SIS](https://pubmed.ncbi.nlm.nih.gov/25249709/), [HSIC](https://www.jmlr.org/papers/v13/song12a.html), [FEAST](https://github.com/Craigacp/FEAST), [praznik](https://gitlab.com/mbq/praznik), [information criteria](https://jmlr.org/papers/v13/brown12a.html), [Laplacian Score](https://proceedings.neurips.cc/paper/2005/hash/b5b03f06271f8917685d14cea7c6c50a-Abstract.html), [BorutaPy](https://github.com/scikit-learn-contrib/boruta_py), [scikit-learn](https://scikit-learn.org/stable/modules/feature_selection.html), [SciPy](https://docs.scipy.org/doc/scipy/reference/stats.html).

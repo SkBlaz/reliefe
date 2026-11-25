@@ -1,6 +1,6 @@
 """Dense numeric filters. Each function returns a value per input column."""
 import numpy as np
-from .native import (concordance_scores, greedy_information, original_scores,
+from .native import (group_separation, concordance_scores, greedy_information, original_scores,
                      regression_scores, scale_columns)
 
 
@@ -96,3 +96,11 @@ def rank_association(x, y, method):
                 a, b = (rankdata(col), rankdata(y)) if method == "spearman" else (col, y)
                 scores[j] = abs(np.corrcoef(a, b)[0, 1])
     return scores
+
+def separation_scores(x, y, method, ddof=0):
+    """Use population standard deviations for scikit-feature t-score parity.
+    Set ddof=1 for the absolute Welch statistic.
+    """
+    if ddof not in (0, 1) or (method == "fisher-score" and ddof != 0):
+        raise ValueError("ddof may be 0 or 1 for t-score")
+    return group_separation(x, y, method == "t-score", int(ddof))

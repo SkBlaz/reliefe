@@ -499,3 +499,36 @@ def native_subset(method, x, y, random_state, k=5, keep_fraction=.5, subset_size
             scores = nearest_class_scores(x[:, subset], y, k, False)
             result[subset] = np.maximum(result[subset], scores)
     return result
+
+
+@njit(cache=True)
+def group_separation(x, y, t_score, ddof):
+    """Between/within-class Fisher ratio or the absolute two-group t statistic."""
+    classes = y.max() + 1
+    if t_score and classes != 2:
+        raise ValueError("t-score requires two classes")
+    counts = np.bincount(y)
+    if t_score and counts.min() <= ddof:
+        raise ValueError("each class must contain more observations than ddof")
+    scores = np.zeros(x.shape[1])
+    for j in range(x.shape[1]):
+        # Normalize before squaring to preserve the ratio at very large scales.
+        scale = np.max(np.abs(x[:, j]))
+        if scale == 0:
+            continue
+        column = x[:, j] / scale
+        means = np.zeros(classes)
+        for i in range(len(y)):
+            means[y[i]] += column[i]
+        means /= counts
+        scatter = np.zeros(classes)
+        for i in range(len(y)):
+            scatter[y[i]] += (column[i] - means[y[i]])**2
+        if t_score:
+            numerator = abs(means[0] - means[1])
+            denominator = np.sqrt(np.sum(scatter / ((counts - ddof) * counts)))
+        else:
+            numerator = np.sum(counts * (means - column.mean())**2)
+            denominator = np.sum(scatter)
+        scores[j] = numerator / denominator if denominator else (np.inf if numerator else 0.)
+    return scores

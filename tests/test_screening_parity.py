@@ -116,3 +116,173 @@ class DependenceTests(unittest.TestCase):
             dependence_scores(x, y, "regression", "dc-sis", bandwidth=-1)
         with self.assertRaises(ValueError):
             dependence_scores(x, y * np.nan, "regression", "hsic")
+
+
+class SpectralTests(unittest.TestCase):
+    def test_scikit_feature_reference(self):
+        # Raw output from scikit-feature SPEC.spec, gamma=1, styles -1, 0, 3.
+        x = np.random.RandomState(24).normal(size=(15, 5))
+        scores = {
+            "spec-energy": [
+                0.0416732987152746,
+                0.037258954503569246,
+                0.04353772317711078,
+                0.03931165069870719,
+                0.10220904264518783,
+            ],
+            "spec": [
+                0.04197036853196249,
+                0.042690587767480526,
+                0.05242743202671762,
+                0.06460337120759087,
+                0.11722904852802225,
+            ],
+            "spec-cluster": [
+                0.22294582765365764,
+                0.7739959862095483,
+                0.9678272127016363,
+                0.25622110009024557,
+                0.2887440088213392,
+            ],
+        }
+        for name, expected in scores.items():
+            fit = FeatureRanker(name, method_params={"clusters": 3}).fit(x)
+            np.testing.assert_allclose(fit.scores_, expected, rtol=1e-11)
+            order = np.argsort(expected)
+            if name == "spec-cluster":
+                order = order[::-1]
+            np.testing.assert_array_equal(order, fit.order_)
+
+    def test_graphs_constants_and_validation(self):
+        x = np.c_[np.arange(5), np.arange(5) ** 2, np.ones(5)]
+        fit = lambda name, **params: FeatureRanker(name, method_params=params).fit(x)
+        self.assertTrue(np.isnan(fit("spec").scores_[-1]))
+        np.testing.assert_allclose(fit("spec-energy", affinity=np.eye(5)).scores_, 0.0)
+        # All nonconstant directions have the same eigenvalue on an identity graph.
+        scores = fit("spec-cluster", affinity=np.eye(5)).scores_
+        permuted = FeatureRanker(
+            "spec-cluster", method_params={"affinity": np.eye(5)}
+        ).fit(x[::-1])
+        np.testing.assert_allclose(scores, permuted.scores_, atol=1e-12)
+        for params in ({"gamma": 0}, {"clusters": 1}, {"affinity": np.zeros((5, 5))}):
+            with self.assertRaises(ValueError):
+                fit("spec", **params)
+
+
+class SeparationTests(unittest.TestCase):
+    def test_scikit_feature_and_welch_parity(self):
+        from scipy.stats import ttest_ind
+
+        x = np.random.RandomState(97).normal(size=(36, 5))
+        y = np.arange(36) % 2
+        expected = [
+            0.5643735276505818,
+            0.7093509449791529,
+            1.3364000573497872,
+            0.19490329213936955,
+            0.10092764493434359,
+        ]
+        np.testing.assert_allclose(
+            FeatureRanker("t-score").fit(x, y).scores_, expected, atol=1e-12
+        )
+        y[0] = 1
+        fit = FeatureRanker("t-score", method_params={"ddof": 1}).fit(x, y)
+        np.testing.assert_allclose(
+            fit.scores_, abs(ttest_ind(x[y == 0], x[y == 1], equal_var=False).statistic)
+        )
+        expected = [
+            0.037157371089004076,
+            0.05235988901420785,
+            0.17971024654715406,
+            0.028505363862885602,
+            0.017188407877762435,
+        ]
+        np.testing.assert_allclose(
+            FeatureRanker("fisher-score").fit(x, (np.arange(36) % 3)).scores_,
+            expected,
+            atol=1e-12,
+        )
+
+    def test_undefined_variance_and_targets(self):
+        x = np.c_[np.zeros(6), np.repeat([0, 1], 3), np.ones(6)]
+        y = np.repeat([0, 1], 3)
+        for method in ("fisher-score", "t-score"):
+            np.testing.assert_array_equal(
+                FeatureRanker(method).fit(x, y).scores_, [0, np.inf, 0]
+            )
+        with self.assertRaises(ValueError):
+            FeatureRanker("t-score").fit(x, np.arange(6) % 3)
+        with self.assertRaises(ValueError):
+            FeatureRanker("t-score", method_params={"ddof": 1}).fit(
+                x, np.arange(6) == 0
+            )
+        with self.assertRaises(ValueError):
+            FeatureRanker("t-score", method_params={"ddof": 2}).fit(x, y)
+        result = FeatureRanker("t-score", target_strategy="auto").fit(
+            x, np.arange(6) % 3
+        )
+        self.assertEqual(result.target_strategy_, "one-vs-rest")
+
+
+class RobustTests(unittest.TestCase):
+    def test_upstream_coefficients(self):
+        x = np.random.RandomState(31).normal(size=(18, 4))
+        cases = [
+            (
+                "classification",
+                np.arange(18) % 3,
+                [
+                    0.07433853766196787,
+                    0.44490875476453345,
+                    0.15792590210237195,
+                    0.05720403260091776,
+                ],
+            ),
+            (
+                "multilabel",
+                (x[:, :2] > 0).astype(int),
+                [
+                    0.06864481679126405,
+                    0.04427903760554591,
+                    0.0046555607314027634,
+                    0.002221810425076753,
+                ],
+            ),
+            (
+                "regression",
+                x[:, 1] ** 2,
+                [
+                    0.0011939988261550317,
+                    0.4063245907418482,
+                    0.00037427486144211134,
+                    0.0031284095184881,
+                ],
+            ),
+            (
+                "multioutput",
+                x[:, :2] ** 2,
+                [
+                    0.05531366799957507,
+                    0.7058512768060414,
+                    0.08164728544169246,
+                    0.0045613027816912375,
+                ],
+            ),
+        ]
+        for task, y, expected in cases:
+            with self.subTest(task=task):
+                fit = FeatureRanker("rfs", task=task, method_params={"gamma": 0.8}).fit(
+                    x, y
+                )
+                np.testing.assert_allclose(fit.scores_, expected, rtol=1e-8, atol=1e-11)
+
+    def test_validation(self):
+        from reliefe.robust import robust_scores
+
+        x = np.ones((4, 2))
+        y = np.array([0, 0, 1, 1])
+        for params in ({"gamma": 0}, {"tolerance": np.nan}, {"max_iter": 0}):
+            with self.assertRaises(ValueError):
+                robust_scores(x, y, "classification", **params)
+        with self.assertRaises(ValueError):
+            robust_scores(x, y * np.nan, "regression")

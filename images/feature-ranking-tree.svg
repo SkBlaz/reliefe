@@ -7,7 +7,7 @@
 <text x="34" y="54">One feature at a time</text>
 <path d="M219 49 H234 M234 18 V81" stroke="black" fill="none"/>
 <path d="M234 18 H248" stroke="black" fill="none"/>
-<text x="254" y="23" data-methods="variance numba-variance pearson numba-pearson spearman numba-spearman kendall kruskal f numba-f chi2 numba-chi2 survival-concordance"><title>variance, numba-variance, pearson, numba-pearson, spearman, numba-spearman, kendall, kruskal, f, numba-f, chi2, numba-chi2, survival-concordance</title>Variance, correlation and rank tests</text>
+<text x="254" y="23" data-methods="variance numba-variance pearson numba-pearson spearman numba-spearman kendall kruskal t-score fisher-score f numba-f chi2 numba-chi2 survival-concordance"><title>variance, numba-variance, pearson, numba-pearson, spearman, numba-spearman, kendall, kruskal, t-score, fisher-score, f, numba-f, chi2, numba-chi2, survival-concordance</title>Variance, correlation and rank tests</text>
 <path d="M234 39 H248" stroke="black" fill="none"/>
 <text x="254" y="44" data-methods="mi numba-info-gain numba-gain-ratio numba-symmetrical-uncertainty numba-gini core-infgain core-gainratio core-mdl core-gini core-dkm core-accuracy core-mseofmean core-myopicrelieff core-dkmcost core-gainratiocost core-mdlsmp core-uniformdkm core-uniformgini core-uniforminf core-uniformaccuracy core-equaldkm core-equalgini core-equalinf"><title>mi, numba-info-gain, numba-gain-ratio, numba-symmetrical-uncertainty, numba-gini, core-infgain, core-gainratio, core-mdl, core-gini, core-dkm, core-accuracy, core-mseofmean, core-myopicrelieff, core-dkmcost, core-gainratiocost, core-mdlsmp, core-uniformdkm, core-uniformgini, core-uniforminf, core-uniformaccuracy, core-equaldkm, core-equalgini, core-equalinf</title>Information gain and split impurity</text>
 <path d="M234 60 H248" stroke="black" fill="none"/>
@@ -28,7 +28,7 @@
 <path d="M234 200 H248" stroke="black" fill="none"/>
 <text x="254" y="205" data-methods="reliefe"><title>reliefe</title>Embedding distance (ReliefE)</text>
 <path d="M234 221 H248" stroke="black" fill="none"/>
-<text x="254" y="226" data-methods="laplacian"><title>laplacian</title>Graph smoothness (Laplacian Score)</text>
+<text x="254" y="226" data-methods="laplacian spec spec-energy spec-cluster"><title>laplacian, spec, spec-energy, spec-cluster</title>Graph smoothness and spectral alignment</text>
 <path d="M8 266 H28" stroke="black" fill="none"/>
 <text x="34" y="271">Forward selection</text>
 <path d="M219 266 H234 M234 256 V277" stroke="black" fill="none"/>
@@ -40,7 +40,7 @@
 <text x="34" y="327">Fitted models</text>
 <path d="M219 322 H234 M234 312 V333" stroke="black" fill="none"/>
 <path d="M234 312 H248" stroke="black" fill="none"/>
-<text x="254" y="317" data-methods="linear forest estimator core-mseofmodel core-maeofmodel"><title>linear, forest, estimator, core-mseofmodel, core-maeofmodel</title>Coefficients, tree importance and split error</text>
+<text x="254" y="317" data-methods="linear forest estimator rfs core-mseofmodel core-maeofmodel"><title>linear, forest, estimator, rfs, core-mseofmodel, core-maeofmodel</title>Coefficients, tree importance and split error</text>
 <path d="M234 333 H248" stroke="black" fill="none"/>
 <text x="254" y="338" data-methods="rfe permutation shadow-forest boruta"><title>rfe, permutation, shadow-forest, boruta</title>Elimination, permutation and shadow features</text>
 <path d="M8 368 H28" stroke="black" fill="none"/>
