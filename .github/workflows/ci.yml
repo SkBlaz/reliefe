@@ -1,51 +1,35 @@
-name: Basic CI
+name: Tests
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [master, main]
   pull_request:
-    branches: [ master, main ]
+    branches: [master, main]
 
 jobs:
-  test:
+  library:
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        python-version: [3.8, 3.9, '3.10', 3.11]
       fail-fast: false
-    
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest matplotlib seaborn pandas
-        
-    - name: Install package locally
-      run: |
-        pip install .
-        
-    - name: Verify installation
-      run: |
-        python -c "import reliefe; print('ReliefE version:', reliefe.__version__ if hasattr(reliefe, '__version__') else 'unknown')"
-        
-    - name: Run tests (continue on error for compatibility issues)
-      run: |
-        pytest tests/ -v --tb=short --continue-on-collection-errors || true
-        echo "Note: Some tests may fail due to compatibility issues with newer library versions"
-        
-    - name: Test main examples
-      run: |
-        cd examples
-        export MPLBACKEND=Agg
-        echo "Testing minimal_benchmark.py..."
-        timeout 300 python minimal_benchmark.py
-        echo "Testing example_synthetic.py..."
-        timeout 300 python example_synthetic.py
-        echo "All examples completed successfully!"
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync --locked
+      - name: Test the base library without MCP dependencies
+        run: NUMBA_DISABLE_JIT=1 uv run --no-sync python -m unittest discover -s tests -v
+      - run: uv run --no-sync python examples/minimal_reliefe2.py
+
+  coverage-and-mcp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+      - run: uv sync --locked --extra mcp --group dev
+      - name: Require full coverage, MCP round trips, and compiled numerical checks
+        run: make test

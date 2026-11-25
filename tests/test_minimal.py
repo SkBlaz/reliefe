@@ -8,6 +8,7 @@ from contextlib import redirect_stdout
 
 import numpy as np
 import scipy.io as sio
+from scipy.sparse import csr_matrix
 from sklearn.decomposition import TruncatedSVD
 
 import reliefe
@@ -47,7 +48,7 @@ class ReliefESmokeTests(unittest.TestCase):
 
     def test_custom_embedding_smoke(self):
         mat_obj = sio.loadmat(ROOT / "data" / "mcc" / "chess.mat")
-        x = mat_obj["input_space"][:128]
+        x = csr_matrix(mat_obj["input_space"])[:128]
         y = np.asarray(mat_obj["target_space"]).reshape(-1)[:128]
         model = reliefe.ReliefE(embedding_based_distances=True,
                                 num_iter=24,
@@ -59,7 +60,7 @@ class ReliefESmokeTests(unittest.TestCase):
 
     def test_default_embedding_method_is_usable(self):
         mat_obj = sio.loadmat(ROOT / "data" / "mcc" / "chess.mat")
-        x = mat_obj["input_space"][:128]
+        x = csr_matrix(mat_obj["input_space"])[:128]
         y = np.asarray(mat_obj["target_space"]).reshape(-1)[:128]
         model = reliefe.ReliefE(embedding_based_distances=True,
                                 num_iter=24,
@@ -112,6 +113,16 @@ class ReliefESmokeTests(unittest.TestCase):
             with self.subTest(script=script_name):
                 output = self.run_example(script_name)
                 self.assert_example_output(script_name, output)
+
+    def test_mat_examples_accept_coo_matrices(self):
+        # SciPy versions differ in the sparse format returned by loadmat.
+        from unittest.mock import patch
+
+        mat_obj = sio.loadmat(ROOT / "data" / "mcc" / "chess.mat")
+        mat_obj["input_space"] = csr_matrix(mat_obj["input_space"]).tocoo()
+        for script_name in ["custom_embeddings.py", "minimal_reliefe2.py"]:
+            with self.subTest(script=script_name), patch.object(sio, "loadmat", return_value=mat_obj):
+                self.assert_example_output(script_name, self.run_example(script_name))
 
     def run_example(self, script_name):
         previous_cwd = Path.cwd()
