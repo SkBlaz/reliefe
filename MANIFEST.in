@@ -1,1 +1,3 @@
 include requirements.txt
+include images/feature-ranking-tree.svg
+include tools/draw_taxonomy.py

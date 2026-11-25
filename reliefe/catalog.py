@@ -26,6 +26,9 @@ REBATE = {
 }
 
 _METHODS = {
+    "stir-relieff": Method(C, False, "binary STIR pooled pseudo-t statistic"),
+    "stir-surf": Method(C, False, "binary STIR pooled pseudo-t statistic"),
+    "stir-multisurf": Method(C, False, "binary STIR pooled pseudo-t statistic"),
     "numba-variance": Method(("unsupervised",), False, "population variance"),
     "numba-f": Method(CR, False, "univariate F statistic"),
     "numba-chi2": Method(C, False, "chi-square statistic on nonnegative features"),

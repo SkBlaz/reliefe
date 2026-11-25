@@ -18,6 +18,7 @@ from sklearn.utils.validation import check_array, check_consistent_length, check
 
 from .catalog import REBATE, list_methods
 from .julia_relief import JULIA_OPTIONS, julia_scores
+from .stir import stir_scores
 from .native import RADIUS_METHODS, categorical_impurity, native_margin, native_radius, native_subset, native_univariate
 from .historical import METHODS_1994, categorical_relief
 from .corelearn import CORE_METHODS, core_scores
@@ -139,6 +140,8 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
     def _fit_scores(self, x, y, task, params):
         m = self.method
         classification = task == "classification"
+        if m.startswith("stir-"):
+            return stir_scores(m, x, y, **params)
         if m.startswith("numba-"):
             variant = m[6:]
             if variant in ("iterative-relief", "mu-relief", "turf", "vls"):

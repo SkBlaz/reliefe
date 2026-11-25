@@ -116,3 +116,21 @@ class NativeTests(unittest.TestCase):
                         ("mu-relief", {"k": 0}), ("iterative-relief", {"max_iter": 0})]:
             with self.assertRaises(ValueError):
                 FeatureRanker("numba-" + m, method_params=opts).fit(x, y)
+
+    def test_stir_original_R_statistics(self):
+        # insilico/stir 01890541, find.neighbors + stir, Manhattan, k=2,
+        # sd.frac=0.5. Reorder the R STIR_T table to original column order.
+        x = np.random.RandomState(3072).uniform(size=(32, 4))
+        y = np.tile([0, 1], 16)
+        for method, expected in [
+            ("stir-relieff", [-.02888967526854, .90670789067875, .74090655996531, -.01837448691040]),
+            ("stir-surf", [-1.35812814125983, 2.08136513945228, .87540473663444, .47193454667341]),
+            ("stir-multisurf", [-1.36528220496856, 1.98843873043866, 1.34306397205879, .35515750431171]),
+        ]:
+            scores = FeatureRanker(method, method_params={"k": 2}).fit(x, y).scores_
+            np.testing.assert_allclose(scores, expected, atol=1e-12)
+        for options, target in [({}, self.y), ({"k": 0}, self.y % 2)]:
+            with self.assertRaises(ValueError):
+                FeatureRanker("stir-relieff", method_params=options).fit(self.x, target)
+        scores = FeatureRanker("stir-surf", method_params={"sd_fraction": 100}).fit(x, y).scores_
+        self.assertTrue(np.isnan(scores).all())
