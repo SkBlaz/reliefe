@@ -214,3 +214,26 @@ The bridge launches a local R process per fit and exchanges finite dense numeric
 arrays in a temporary directory. Declare encoded categorical columns with
 `categorical_features=[0, 3]`, supply a misclassification `cost_matrix` in
 sorted class order, or pass named scalar CORElearn options via `method_params`.
+
+### Comparing rankings and repeated measurements
+
+* `reliefseq` takes the largest direct ReliefF score for each feature across
+  `k_min ... k_max`. Inspect `best_k_` to see the winning neighborhood size.
+* `laplacian` ranks unsupervised numeric features by their normalized graph
+  energy on a symmetric heat-weighted k-neighbor graph. Lower scores rank first.
+* `per-target` fits a base ranker to each response and averages tied ranks.
+  Use `base_method` and `base_task` to configure multilabel or multi-output
+  regression baselines. Constant targets contribute a neutral tied rank.
+* `shadow-forest` estimates how often a variable beats the best independently
+  shuffled shadow variable over repeated forest fits. Its scores are empirical
+  frequencies. They carry no multiple-testing or false-discovery guarantee.
+
+`compare_rankings(X, y, rankers, estimator, splits, scoring=...)` fits each
+configuration separately on each training fold. It reports paired fold scores,
+per-feature selection frequencies, and mean pairwise Jaccard overlap. Supply a
+mapping from labels to rankers (use None for all columns) and precomputed splits
+for group or time-series evaluation. Choose hyperparameters inside training folds.
+
+Use `grouped_permutation_importance(fitted_estimator, X_test, y_test, groups)`
+to shuffle correlated or one-hot columns together on held-out data. The returned
+mapping contains one score decrease per repeat for each named group.

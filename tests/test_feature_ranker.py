@@ -42,7 +42,7 @@ class RankerTests(unittest.TestCase):
             for task in spec.tasks:
                 with self.subTest(m=m, task=task):
                     target = {"classification": self.y, "multilabel": np.c_[self.y, self.x[:, 0] > .5],
-                              "regression": self.response, "unsupervised": None}[task]
+                              "multioutput": np.c_[self.response, self.x[:, 1]], "regression": self.response, "unsupervised": None}[task]
                     params = {"mlc_distance": "hamming", "embedding_method": "SVD"} if m == "reliefe" else {}
                     model = FeatureRanker(m, task=task, method_params=params, top_k=3).fit(self.x, target)
                     np.testing.assert_array_equal(np.sort(model.order_), np.arange(6))

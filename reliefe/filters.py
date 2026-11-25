@@ -69,3 +69,24 @@ def mrmr_order(x, y, bins=8):
         for j in np.flatnonzero(remaining):
             redundancy[j] += mutual_info_score(columns[best], columns[j])
     return np.argsort(order) + 1
+
+
+def laplacian_score(x, k=5, heat_width=1.0):
+    """Laplacian Score on a symmetric heat-weighted nearest-neighbor graph.
+
+    Returns the native graph energy divided by degree-weighted variance.
+    Lower values rank first. Constant columns have undefined scores.
+    """
+    from sklearn.neighbors import kneighbors_graph
+    if not isinstance(k, (int, np.integer)) or not 1 <= k < x.shape[0] or heat_width <= 0:
+        raise ValueError("Laplacian Score requires 1 <= k < n and positive heat_width")
+    graph = kneighbors_graph(x, k, mode="distance", include_self=False)
+    graph.data = np.exp(-np.square(graph.data) / heat_width)
+    graph = graph.maximum(graph.T)
+    degree = np.asarray(graph.sum(axis=1)).ravel()
+    if degree.sum() == 0:
+        raise ValueError("Graph has zero total weight; increase heat_width")
+    centered = x - np.average(x, axis=0, weights=degree)
+    denom = degree @ (centered ** 2)
+    energy = np.sum(centered * (degree[:, None] * centered - graph @ centered), axis=0)
+    return np.divide(energy, denom, out=np.full(x.shape[1], np.nan), where=denom > 0)
