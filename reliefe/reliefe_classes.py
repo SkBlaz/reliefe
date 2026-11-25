@@ -251,7 +251,7 @@ def _numba_distance_target(row1, row2, dist):
         return 1.0 - intersection / union if union > 0 else 0.0
 
     elif dist == "subset":
-        return float(np.any(row1 != row2))
+        return 1.0 if np.any(row1 != row2) else 0.0
 
     elif dist == "hamming":
         return np.abs(row1 - row2).sum() / len(row1)
