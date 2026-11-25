@@ -137,8 +137,6 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         for attr in list(vars(self)):
             if attr.endswith("_"):
                 delattr(self, attr)
-        if self.method == "per-target":
-            self.target_names_ = np.arange(y.shape[1]) if target_columns is None else np.asarray(target_columns)
         if strategy == "label-powerset":
             combinations, encoded = np.unique(y, axis=0, return_inverse=True)
             self.label_combinations_ = combinations
@@ -156,6 +154,7 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
             raw = self._fit_scores(x, y, task, dict(self.method_params or {}))
         self.target_strategy_ = strategy
         if self.method == "per-target":
+            self.target_names_ = np.arange(y.shape[1]) if target_columns is None else np.asarray(target_columns)
             self.target_strategy_ = "binary-relevance" if task == "multilabel" else "per-target"
         values = np.asarray(raw, dtype=float)
         if values.shape != (x.shape[1],):
