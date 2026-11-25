@@ -90,3 +90,20 @@ _METHODS.update({"numba-" + key: Method(CR, False, "native " + key + " neighborh
 def list_methods():
     """Return a fresh mapping of public method names to immutable capability records."""
     return dict(_METHODS)
+
+
+def classification_strategies(target):
+    """Map compatible method IDs to their multiclass or multilabel scoring strategy."""
+    if target not in ("multiclass", "multilabel"):
+        raise ValueError("target must be multiclass or multilabel")
+    binary_only = {"relief", "core-relief", *METHODS_1994[:4], "stir-relieff", "stir-surf", "stir-multisurf"}
+    result = {}
+    for name, spec in _METHODS.items():
+        if target == "multilabel" and "multilabel" in spec.tasks:
+            result[name] = "binary-relevance" if name == "per-target" else "direct"
+        elif "classification" in spec.tasks:
+            if target == "multilabel":
+                result[name] = "binary-relevance"
+            else:
+                result[name] = "one-vs-rest" if name in binary_only else "direct"
+    return result

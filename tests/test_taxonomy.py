@@ -15,4 +15,9 @@ class TaxonomyTests(unittest.TestCase):
         self.assertCountEqual(ids, list(list_methods()))
         published = (root / "images/feature-ranking-tree.svg").read_text(encoding="utf-8")
         self.assertEqual(published, generator["draw"](catalogue))
-        ElementTree.fromstring(published)
+        svg = ElementTree.fromstring(published)
+        leaves = svg.findall(".//*[@data-methods]")
+        self.assertCountEqual([key for leaf in leaves for key in leaf.attrib["data-methods"].split()], ids)
+        colors = {value for node in svg.iter() for key, value in node.attrib.items()
+                  if key in ("fill", "stroke")}
+        self.assertEqual(colors, {"black", "white", "none"})

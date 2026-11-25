@@ -14,12 +14,14 @@ def original_relief(x, y):
 
 def rrelieff(x, y, k=10, sigma=50.0):
     """Regression ReliefF using rank-weighted nearest neighbors and range differences."""
-    if not isinstance(k, (int, np.integer)) or k < 1 or sigma <= 0 or len(y) < 2:
+    if not isinstance(k, (int, np.integer)) or k < 1 or not np.isfinite(sigma) or sigma <= 0 or len(y) < 2:
         raise ValueError("RReliefF requires positive k, sigma and at least two rows")
     k = min(k, len(y) - 1)
     ranks = np.arange(1, k + 1, dtype=float)
     # Subtract the nearest neighbor's log weight before exponentiation.
-    influence = np.exp(-((ranks - 1) / sigma) * ((ranks + 1) / sigma))
+    influence = np.ones(k)
+    with np.errstate(over="ignore"):
+        influence[1:] = np.exp(-((ranks[1:] - 1) / sigma) * ((ranks[1:] + 1) / sigma))
     influence /= influence.sum()
     target = scale_columns(y.reshape(-1, 1)).ravel()
     return regression_scores(scale_columns(x), target, influence)
@@ -31,6 +33,10 @@ def quantile_codes(x, bins):
         raise ValueError("bins must be an integer >= 2")
     columns = []
     for col in x.T:
+        levels = np.unique(col)
+        if len(levels) <= bins:
+            columns.append(np.searchsorted(levels, col))
+            continue
         cuts = np.unique(np.quantile(col, np.arange(1, bins) / bins))
         columns.append(np.searchsorted(cuts, col, side="left"))
     return np.asarray(columns, dtype=np.int64)

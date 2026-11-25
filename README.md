@@ -11,11 +11,38 @@ Use `from reliefe import FeatureRanker, list_methods` and inspect
 score semantics. The bounded `rank_features` function remains available for
 small classification tables and MCP clients.
 
+## Try the rankers
+
+From the repository root, run:
+
+```bash
+uv run python examples/try_rankers.py
+uv run python examples/try_rankers.py --task multilabel f relief cmim
+uv run python examples/try_rankers.py --task multilabel --strategy label-powerset cmim
+uv run python examples/try_rankers.py --task multiclass --list
+```
+
+Each row gives the method, the target strategy and the feature order. Choose `--all` to try every compatible method and see which optional backends need installation. The example also has datasets for regression, multi-output regression (`multioutput`), survival and unsupervised ranking. To evaluate predictive performance on held-out folds, see [the benchmark example](examples/minimal_benchmark.py).
+
+For your own data:
+
+```python
+from reliefe import FeatureRanker, classification_strategies
+
+strategies = classification_strategies("multilabel")
+ranker = FeatureRanker("cmim", target_strategy="auto", top_k=5).fit(X_train, Y_train)
+selected_test = ranker.transform(X_test)
+```
+
+Use a class vector for multiclass classification (MCC) or a binary indicator matrix for multilabel classification (MLC). With `target_strategy="auto"`, direct MCC and joint MLC algorithms keep their scoring rule. Binary-only MCC rankers fit one model per class against the rest. Single-output classification rankers fit each MLC label separately (binary relevance). Both reductions give each target equal weight, average tied feature ranks, and return a mean rank where lower is better. A constant label gives all features the same rank. Inspect `target_strategy_`, `per_target_ranks_` and `target_names_` on reduced fits. Binary relevance measures label-specific relevance independently. ReliefE's joint MLC score can use distances between whole label vectors. For a joint reduction, set `target_strategy="label-powerset"`. Each distinct training label vector becomes a class. Inspect `label_combinations_` to see those classes. Rare combinations must satisfy the base ranker’s sample requirements. [Tsoumakas and Katakis on multilabel transformations](https://doi.org/10.4018/jdwm.2007070101)
+
+Fit the ranker inside the training fold when comparing methods.
+
 ## Feature ranking taxonomy
 
 [![Feature ranking methods grouped by the evidence they use](images/feature-ranking-tree.svg)](images/feature-ranking-tree.svg)
 
-Read the tree from left to right. A **myopic** filter evaluates one input column at a time. A **neighborhood** method constructs distances across columns before assigning credit to each feature, so a feature can matter through an interaction. In the conditional-information branch, earlier selections change the score of the next candidate. A model-based rank depends on the learner, loss and data. Each public ID appears once under its primary scoring rule. Alternate implementations have separate IDs.
+Read the tree from left to right. A **myopic** filter evaluates one input column at a time. A **neighborhood** method constructs distances across columns before assigning credit to each feature, so a feature can matter through an interaction. In the conditional-information branch, earlier selections change the score of the next candidate. A model-based rank depends on the learner, loss and data. The tree groups alternate implementations under one name. The table below lists every public ID.
 
 ### Complete method catalogue
 
@@ -348,7 +375,7 @@ before applying the hyperboloid distance.
 Use `pearson`, `spearman`, or `kendall` for absolute regression association and
 `kruskal` for a rank-based multiclass comparison. The discrete greedy selectors
 `jmi`, `cmim`, `cife`, and `mrmr` expose an ordinal selection sequence.
-All use the same training-only quantile discretization (`method_params={"bins": 8}`).
+Columns with at most the requested number of distinct values retain every level. Higher-cardinality columns use training-only quantile discretization (`method_params={"bins": 8}`).
 [Information-theoretic criteria](https://jmlr.org/papers/v13/brown12a.html)
 
 Install `reliefe[all-relevant]` to use `FeatureRanker("boruta")`. Inspect

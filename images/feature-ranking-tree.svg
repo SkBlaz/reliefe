@@ -1,193 +1,114 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2218" role="img" aria-labelledby="title description">
-<title id="title">How features earn their rank</title>
-<desc id="description">Tree of 128 public ranking methods. Read from scoring family to rule to method ID. The README contains the same catalogue as text.</desc>
-<rect width="100%" height="100%" fill="#fcfbf7"/>
-<g font-family="DejaVu Sans, sans-serif" xml:space="preserve">
-<text x="66" y="59" font-size="17" fill="#126b60" letter-spacing="3" font-weight="bold">RELIEFE   /   METHOD ATLAS</text>
-<text x="64" y="121" font-size="54" fill="#1a302f" font-family="Georgia, serif">How features earn their rank</text>
-<text x="66" y="162" font-size="23" fill="#1a302f" >128 public method IDs grouped by the evidence each ranker uses.</text>
-<path d="M65 186 L1535 186" stroke="#84918d" fill="none"/>
-<text x="83" y="222" font-size="15" fill="#455b57" font-weight="bold" letter-spacing="2">SCORING FAMILY</text>
-<text x="366" y="222" font-size="15" fill="#455b57" font-weight="bold" letter-spacing="2">SCORING RULE</text>
-<text x="735" y="222" font-size="15" fill="#455b57" font-weight="bold" letter-spacing="2">METHOD IDS</text>
-<rect x="54" y="241" width="1488" height="498" fill="#925125" opacity=".045"/>
-<path d="M45 264 L75 264" stroke="#925125" fill="none"/>
-<circle cx="75" cy="264" r="4" fill="#925125"/>
-<text x="87" y="271" font-size="24" fill="#925125" font-weight="bold">Marginal filters</text>
-<text x="87" y="299" font-size="16" fill="#415652" >Evaluate one column at a</text>
-<text x="87" y="318" font-size="16" fill="#415652" >time. These scores are</text>
-<text x="87" y="337" font-size="16" fill="#415652" >myopic to other predictors.</text>
-<path d="M341 265 L341 688" stroke="#925125" fill="none"/>
-<path d="M334 265 L341 265" stroke="#925125" fill="none"/>
-<path d="M341 265 L356 265" stroke="#925125" fill="none"/>
-<text x="366" y="271" font-size="18" fill="#1a302f" font-weight="bold">Dispersion</text>
-<path d="M688 265 L722 265" stroke="#925125" fill="none"/>
-<text x="735" y="271" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">variance   numba-variance</text>
-<path d="M341 313 L356 313" stroke="#925125" fill="none"/>
-<text x="366" y="319" font-size="18" fill="#1a302f" font-weight="bold">Association and group tests</text>
-<path d="M688 313 L722 313" stroke="#925125" fill="none"/>
-<text x="735" y="319" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">pearson   numba-pearson   spearman   numba-spearman   kendall   kruskal</text>
-<text x="735" y="346" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">f   numba-f   chi2   numba-chi2</text>
-<path d="M341 388 L356 388" stroke="#925125" fill="none"/>
-<text x="366" y="394" font-size="18" fill="#1a302f" font-weight="bold">Censored outcome ordering</text>
-<path d="M688 388 L722 388" stroke="#925125" fill="none"/>
-<text x="735" y="394" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">survival-concordance</text>
-<path d="M341 436 L356 436" stroke="#925125" fill="none"/>
-<text x="366" y="442" font-size="18" fill="#1a302f" font-weight="bold">Information and impurity</text>
-<path d="M688 436 L722 436" stroke="#925125" fill="none"/>
-<text x="735" y="442" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">mi   numba-info-gain   numba-gain-ratio   numba-symmetrical-uncertainty</text>
-<text x="735" y="469" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">numba-gini   core-infgain   core-gainratio   core-mdl   core-gini</text>
-<text x="735" y="496" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-dkm</text>
-<path d="M341 538 L356 538" stroke="#925125" fill="none"/>
-<text x="366" y="544" font-size="18" fill="#1a302f" font-weight="bold">Split accuracy and error</text>
-<path d="M688 538 L722 538" stroke="#925125" fill="none"/>
-<text x="735" y="544" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-accuracy   core-mseofmean   core-myopicrelieff</text>
-<path d="M341 586 L356 586" stroke="#925125" fill="none"/>
-<text x="366" y="592" font-size="18" fill="#1a302f" font-weight="bold">Costs and split weighting</text>
-<path d="M688 586 L722 586" stroke="#925125" fill="none"/>
-<text x="735" y="592" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-dkmcost   core-gainratiocost   core-mdlsmp   core-uniformdkm</text>
-<text x="735" y="619" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-uniformgini   core-uniforminf   core-uniformaccuracy   core-equaldkm</text>
-<text x="735" y="646" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-equalgini   core-equalinf</text>
-<path d="M341 688 L356 688" stroke="#925125" fill="none"/>
-<text x="366" y="694" font-size="18" fill="#1a302f" font-weight="bold">Class distribution distance</text>
-<path d="M688 688 L722 688" stroke="#925125" fill="none"/>
-<text x="735" y="694" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-impurityeuclid   core-impurityhellinger   core-equalhellinger</text>
-<text x="735" y="721" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-disthellinger   core-distauc   core-distangle   core-disteuclid</text>
-<rect x="54" y="748" width="1488" height="894" fill="#126b60" opacity=".045"/>
-<path d="M45 771 L75 771" stroke="#126b60" fill="none"/>
-<circle cx="75" cy="771" r="4" fill="#126b60"/>
-<text x="87" y="778" font-size="24" fill="#126b60" font-weight="bold">Neighborhoods</text>
-<text x="87" y="806" font-size="16" fill="#415652" >Build neighbors across</text>
-<text x="87" y="825" font-size="16" fill="#415652" >features, then measure each</text>
-<text x="87" y="844" font-size="16" fill="#415652" >column’s local contribution.</text>
-<path d="M341 772 L341 1618" stroke="#126b60" fill="none"/>
-<path d="M334 772 L341 772" stroke="#126b60" fill="none"/>
-<path d="M341 772 L356 772" stroke="#126b60" fill="none"/>
-<text x="366" y="778" font-size="18" fill="#1a302f" font-weight="bold">k-NN hits and misses</text>
-<path d="M688 772 L722 772" stroke="#126b60" fill="none"/>
-<text x="735" y="778" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">relief   relieff   rebate-relieff   core-relief   core-relieffequalk</text>
-<path d="M341 820 L356 820" stroke="#126b60" fill="none"/>
-<text x="366" y="826" font-size="18" fill="#1a302f" font-weight="bold">Historical categorical Relief</text>
-<path d="M688 820 L722 820" stroke="#126b60" fill="none"/>
-<text x="735" y="826" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">relief-1994-a   relief-1994-b   relief-1994-c   relief-1994-d</text>
-<text x="735" y="853" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">relief-1994-e   relief-1994-f</text>
-<path d="M341 895 L356 895" stroke="#126b60" fill="none"/>
-<text x="366" y="901" font-size="18" fill="#1a302f" font-weight="bold">Neighbor and update weights</text>
-<path d="M688 895 L722 895" stroke="#126b60" fill="none"/>
-<text x="735" y="901" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-relieffexprank   core-relieffdistance   core-relieffsqrdistance</text>
-<text x="735" y="928" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-relieffmerit   reliefmss   numba-reliefmss   mu-relief</text>
-<text x="735" y="955" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">numba-mu-relief</text>
-<path d="M341 997 L356 997" stroke="#126b60" fill="none"/>
-<text x="366" y="1003" font-size="18" fill="#1a302f" font-weight="bold">Adaptive neighbor count</text>
-<path d="M688 997 L722 997" stroke="#126b60" fill="none"/>
-<text x="735" y="1003" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">reliefseq   core-relieffbestk   core-rrelieffbestk</text>
-<path d="M341 1045 L356 1045" stroke="#126b60" fill="none"/>
-<text x="366" y="1051" font-size="18" fill="#1a302f" font-weight="bold">Continuous target updates</text>
-<path d="M688 1045 L722 1045" stroke="#126b60" fill="none"/>
-<text x="735" y="1051" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">rrelieff   core-rrelieffequalk   core-rrelieffexprank</text>
-<text x="735" y="1078" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-rrelieffdistance   core-rrelieffsqrdistance   core-rrelieffwithmse</text>
-<path d="M341 1120 L356 1120" stroke="#126b60" fill="none"/>
-<text x="366" y="1126" font-size="18" fill="#1a302f" font-weight="bold">Cost-sensitive neighbors</text>
-<path d="M688 1120 L722 1120" stroke="#126b60" fill="none"/>
-<text x="735" y="1126" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-relieffexpc   core-relieffavgc   core-relieffpe   core-relieffpa</text>
-<text x="735" y="1153" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-relieffsmp   core-reliefkukar</text>
-<path d="M341 1195 L356 1195" stroke="#126b60" fill="none"/>
-<text x="366" y="1201" font-size="18" fill="#1a302f" font-weight="bold">Global distance threshold</text>
-<path d="M688 1195 L722 1195" stroke="#126b60" fill="none"/>
-<text x="735" y="1201" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">surf   numba-surf   surf-star   numba-surf-star   swrf   numba-swrf</text>
-<text x="735" y="1228" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">swrf-star   numba-swrf-star</text>
-<path d="M341 1270 L356 1270" stroke="#126b60" fill="none"/>
-<text x="366" y="1276" font-size="18" fill="#1a302f" font-weight="bold">Per-observation threshold</text>
-<path d="M688 1270 L722 1270" stroke="#126b60" fill="none"/>
-<text x="735" y="1276" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">multisurf   numba-multisurf   multisurf-star   numba-multisurf-star</text>
-<text x="735" y="1303" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">multiswrf   numba-multiswrf   multiswrf-star   numba-multiswrf-star</text>
-<text x="735" y="1330" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">multiswrfdb   numba-multiswrfdb   multiswrfdb-star</text>
-<text x="735" y="1357" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">numba-multiswrfdb-star</text>
-<path d="M341 1399 L356 1399" stroke="#126b60" fill="none"/>
-<text x="366" y="1405" font-size="18" fill="#1a302f" font-weight="bold">Learned distance weights</text>
-<path d="M688 1399 L722 1399" stroke="#126b60" fill="none"/>
-<text x="735" y="1405" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">irelief   numba-irelief   iterative-relief   numba-iterative-relief</text>
-<text x="735" y="1432" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">boostedsurf   iter</text>
-<path d="M341 1474 L356 1474" stroke="#126b60" fill="none"/>
-<text x="366" y="1480" font-size="18" fill="#1a302f" font-weight="bold">Feature subsets and pruning</text>
-<path d="M688 1474 L722 1474" stroke="#126b60" fill="none"/>
-<text x="735" y="1480" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">turf   numba-turf   vls   numba-vls   ec-relieff</text>
-<path d="M341 1522 L356 1522" stroke="#126b60" fill="none"/>
-<text x="366" y="1528" font-size="18" fill="#1a302f" font-weight="bold">Hit/miss variance</text>
-<path d="M688 1522 L722 1522" stroke="#126b60" fill="none"/>
-<text x="735" y="1528" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">stir-relieff   stir-surf   stir-multisurf</text>
-<path d="M341 1570 L356 1570" stroke="#126b60" fill="none"/>
-<text x="366" y="1576" font-size="18" fill="#1a302f" font-weight="bold">Embedding neighborhoods</text>
-<path d="M688 1570 L722 1570" stroke="#126b60" fill="none"/>
-<text x="735" y="1576" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">reliefe</text>
-<path d="M341 1618 L356 1618" stroke="#126b60" fill="none"/>
-<text x="366" y="1624" font-size="18" fill="#1a302f" font-weight="bold">Neighbor graph smoothness</text>
-<path d="M688 1618 L722 1618" stroke="#126b60" fill="none"/>
-<text x="735" y="1624" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">laplacian</text>
-<rect x="54" y="1651" width="1488" height="148" fill="#68529a" opacity=".045"/>
-<path d="M45 1674 L75 1674" stroke="#68529a" fill="none"/>
-<circle cx="75" cy="1674" r="4" fill="#68529a"/>
-<text x="87" y="1681" font-size="24" fill="#68529a" font-weight="bold">Conditional</text>
-<text x="87" y="1707" font-size="24" fill="#68529a" font-weight="bold">information</text>
-<text x="87" y="1735" font-size="16" fill="#415652" >Update candidate scores as</text>
-<text x="87" y="1754" font-size="16" fill="#415652" >the selected feature set</text>
-<text x="87" y="1773" font-size="16" fill="#415652" >grows.</text>
-<path d="M341 1675 L341 1675" stroke="#68529a" fill="none"/>
-<path d="M334 1675 L341 1675" stroke="#68529a" fill="none"/>
-<path d="M341 1675 L356 1675" stroke="#68529a" fill="none"/>
-<text x="366" y="1681" font-size="18" fill="#1a302f" font-weight="bold">Greedy subset construction</text>
-<path d="M688 1675 L722 1675" stroke="#68529a" fill="none"/>
-<text x="735" y="1681" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">mrmr   jmi   cmim   cife</text>
-<rect x="54" y="1808" width="1488" height="192" fill="#255c8a" opacity=".045"/>
-<path d="M45 1831 L75 1831" stroke="#255c8a" fill="none"/>
-<circle cx="75" cy="1831" r="4" fill="#255c8a"/>
-<text x="87" y="1838" font-size="24" fill="#255c8a" font-weight="bold">Predictive models</text>
-<text x="87" y="1866" font-size="16" fill="#415652" >Use a fitted predictor, a</text>
-<text x="87" y="1885" font-size="16" fill="#415652" >change in loss, or a</text>
-<text x="87" y="1904" font-size="16" fill="#415652" >comparison to shuffled</text>
-<text x="87" y="1923" font-size="16" fill="#415652" >features.</text>
-<path d="M341 1832 L341 1976" stroke="#255c8a" fill="none"/>
-<path d="M334 1832 L341 1832" stroke="#255c8a" fill="none"/>
-<path d="M341 1832 L356 1832" stroke="#255c8a" fill="none"/>
-<text x="366" y="1838" font-size="18" fill="#1a302f" font-weight="bold">Fitted model importance</text>
-<path d="M688 1832 L722 1832" stroke="#255c8a" fill="none"/>
-<text x="735" y="1838" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">linear   forest   estimator</text>
-<path d="M341 1880 L356 1880" stroke="#255c8a" fill="none"/>
-<text x="366" y="1886" font-size="18" fill="#1a302f" font-weight="bold">Error after splitting</text>
-<path d="M688 1880 L722 1880" stroke="#255c8a" fill="none"/>
-<text x="735" y="1886" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">core-mseofmodel   core-maeofmodel</text>
-<path d="M341 1928 L356 1928" stroke="#255c8a" fill="none"/>
-<text x="366" y="1934" font-size="18" fill="#1a302f" font-weight="bold">Recursive elimination</text>
-<path d="M688 1928 L722 1928" stroke="#255c8a" fill="none"/>
-<text x="735" y="1934" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">rfe</text>
-<path d="M341 1976 L356 1976" stroke="#255c8a" fill="none"/>
-<text x="366" y="1982" font-size="18" fill="#1a302f" font-weight="bold">Perturbation and shadows</text>
-<path d="M688 1976 L722 1976" stroke="#255c8a" fill="none"/>
-<text x="735" y="1982" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">permutation   shadow-forest   boruta</text>
-<rect x="54" y="2009" width="1488" height="148" fill="#785366" opacity=".045"/>
-<path d="M45 2032 L75 2032" stroke="#785366" fill="none"/>
-<circle cx="75" cy="2032" r="4" fill="#785366"/>
-<text x="87" y="2039" font-size="24" fill="#785366" font-weight="bold">Aggregation and</text>
-<text x="87" y="2065" font-size="24" fill="#785366" font-weight="bold">controls</text>
-<text x="87" y="2093" font-size="16" fill="#415652" >Combine target-specific</text>
-<text x="87" y="2112" font-size="16" fill="#415652" >rankings or establish a</text>
-<text x="87" y="2131" font-size="16" fill="#415652" >chance baseline.</text>
-<path d="M341 2033 L341 2081" stroke="#785366" fill="none"/>
-<path d="M334 2033 L341 2033" stroke="#785366" fill="none"/>
-<path d="M341 2033 L356 2033" stroke="#785366" fill="none"/>
-<text x="366" y="2039" font-size="18" fill="#1a302f" font-weight="bold">Rank across target columns</text>
-<path d="M688 2033 L722 2033" stroke="#785366" fill="none"/>
-<text x="735" y="2039" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">per-target</text>
-<path d="M341 2081 L356 2081" stroke="#785366" fill="none"/>
-<text x="366" y="2087" font-size="18" fill="#1a302f" font-weight="bold">Random ordering</text>
-<path d="M688 2081 L722 2081" stroke="#785366" fill="none"/>
-<text x="735" y="2087" font-size="17" fill="#1a302f" font-family="DejaVu Sans Mono, monospace">random</text>
-<path d="M45 264 L45 2032" stroke="#81938f" fill="none"/>
-<circle cx="45" cy="264" r="4" fill="#47615c"/>
-<circle cx="45" cy="771" r="4" fill="#47615c"/>
-<circle cx="45" cy="1674" r="4" fill="#47615c"/>
-<circle cx="45" cy="1831" r="4" fill="#47615c"/>
-<circle cx="45" cy="2032" r="4" fill="#47615c"/>
-<text x="66" y="2190" font-size="17" fill="#1a302f" >Each ID appears at its primary scoring rule. Several algorithms have both native and reference implementations.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 1185" role="img" aria-labelledby="title desc">
+<title id="title">Feature ranking</title>
+<desc id="desc">Scoring families branch into rules and their algorithms. The README lists each public implementation.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<g fill="black" font-family="Arial, Helvetica, sans-serif">
+<text x="18" y="36" font-size="26" font-weight="bold">Feature ranking</text>
+<text x="44" y="72" font-size="20" font-weight="bold">Marginal filters</text>
+<text x="72" y="100" font-size="16" font-weight="bold">Dispersion</text>
+<text x="336" y="100" font-size="15" data-methods="variance numba-variance">variance</text>
+<text x="72" y="128" font-size="16" font-weight="bold">Association and group tests</text>
+<text x="336" y="128" font-size="15" data-methods="pearson numba-pearson spearman numba-spearman kendall kruskal f numba-f chi2 numba-chi2">pearson, spearman, kendall, kruskal, f, chi2</text>
+<text x="72" y="156" font-size="16" font-weight="bold">Censored outcome ordering</text>
+<text x="336" y="156" font-size="15" data-methods="survival-concordance">survival-concordance</text>
+<text x="72" y="184" font-size="16" font-weight="bold">Information and impurity</text>
+<text x="336" y="184" font-size="15" data-methods="mi numba-info-gain numba-gain-ratio numba-symmetrical-uncertainty">mi, numba-info-gain, numba-gain-ratio, numba-symmetrical-uncertainty</text>
+<text x="336" y="205" font-size="15" data-methods="numba-gini core-infgain core-gainratio core-mdl core-gini core-dkm">numba-gini, core-infgain, core-gainratio, core-mdl, core-gini, core-dkm</text>
+<text x="72" y="233" font-size="16" font-weight="bold">Split accuracy and error</text>
+<text x="336" y="233" font-size="15" data-methods="core-accuracy core-mseofmean core-myopicrelieff">core-accuracy, core-mseofmean, core-myopicrelieff</text>
+<text x="72" y="261" font-size="16" font-weight="bold">Costs and split weighting</text>
+<text x="336" y="261" font-size="15" data-methods="core-dkmcost core-gainratiocost core-mdlsmp core-uniformdkm">core-dkmcost, core-gainratiocost, core-mdlsmp, core-uniformdkm</text>
+<text x="336" y="282" font-size="15" data-methods="core-uniformgini core-uniforminf core-uniformaccuracy core-equaldkm">core-uniformgini, core-uniforminf, core-uniformaccuracy, core-equaldkm</text>
+<text x="336" y="303" font-size="15" data-methods="core-equalgini core-equalinf">core-equalgini, core-equalinf</text>
+<text x="72" y="331" font-size="16" font-weight="bold">Class distribution distance</text>
+<text x="336" y="331" font-size="15" data-methods="core-impurityeuclid core-impurityhellinger core-equalhellinger">core-impurityeuclid, core-impurityhellinger, core-equalhellinger</text>
+<text x="336" y="352" font-size="15" data-methods="core-disthellinger core-distauc core-distangle core-disteuclid">core-disthellinger, core-distauc, core-distangle, core-disteuclid</text>
+<path d="M54 79 V326" stroke="black" fill="none"/>
+<path d="M54 95 h12" stroke="black"/>
+<path d="M54 123 h12" stroke="black"/>
+<path d="M54 151 h12" stroke="black"/>
+<path d="M54 179 h12" stroke="black"/>
+<path d="M54 228 h12" stroke="black"/>
+<path d="M54 256 h12" stroke="black"/>
+<path d="M54 326 h12" stroke="black"/>
+<text x="44" y="388" font-size="20" font-weight="bold">Neighborhoods</text>
+<text x="72" y="416" font-size="16" font-weight="bold">k-NN hits and misses</text>
+<text x="336" y="416" font-size="15" data-methods="relief relieff rebate-relieff core-relief core-relieffequalk">relief, relieff, core-relief, core-relieffequalk</text>
+<text x="72" y="444" font-size="16" font-weight="bold">Historical categorical Relief</text>
+<text x="336" y="444" font-size="15" data-methods="relief-1994-a relief-1994-b relief-1994-c relief-1994-d relief-1994-e">relief-1994-a, relief-1994-b, relief-1994-c, relief-1994-d, relief-1994-e</text>
+<text x="336" y="465" font-size="15" data-methods="relief-1994-f">relief-1994-f</text>
+<text x="72" y="493" font-size="16" font-weight="bold">Neighbor and update weights</text>
+<text x="336" y="493" font-size="15" data-methods="core-relieffexprank core-relieffdistance core-relieffsqrdistance">core-relieffexprank, core-relieffdistance, core-relieffsqrdistance</text>
+<text x="336" y="514" font-size="15" data-methods="core-relieffmerit reliefmss numba-reliefmss mu-relief numba-mu-relief">core-relieffmerit, reliefmss, mu-relief</text>
+<text x="72" y="542" font-size="16" font-weight="bold">Adaptive neighbor count</text>
+<text x="336" y="542" font-size="15" data-methods="reliefseq core-relieffbestk core-rrelieffbestk">reliefseq, core-relieffbestk, core-rrelieffbestk</text>
+<text x="72" y="570" font-size="16" font-weight="bold">Continuous target updates</text>
+<text x="336" y="570" font-size="15" data-methods="rrelieff core-rrelieffequalk core-rrelieffexprank core-rrelieffdistance">rrelieff, core-rrelieffequalk, core-rrelieffexprank, core-rrelieffdistance</text>
+<text x="336" y="591" font-size="15" data-methods="core-rrelieffsqrdistance core-rrelieffwithmse">core-rrelieffsqrdistance, core-rrelieffwithmse</text>
+<text x="72" y="619" font-size="16" font-weight="bold">Cost-sensitive neighbors</text>
+<text x="336" y="619" font-size="15" data-methods="core-relieffexpc core-relieffavgc core-relieffpe core-relieffpa">core-relieffexpc, core-relieffavgc, core-relieffpe, core-relieffpa</text>
+<text x="336" y="640" font-size="15" data-methods="core-relieffsmp core-reliefkukar">core-relieffsmp, core-reliefkukar</text>
+<text x="72" y="668" font-size="16" font-weight="bold">Global distance threshold</text>
+<text x="336" y="668" font-size="15" data-methods="surf numba-surf surf-star numba-surf-star swrf numba-swrf swrf-star numba-swrf-star">surf, surf-star, swrf, swrf-star</text>
+<text x="72" y="696" font-size="16" font-weight="bold">Per-observation threshold</text>
+<text x="336" y="696" font-size="15" data-methods="multisurf numba-multisurf multisurf-star numba-multisurf-star multiswrf numba-multiswrf multiswrf-star numba-multiswrf-star multiswrfdb numba-multiswrfdb">multisurf, multisurf-star, multiswrf, multiswrf-star, multiswrfdb</text>
+<text x="336" y="717" font-size="15" data-methods="multiswrfdb-star numba-multiswrfdb-star">multiswrfdb-star</text>
+<text x="72" y="745" font-size="16" font-weight="bold">Learned distance weights</text>
+<text x="336" y="745" font-size="15" data-methods="irelief numba-irelief iterative-relief numba-iterative-relief boostedsurf iter">irelief, iterative-relief, boostedsurf, iter</text>
+<text x="72" y="773" font-size="16" font-weight="bold">Feature subsets and pruning</text>
+<text x="336" y="773" font-size="15" data-methods="turf numba-turf vls numba-vls ec-relieff">turf, vls, ec-relieff</text>
+<text x="72" y="801" font-size="16" font-weight="bold">Hit/miss variance</text>
+<text x="336" y="801" font-size="15" data-methods="stir-relieff stir-surf stir-multisurf">stir-relieff, stir-surf, stir-multisurf</text>
+<text x="72" y="829" font-size="16" font-weight="bold">Embedding neighborhoods</text>
+<text x="336" y="829" font-size="15" data-methods="reliefe">reliefe</text>
+<text x="72" y="857" font-size="16" font-weight="bold">Neighbor graph smoothness</text>
+<text x="336" y="857" font-size="15" data-methods="laplacian">laplacian</text>
+<path d="M54 395 V852" stroke="black" fill="none"/>
+<path d="M54 411 h12" stroke="black"/>
+<path d="M54 439 h12" stroke="black"/>
+<path d="M54 488 h12" stroke="black"/>
+<path d="M54 537 h12" stroke="black"/>
+<path d="M54 565 h12" stroke="black"/>
+<path d="M54 614 h12" stroke="black"/>
+<path d="M54 663 h12" stroke="black"/>
+<path d="M54 691 h12" stroke="black"/>
+<path d="M54 740 h12" stroke="black"/>
+<path d="M54 768 h12" stroke="black"/>
+<path d="M54 796 h12" stroke="black"/>
+<path d="M54 824 h12" stroke="black"/>
+<path d="M54 852 h12" stroke="black"/>
+<text x="44" y="893" font-size="20" font-weight="bold">Conditional information</text>
+<text x="72" y="921" font-size="16" font-weight="bold">Greedy subset construction</text>
+<text x="336" y="921" font-size="15" data-methods="mrmr jmi cmim cife">mrmr, jmi, cmim, cife</text>
+<path d="M54 900 V916" stroke="black" fill="none"/>
+<path d="M54 916 h12" stroke="black"/>
+<text x="44" y="957" font-size="20" font-weight="bold">Predictive models</text>
+<text x="72" y="985" font-size="16" font-weight="bold">Fitted model importance</text>
+<text x="336" y="985" font-size="15" data-methods="linear forest estimator">linear, forest, estimator</text>
+<text x="72" y="1013" font-size="16" font-weight="bold">Error after splitting</text>
+<text x="336" y="1013" font-size="15" data-methods="core-mseofmodel core-maeofmodel">core-mseofmodel, core-maeofmodel</text>
+<text x="72" y="1041" font-size="16" font-weight="bold">Recursive elimination</text>
+<text x="336" y="1041" font-size="15" data-methods="rfe">rfe</text>
+<text x="72" y="1069" font-size="16" font-weight="bold">Perturbation and shadows</text>
+<text x="336" y="1069" font-size="15" data-methods="permutation shadow-forest boruta">permutation, shadow-forest, boruta</text>
+<path d="M54 964 V1064" stroke="black" fill="none"/>
+<path d="M54 980 h12" stroke="black"/>
+<path d="M54 1008 h12" stroke="black"/>
+<path d="M54 1036 h12" stroke="black"/>
+<path d="M54 1064 h12" stroke="black"/>
+<text x="44" y="1105" font-size="20" font-weight="bold">Aggregation and controls</text>
+<text x="72" y="1133" font-size="16" font-weight="bold">Rank across target columns</text>
+<text x="336" y="1133" font-size="15" data-methods="per-target">per-target</text>
+<text x="72" y="1161" font-size="16" font-weight="bold">Random ordering</text>
+<text x="336" y="1161" font-size="15" data-methods="random">random</text>
+<path d="M54 1112 V1156" stroke="black" fill="none"/>
+<path d="M54 1128 h12" stroke="black"/>
+<path d="M54 1156 h12" stroke="black"/>
+<path d="M26 45 V1099" stroke="black" fill="none"/>
+<path d="M26 66 h12" stroke="black"/>
+<path d="M26 382 h12" stroke="black"/>
+<path d="M26 887 h12" stroke="black"/>
+<path d="M26 951 h12" stroke="black"/>
+<path d="M26 1099 h12" stroke="black"/>
 </g>
 </svg>
