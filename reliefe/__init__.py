@@ -4,3 +4,5 @@ from .reliefe_evaluation import *  # Evaluation code
 from .ranking import rank_features
 
 __version__ = "0.18"
+from .catalog import list_methods
+from .estimators import FeatureRanker

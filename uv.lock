@@ -1526,6 +1526,9 @@ dependencies = [
 mcp = [
     { name = "mcp", marker = "python_full_version >= '3.10'" },
 ]
+rebate = [
+    { name = "skrebate", marker = "python_full_version >= '3.9'" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -1541,10 +1544,11 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.19" },
     { name = "scikit-learn", specifier = ">=1.0.0" },
     { name = "scipy", specifier = ">=1.6.0" },
+    { name = "skrebate", marker = "python_full_version >= '3.9' and extra == 'rebate'", specifier = "==0.8.4" },
     { name = "tqdm", specifier = ">=4.30.0" },
     { name = "umap-learn", specifier = ">=0.5.0" },
 ]
-provides-extras = ["mcp"]
+provides-extras = ["mcp", "rebate"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "coverage", specifier = ">=7.6" }]
@@ -2212,6 +2216,27 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/52/52/e57eceff0e342a1f50e274264ed47497b59e6a4e3118808ee58ddda7b74a/scipy-1.17.1-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:a77cbd07b940d326d39a1d1b37817e2ee4d79cb30e7338f3d0cddffae70fcaa2", size = 37682317, upload-time = "2026-02-23T00:22:18.513Z" },
     { url = "https://files.pythonhosted.org/packages/11/2f/b29eafe4a3fbc3d6de9662b36e028d5f039e72d345e05c250e121a230dd4/scipy-1.17.1-cp314-cp314t-win_amd64.whl", hash = "sha256:eb092099205ef62cd1782b006658db09e2fed75bffcae7cc0d44052d8aa0f484", size = 37345327, upload-time = "2026-02-23T00:22:24.442Z" },
     { url = "https://files.pythonhosted.org/packages/07/39/338d9219c4e87f3e708f18857ecd24d22a0c3094752393319553096b98af/scipy-1.17.1-cp314-cp314t-win_arm64.whl", hash = "sha256:200e1050faffacc162be6a486a984a0497866ec54149a01270adc8a59b7c7d21", size = 25489165, upload-time = "2026-02-23T00:22:29.563Z" },
+]
+
+[[package]]
+name = "skrebate"
+version = "0.8.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "joblib", version = "1.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "numpy", version = "2.4.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "scikit-learn", version = "1.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "scikit-learn", version = "1.7.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "scikit-learn", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "scipy", version = "1.13.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/80/42/e5f04c65d092150d43ac042bf017062f8378f4af1af7da28fdab67135629/skrebate-0.8.4.tar.gz", hash = "sha256:4b590dfbc64ab5f6d6b215a07a472a7e8f8990f395f37bde33fe171b852b449b", size = 45914, upload-time = "2026-09-12T01:28:27.454Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d7/26/581818621c63d61a556ab2d615893fe4827994482857191b5b9588a033fc/skrebate-0.8.4-py3-none-any.whl", hash = "sha256:eb11e157ba60420fd615a3759ac9356504f90ef86e01ec846f2518c5aff45575", size = 55356, upload-time = "2026-09-12T01:28:26.159Z" },
 ]
 
 [[package]]
