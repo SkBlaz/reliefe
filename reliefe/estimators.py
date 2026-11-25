@@ -15,6 +15,7 @@ from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.validation import check_array, check_consistent_length, check_is_fitted
 
 from .catalog import REBATE, list_methods
+from .corelearn import CORE_METHODS, core_scores
 from .filters import mrmr_order, original_relief, rrelieff
 from .reliefe_classes import ReliefE
 
@@ -119,6 +120,8 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
     def _fit_scores(self, x, y, task, params):
         m = self.method
         classification = task == "classification"
+        if m in CORE_METHODS:
+            return core_scores(m, x, y, task, self.random_state, **params)
         if m in REBATE:
             return _rebate(m, x, y, classification, params, self.random_state)
         if m in ("relieff", "reliefe"):

@@ -35,6 +35,8 @@ class RankerTests(unittest.TestCase):
 
     def test_catalog_and_target_matrix(self):
         for m, spec in list_methods().items():
+            if m.startswith("core-"):
+                continue  # Covered by the optional R integration suite.
             if m in REBATE and importlib.util.find_spec("skrebate") is None:
                 continue
             for task in spec.tasks:

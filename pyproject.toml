@@ -54,3 +54,6 @@ source = ["reliefe"]
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
+
+[tool.setuptools.package-data]
+reliefe = ["corelearn.R"]

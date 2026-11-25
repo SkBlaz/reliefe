@@ -183,3 +183,34 @@ expose `scores_=None`. `ranks_` starts at one and permits ties. Equal values
 retain column order at the top-k boundary. Undefined univariate statistics sort
 last. Labeled tables retain their original names. Run
 `uv run python examples/minimal_benchmark.py` for fold-local comparisons.
+
+### CORElearn methods
+
+An optional local R backend exposes all 37 classification and nine regression
+attribute evaluators in CORElearn 1.56.0. This includes equal-k, exponential
+rank, best-k, distance and squared-distance neighborhoods, merit and cost
+sensitive ReliefF variants, myopic ReliefF, Kukar's Relief, RReliefF with MSE,
+information gain, gain ratio, MDL, Gini, Hellinger and other split criteria.
+Use `[m for m in list_methods() if m.startswith("core-")]` for exact identifiers.
+Method names refer to implementations. Several backends implement the same
+published algorithm.
+
+Install R with `Rscript` on PATH and install CORElearn in that R environment.
+The version used by CI is available in the [CRAN archive](https://cran.r-project.org/src/contrib/Archive/CORElearn/).
+For example, in R:
+
+```r
+install.packages(c("cluster", "nnet", "plotrix", "rpart.plot"))
+install.packages("https://cran.r-project.org/src/contrib/Archive/CORElearn/CORElearn_1.56.0.tar.gz",
+                 repos = NULL, type = "source")
+```
+
+```python
+ranker = FeatureRanker("core-relieffexprank", method_params={"kNearestExpRank": 5})
+ranker.fit(X, y)
+```
+
+The bridge launches a local R process per fit and exchanges finite dense numeric
+arrays in a temporary directory. Declare encoded categorical columns with
+`categorical_features=[0, 3]`, supply a misclassification `cost_matrix` in
+sorted class order, or pass named scalar CORElearn options via `method_params`.
