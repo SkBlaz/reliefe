@@ -278,6 +278,8 @@ All 37 classification and nine regression IDs originally exposed through CORElea
 ranker = FeatureRanker("core-relieffexprank", method_params={"kNearestExpRank": 5})
 ```
 
+The parity tests use frozen per-feature outputs from CORElearn 1.56.0 and Relief.jl 0.2.0. They cover all 51 migrated IDs, compare original column order before selection, and run with Numba enabled in CI. The fixtures include nonuniform costs, categorical splits, seeded sampling and regression-model options. [Parity tests](tests/test_reference_parity.py)
+
 The Python entry point accepts explicit scoring options. See the [option signature](reliefe/corelearn.py) and [original CORElearn source](https://cran.r-project.org/src/contrib/Archive/CORElearn/).
 
 ### Comparing rankings and repeated measurements
@@ -321,6 +323,8 @@ The separate `reliefe` method implements the 2021 embedding algorithm.
 
 `reliefmss`, `boostedsurf`, `iterative-relief`, `irelief`, and `ec-relieff`
 run in-process Numba kernels following the Relief.jl 0.2.0 scoring conventions. Iterative Relief and I-Relief use different updates. Evaporative Cooling returns elimination ranks. These methods accept dense numeric classification tables and support `method_params={"f_type": "discrete"}`. [Original implementations](https://github.com/jernejvivod/Relief.jl)
+
+In Relief.jl 0.2.0, BoostedSURF can read its distance buffer before the first refresh. Repeating a fit with the same seed can then give different weights. The Numba implementation computes distances before scoring any query. Reference fixtures for BoostedSURF use initialized distances.
 
 ### Survival and temporal evaluation
 
