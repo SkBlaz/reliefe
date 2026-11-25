@@ -2,6 +2,7 @@
 ReliefE algorithm : Skrlj and Petkovic, 2021
 """
 
+from collections import deque
 from typing import List, Union
 import logging
 import time
@@ -59,7 +60,7 @@ def _sparsify_matrix_kernel(matrix_input, epsilon=1):
     for i in prange(n):
         for j in range(n):
             matrix_el = matrix_input[i, j]
-            if matrix_el > threshold:
+            if np.abs(matrix_el) > threshold:
                 continue
             else:
                 coin = np.random.random()
@@ -265,7 +266,11 @@ def _numba_distance_target(row1, row2, dist):
         return 1 - np.dot(row1, row2) / denominator
 
     elif dist == "hyperbolic":
-        return np.arccosh(np.sum(-(row1 * row2)))
+        # UMAP's hyperboloid output stores the spatial coordinates. Recover
+        # the positive time coordinates before taking the Lorentz product.
+        time1 = np.sqrt(1.0 + np.dot(row1, row1))
+        time2 = np.sqrt(1.0 + np.dot(row2, row2))
+        return np.arccosh(max(1.0, time1 * time2 - np.dot(row1, row2)))
 
     else:
         raise ValueError()
@@ -462,7 +467,7 @@ class ReliefE:
         for j in range(len(i0)):
             cx = i0[j]
             ds = dists[j, cx]
-            ds1 = dists[j, cx + 1]
+            ds1 = dists[j, min(cx + 1, len(dists[j]) - 1)]
             dmat.append([ds, ds1])
 
         dists = np.array(dmat)
@@ -617,8 +622,7 @@ class ReliefE:
         if isinstance(x, np.ndarray):
             x = sparse.csr_matrix(x)
 
-        if x.getformat() != "csr":
-            x = x.tocsr()
+        x = sparse.csr_matrix(x)
 
         if isinstance(y, list):
             y = np.array(y)
@@ -632,6 +636,9 @@ class ReliefE:
         if not isinstance(y, csr_matrix):
             y = csr_matrix(y)
 
+        y = y.copy()
+        y.eliminate_zeros()
+        y.sort_indices()
         return x, y
 
     def send_message(self, message):
@@ -644,7 +651,7 @@ class ReliefE:
             return "UMAP" if umap is not None else "SVD"
         return embedding_method
 
-    def fit(self, x, y, embedding_method="auto", store_neighborhoods=None):
+    def fit(self, x, y, embedding_method="auto", store_neighborhoods=None, task_type="auto"):
         """
         Key idea of ReliefE:
         embed the instance space. Compute mean embedding for each of the classes.
@@ -658,6 +665,13 @@ class ReliefE:
         :return: None.
         """
 
+        if task_type not in ("auto", "classification", "multilabel"):
+            raise ValueError("Expected auto, classification or multilabel task_type")
+        if task_type == "multilabel" and np.ndim(y) != 2:
+            raise ValueError("Multilabel targets must be an indicator matrix")
+        x, y = ReliefE._transform_x_y(x, y)
+        if x.shape[0] != y.shape[0]:
+            raise ValueError("Feature and target row counts differ")
         embedding_method = self._resolve_embedding_method(embedding_method)
 
         if self.verbose:
@@ -668,48 +682,34 @@ class ReliefE:
             self.send_message("Dataset shape X: {} Y: {}".format(
                 x.shape, y.shape))
 
-        subsamples = min(self.samples, x.shape[0])
-
-        if self.samples < x.shape[0]:
-            self.send_message(
-                "Subsampling to {} instances.".format(subsamples))
-            unique_indice_maps = {}
-
-            if y.ndim > 1:
-                # MLC
-                for j in range(y.shape[0]):
-                    nzc = np.nonzero(y[j])
-                    nzc = nzc[1] if len(nzc) > 1 else nzc[0]
-                    nze = np.array2string(nzc)
-
-                    if not nze in unique_indice_maps:
-                        unique_indice_maps[nze] = [j]
-
-                    else:
-                        unique_indice_maps[nze].append(j)
-            else:
-                # CC
-                unique_hashes = np.unique(y)
-                for uh in unique_hashes:
-                    unique_indice_maps[uh] = np.where(y == uh)[0].tolist()
-
+        n_examples = x.shape[0]
+        self.task_type = ReliefE._compute_task_type(y)
+        if task_type == "multilabel":
+            if not np.isin(y.data, [0, 1]).all():
+                raise ValueError("Multilabel targets must contain binary values")
+            self.task_type = TaskTypes.MLC
+        elif task_type == "classification" and self.task_type != TaskTypes.CLASSIFICATION:
+            raise ValueError("Expected one class per row")
+        sampled_targets = self.task_type == TaskTypes.MLC and self.mlc_distance in ("cosine", "hyperbolic")
+        if (self.embedding_based_distances or sampled_targets) and self.samples < n_examples:
+            if self.samples < 1:
+                raise ValueError("samples must be positive")
+            groups = {}
+            for row in range(n_examples):
+                start, end = y.indptr[row:row + 2]
+                signature = tuple(y.indices[start:end])
+                groups.setdefault(signature, deque()).append(row)
+            pending = deque(groups[key] for key in sorted(groups))
             indices_sample = []
-            counter = 0
-
-            while counter < subsamples:
-                for k, v in unique_indice_maps.items():
-                    if len(v) > 0:
-                        indices_sample.append(v.pop(0))
-                        counter += 1
-                    else:
-                        continue
-
-            indices_sample = np.array(indices_sample)
+            while len(indices_sample) < self.samples:
+                group = pending.popleft()
+                indices_sample.append(group.popleft())
+                if group:
+                    pending.append(group)
             x_sampled = x[indices_sample]
-
         else:
+            indices_sample = np.arange(n_examples)
             x_sampled = x
-            indices_sample = list(range(x.shape[0]))
 
         ts = time.time()
 
@@ -726,7 +726,7 @@ class ReliefE:
                               magnitudes.sum(axis=1).max()) / (rows + cols)
                 threshold = epsilon / np.sqrt(rows + cols)
                 values = x_sampled.data
-                small = values <= threshold
+                small = np.abs(values) <= threshold
                 draws = np.random.RandomState(self.random_state).uniform(size=small.sum())
                 values[small] = np.sign(values[small]) * threshold * (
                     draws * threshold <= np.abs(values[small]))
@@ -739,15 +739,7 @@ class ReliefE:
         if self.verbose:
             logger.info("Transforming the data .. ")
 
-        x, y = ReliefE._transform_x_y(x, y)
-
-        nrow_raw = x.shape[0]
-        ncol_raw = x.shape[1]
-
-        assert x.shape[0] == y.shape[0]
-        n_examples = x.shape[0]
-
-        self.task_type = ReliefE._compute_task_type(y)
+        nrow_raw, ncol_raw = x.shape
 
         if self.task_type == TaskTypes.CLASSIFICATION:
 

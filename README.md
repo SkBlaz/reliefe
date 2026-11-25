@@ -1,6 +1,15 @@
 # ReliefE
 
-ReliefE is a Numba-accelerated feature ranking library for multiclass and multi-label classification. It extends the Relief family with optional manifold-based embeddings for the input and target spaces.
+`reliefe` ranks tabular features for classification, regression, multilabel and
+multi-output prediction, unsupervised exploration, and right-censored survival
+data. Its native ReliefE implementation uses Numba and optional manifold
+embeddings. The sklearn-compatible `FeatureRanker` exposes the wider method
+catalog and preserves original feature identities.
+
+Use `from reliefe import FeatureRanker, list_methods` and inspect
+`list_methods()` for method IDs, accepted targets, sparse input support, and
+score semantics. The bounded `rank_features` function remains available for
+small classification tables and MCP clients.
 
 ## Install
 
@@ -268,3 +277,60 @@ PYTHON="$PWD/.venv/bin/python" julia -e 'using Pkg; Pkg.add(PackageSpec(name="Re
 
 Set `JULIA_PROJECT` when using a non-default Julia environment. See the
 [Relief.jl reference implementations](https://github.com/jernejvivod/Relief.jl).
+
+### Survival and temporal evaluation
+
+`survival-concordance` accepts dense features and a two-column target containing
+an observed-event flag and nonnegative follow-up time. It ranks by the absolute
+value of twice Harrell's concordance minus one. `concordance_` preserves direction.
+Tied feature values receive half credit. Pairs with an earlier censoring time
+are excluded. Computation is quadratic in the number of rows. The runnable
+`examples/specialist_ranking.py` also demonstrates forward-chaining regression
+with lagged features and training-only selection.
+
+Native embeddings now preserve large negative entries during sparsification,
+sample at most the requested row budget, and accept COO matrices during
+subsampling. The hyperbolic label metric reconstructs the time coordinate
+before applying the hyperboloid distance.
+
+### Additional statistical and all-relevant methods
+
+Use `pearson`, `spearman`, or `kendall` for absolute regression association and
+`kruskal` for a rank-based multiclass comparison. The discrete greedy selectors
+`jmi`, `cmim`, `cife`, and `mrmr` expose an ordinal selection sequence.
+All use the same training-only quantile discretization (`method_params={"bins": 8}`).
+[Information-theoretic criteria](https://jmlr.org/papers/v13/brown12a.html)
+
+Install `reliefe[all-relevant]` to use `FeatureRanker("boruta")`. Inspect
+`confirmed_` and `tentative_` for the backend's statistical decisions.
+`top_k` controls the usual pipeline transformation independently. The optional
+`estimator` argument accepts a cloneable tree estimator with feature
+importances. [BorutaPy](https://github.com/scikit-learn-contrib/boruta_py)
+
+To integrate another sklearn-compatible estimator, use
+`FeatureRanker("estimator", estimator=model)`. The ranker clones and fits
+the model on training rows. It reads native importances, or averages absolute
+coefficients across outputs. Supply `method_params={"importance_getter": fn}`
+when the fitted model uses a different representation. The callable returns
+one value per original feature, with larger values ranked first.
+
+For ARFF datasets, `load_arff(..., source_index_ranges=True)` maps each
+original ARFF attribute index to its half-open range of encoded columns.
+`feature_ranking_wrapper` uses that mapping to aggregate scores for reordered
+or nonconsecutive attributes. Native `ReliefE.fit(..., task_type="multilabel")`
+preserves multilabel semantics even in a fold where each row happens to have
+exactly one positive label.
+
+### Reproducible benchmark
+
+Run `uv run python benchmarks/ranking_study.py` on Linux for seven seeded
+workloads. Each case starts a fresh Python process. Timings separate the first
+fit (including kernel compilation) from two subsequent fits. Peak RSS includes
+the interpreter, numerical libraries and downstream evaluation. Workloads use
+one thread per numerical backend. The real-data comparisons use 144 sampled
+rows and four selected columns over three folds. On that run, direct ReliefF
+obtained balanced accuracy 1.000 on XOR and 0.519 on Madelon. On multilabel
+Medical the four-column ReliefE model obtained micro-F1 0.087 and the all-column
+model obtained 0.459. The raw data include all baselines, folds, stability,
+hardware and package versions. These timings were collected on a shared machine.
+[Benchmark results](benchmarks/ranking_study_results.json)

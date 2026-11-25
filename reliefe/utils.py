@@ -179,7 +179,7 @@ def load_arff(path_to_data,
               descriptive_indices: List[int],
               target_indices: Union[int, List[int]],
               missing_character='?',
-              impute_missing=True):
+              impute_missing=True, *, source_index_ranges=False):
     """
     Loads arff in sparse or dense form. Nominal attributes (descriptive or target) are 1-hot encoded.
 
@@ -193,7 +193,8 @@ def load_arff(path_to_data,
     :param impute_missing: should missing values be imputed? Is so, simple per-column means/modes are computed.
     Otherwise, missing numeric values are converted to np.NaNs.
     :return: descriptive matrix (dense), target matrix (sparse), attribute_ranges
-    The ranges are given as a dictionary {index of original descriptive attribute: (start, end), ...},
+    By default keys are positions within descriptive_indices. With source_index_ranges=True,
+    keys are original ARFF column indices. The values are (start, end) pairs,
     where columns with indices in range(start, end) in descriptive matrix belong to the descriptive attribute.
     For example, if the attribute was originally numeric, then start = end - 1.
     """
@@ -208,7 +209,7 @@ def load_arff(path_to_data,
     if isinstance(target_indices, int):
         target_indices = [target_indices]
     assert isinstance(target_indices, list)
-    intersection = set(target_indices) & set(descriptive_indices)
+    intersection = set(target_indices) & set(descriptive_indices or [])
     if intersection:
         raise ValueError(
             "The intersection of descriptive and target indices must be empty, "
@@ -228,7 +229,7 @@ def load_arff(path_to_data,
                 values = match.group(2)
                 is_numeric = values.lower() in numeric_types
                 is_nominal = values[0] == '{' and values[-1] == '}'
-                is_kept = len(meta) in descriptive_indices or len(
+                is_kept = descriptive_indices is None or len(meta) in descriptive_indices or len(
                     meta) in target_indices
                 if not (is_numeric or is_nominal) and is_kept:
                     raise ValueError(
@@ -244,6 +245,8 @@ def load_arff(path_to_data,
                     meta.append((name, nominal, parsed_values))
                 else:
                     raise NotImplementedError("The load_arff code needs updates.")
+        if descriptive_indices is None:
+            descriptive_indices = [j for j in range(len(meta)) if j not in target_indices]
         maximal_index = max(max(descriptive_indices), max(target_indices))
         n_attributes = len(meta)
         if maximal_index >= len(meta):
@@ -350,6 +353,8 @@ def load_arff(path_to_data,
                                    len(descriptive_data) + 1)
             descriptive_data.append(column)
     logger.info("Finished processing the data.")
+    if source_index_ranges:
+        attribute_ranges = {descriptive_indices[j]: bounds for j, bounds in attribute_ranges.items()}
     return np.array(descriptive_data).T, target_data, attribute_ranges
 
 
@@ -387,18 +392,9 @@ def feature_ranking_wrapper(path_to_arff: str,
     """
 
     xs, y, attribute_ranges = load_arff(path_to_arff, descriptive_indices,
-                                        target_index)
+                                        target_index, source_index_ranges=True)
     scores = feature_ranking(xs, y, *args)
-    if descriptive_indices is None:
-        descriptive_indices = sorted(attribute_ranges)
-    assert isinstance(descriptive_indices, list)
-    # sum up the one-hot encoded scores
-    feature_importance = {i: 0 for i in descriptive_indices}
-    for i in descriptive_indices:
-        attribute_index = i if i in attribute_ranges else i - 1
-        feature_importance[i] = sum(
-            [scores[j] for j in range(*attribute_ranges[attribute_index])])
-    return feature_importance
+    return {source: sum(scores[start:end]) for source, (start, end) in attribute_ranges.items()}
 
 
 def test_stuff(test_first=False, test_second=False):

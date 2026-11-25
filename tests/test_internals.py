@@ -111,7 +111,7 @@ class ReliefeInternalTests(unittest.TestCase):
         h1 = np.array([1.0, 1.0])
         h2 = np.array([-1.0, -1.0])
         self.assertAlmostEqual(rc._numba_distance_target(h1, h2, "hyperbolic"),
-                               np.arccosh(2.0))
+                               np.arccosh(5.0))
         with self.assertRaises(ValueError):
             rc._numba_distance_target(a, b, "bad")
 

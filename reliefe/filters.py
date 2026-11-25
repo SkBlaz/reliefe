@@ -49,8 +49,8 @@ def rrelieff(x, y, k=10, sigma=50.0):
     return joint / target_diff - (feature_diff - joint) / (len(y) - target_diff)
 
 
-def mrmr_order(x, y, bins=8):
-    """Greedy mutual information difference with empirical quantile discretization."""
+def information_order(x, y, method, bins=8):
+    """Greedy discrete information criteria with empirical quantile discretization."""
     if not isinstance(bins, int) or bins < 2:
         raise ValueError("bins must be an integer >= 2")
     columns = []
@@ -58,16 +58,30 @@ def mrmr_order(x, y, bins=8):
         cuts = np.unique(np.quantile(col, np.arange(1, bins) / bins))
         columns.append(np.searchsorted(cuts, col, side="left"))
     relevance = np.array([mutual_info_score(y, col) for col in columns])
-    redundancy = np.zeros(len(columns))
+    penalty = np.zeros(len(columns))
+    worst = np.full(len(columns), -np.inf)
+    classes, counts = np.unique(y, return_counts=True)
+    class_rows = [(y == c, count / len(y)) for c, count in zip(classes, counts)]
     remaining = np.ones(len(columns), dtype=bool)
     order = []
     for step in range(len(columns)):
-        criterion = relevance - redundancy / max(step, 1)
+        if method == "cmim" and step:
+            criterion = relevance - worst
+        elif method == "cife":
+            criterion = relevance - penalty
+        else:
+            criterion = relevance - penalty / max(step, 1)
         best = np.argmax(np.where(remaining, criterion, -np.inf))
         remaining[best] = False
         order.append(best)
         for j in np.flatnonzero(remaining):
-            redundancy[j] += mutual_info_score(columns[best], columns[j])
+            change = mutual_info_score(columns[best], columns[j])
+            if method != "mrmr":
+                conditional = sum(prob * mutual_info_score(columns[best][rows], columns[j][rows])
+                                  for rows, prob in class_rows)
+                change -= conditional
+            penalty[j] += change
+            worst[j] = max(worst[j], change)
     return np.argsort(order) + 1
 
 
@@ -90,3 +104,41 @@ def laplacian_score(x, k=5, heat_width=1.0):
     denom = degree @ (centered ** 2)
     energy = np.sum(centered * (degree[:, None] * centered - graph @ centered), axis=0)
     return np.divide(energy, denom, out=np.full(x.shape[1], np.nan), where=denom > 0)
+
+
+def survival_concordance(x, y, tied_tol=1e-8):
+    """Univariate Harrell concordance for (event, time) pairs; greater x means greater risk."""
+    if y.ndim != 2 or y.shape[1] != 2:
+        raise ValueError("Expected two target columns: event indicator and duration")
+    if (not np.isfinite(y).all() or not np.isin(y[:, 0], [0, 1]).all()
+            or (y[:, 1] < 0).any() or tied_tol < 0):
+        raise ValueError("Expected binary event indicators, finite nonnegative times and tolerance")
+    event, time = y[:, 0].astype(bool), y[:, 1]
+    pairs = 0
+    credit = np.zeros(x.shape[1])
+    for i in np.flatnonzero(event):
+        later = (time > time[i]) | ((time == time[i]) & ~event)
+        delta = x[i] - x[later]
+        credit += (delta > tied_tol).sum(axis=0) + .5 * (np.abs(delta) <= tied_tol).sum(axis=0)
+        pairs += later.sum()
+    if pairs == 0:
+        raise ValueError("No comparable survival pairs")
+    return credit / pairs
+
+
+def rank_association(x, y, method):
+    """Absolute correlations for regression; Kruskal-Wallis H for classification."""
+    from scipy.stats import kendalltau, kruskal, rankdata
+    scores = np.zeros(x.shape[1])
+    for j, col in enumerate(x.T):
+        if np.ptp(col) == 0:
+            continue
+        if method == "kruskal":
+            scores[j] = kruskal(*(col[y == label] for label in np.unique(y))).statistic
+        elif np.ptp(y) > 0:
+            if method == "kendall":
+                scores[j] = abs(kendalltau(col, y)[0])
+            else:
+                a, b = (rankdata(col), rankdata(y)) if method == "spearman" else (col, y)
+                scores[j] = abs(np.corrcoef(a, b)[0, 1])
+    return scores

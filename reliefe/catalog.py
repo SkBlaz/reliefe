@@ -33,11 +33,21 @@ _METHODS = {
     "per-target": Method(("multioutput", "multilabel"), True, "mean per-target rank (lower is better)"),
     "shadow-forest": Method(CR, False, "fraction of repetitions beating the strongest shuffled feature"),
     "reliefseq": Method(C, True, "maximum ReliefF weight across neighborhood sizes"),
+    "survival-concordance": Method(("survival",), False, "absolute Somers D from censored concordance"),
     "variance": Method(("unsupervised",), True, "population variance"),
+    "pearson": Method(R, False, "absolute Pearson correlation"),
+    "spearman": Method(R, False, "absolute Spearman rank correlation"),
+    "kendall": Method(R, False, "absolute Kendall tau-b"),
+    "kruskal": Method(C, False, "Kruskal-Wallis H statistic"),
+    "jmi": Method(C, False, "joint mutual information selection rank"),
+    "cmim": Method(C, False, "conditional mutual information maximization rank"),
+    "cife": Method(C, False, "conditional infomax feature extraction rank"),
+    "boruta": Method(CR, False, "BorutaPy all-relevant selection rank"),
     "f": Method(CR, True, "univariate F statistic"),
     "chi2": Method(C, True, "chi-square statistic on nonnegative features"),
     "mi": Method(CR, True, "estimated mutual information in nats"),
     "mrmr": Method(C, False, "greedy MID selection rank"),
+    "estimator": Method(CR, True, "importance from a caller-supplied estimator"),
     "forest": Method(CR, True, "mean decrease in impurity"),
     "linear": Method(CR, True, "mean absolute standardized coefficient"),
     "rfe": Method(CR, True, "recursive elimination rank"),
@@ -45,17 +55,11 @@ _METHODS = {
     "random": Method(("unsupervised",), True, "seeded random baseline"),
 }
 _METHODS.update({key: Method(CR, False, "ReBATE " + name + " weight") for key, name in REBATE.items()})
-
-
 _METHODS.update({key: Method(C if name in CLASSIFICATION else R, False,
                              "CORElearn " + name + " attribute evaluation")
                  for key, name in CORE_METHODS.items()})
-
-
 _METHODS.update({key: Method(C, False, "1994 categorical " + key + " weight")
                  for key in METHODS_1994})
-
-
 _METHODS.update({key: Method(C, False, "Relief.jl " + key + (" rank" if key == "ec-relieff" else " weight"))
                  for key in JULIA_OPTIONS})
 
