@@ -40,6 +40,7 @@ rebate = [
 [dependency-groups]
 dev = [
   "coverage>=7.6",
+  "pandas>=2.0.3",
 ]
 
 [tool.setuptools]

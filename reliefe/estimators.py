@@ -16,7 +16,7 @@ from sklearn.utils.validation import check_array, check_consistent_length, check
 
 from .catalog import REBATE, list_methods
 from .corelearn import CORE_METHODS, core_scores
-from .filters import mrmr_order, original_relief, rrelieff
+from .filters import laplacian_score, mrmr_order, original_relief, rrelieff
 from .reliefe_classes import ReliefE
 
 
@@ -82,7 +82,8 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
             else:
                 kind = type_of_target(y) if y is not None else "missing"
                 task = {"binary": "classification", "multiclass": "classification",
-                        "continuous": "regression", "multilabel-indicator": "multilabel"}.get(kind)
+                        "continuous": "regression", "multilabel-indicator": "multilabel",
+                        "multiclass-multioutput": "multioutput", "continuous-multioutput": "multioutput"}.get(kind)
         if task not in spec.tasks or (task != "unsupervised" and y is None):
             raise ValueError(f"{self.method} supports {spec.tasks}; received task {task}")
         if self.estimator is not None and self.method not in ("rfe", "permutation"):
@@ -104,7 +105,8 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
             raise ValueError("Backend returned an incorrect number of feature values")
         ordinal = self.method in ("mrmr", "rfe")
         # Undefined statistics (e.g. F for a constant column) sort last.
-        order_values = values if ordinal else -values
+        ascending = ordinal or self.method in ("laplacian", "per-target")
+        order_values = values if ascending else -values
         order_values = np.where(np.isnan(order_values), np.inf, order_values)
         self.order_ = np.argsort(order_values, kind="stable")
         self.ranks_ = rankdata(order_values, method="min").astype(int)
@@ -120,6 +122,46 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
     def _fit_scores(self, x, y, task, params):
         m = self.method
         classification = task == "classification"
+        if m == "laplacian":
+            return laplacian_score(x, **params)
+        if m == "per-target":
+            base = params.pop("base_method", "f")
+            base_task = params.pop("base_task", "classification" if task == "multilabel" else "auto")
+            if y.ndim != 2 or base == m:
+                raise ValueError("per-target requires a target matrix and a single-output base method")
+            ranks = []
+            for target in y.T:
+                if np.unique(target).size < 2:
+                    ranks.append(np.full(x.shape[1], (x.shape[1] + 1) / 2))
+                else:
+                    model = FeatureRanker(base, task=base_task, random_state=self.random_state,
+                                          method_params=params).fit(x, target)
+                    ranks.append(rankdata(model.ranks_, method="average"))
+            self.per_target_ranks_ = np.asarray(ranks)
+            return self.per_target_ranks_.mean(axis=0)
+        if m == "shadow-forest":
+            repeats = params.pop("n_repeats", 10)
+            if not isinstance(repeats, int) or repeats < 1:
+                raise ValueError("n_repeats must be positive")
+            rng = check_random_state(self.random_state)
+            hits = np.zeros(x.shape[1])
+            forest = RandomForestClassifier if classification else RandomForestRegressor
+            for _ in range(repeats):
+                shadows = np.column_stack([rng.permutation(col) for col in x.T])
+                model = forest(random_state=rng.randint(2**31 - 1), **params).fit(np.c_[x, shadows], y)
+                real, null = np.split(model.feature_importances_, 2)
+                hits += real > null.max()
+            return hits / repeats
+        if m == "reliefseq":
+            limit = np.unique(y, return_counts=True)[1].min() - 1
+            k_min, k_max = params.pop("k_min", 1), params.pop("k_max", min(10, limit))
+            if not (isinstance(k_min, (int, np.integer)) and isinstance(k_max, (int, np.integer))
+                    and 1 <= k_min <= k_max <= limit):
+                raise ValueError("Require 1 <= k_min <= k_max < smallest class size")
+            weights = [ReliefE(k=k, random_state=self.random_state, **params).fit(x, y).feature_importances_
+                       for k in range(k_min, k_max + 1)]
+            self.best_k_ = k_min + np.argmax(weights, axis=0)
+            return np.max(weights, axis=0)
         if m in CORE_METHODS:
             return core_scores(m, x, y, task, self.random_state, **params)
         if m in REBATE:

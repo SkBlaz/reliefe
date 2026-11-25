@@ -6,3 +6,4 @@ from .ranking import rank_features
 __version__ = "0.18"
 from .catalog import list_methods
 from .estimators import FeatureRanker
+from .comparison import compare_rankings, grouped_permutation_importance
