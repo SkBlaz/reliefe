@@ -57,4 +57,4 @@ fail_under = 100
 show_missing = true
 
 [tool.setuptools.package-data]
-reliefe = ["corelearn.R"]
+reliefe = ["corelearn.R", "julia_relief.jl"]

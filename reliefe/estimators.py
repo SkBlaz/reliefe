@@ -1,4 +1,6 @@
 """Feature ranking and selection for scikit-learn pipelines."""
+from inspect import signature
+
 import numpy as np
 from scipy import sparse
 from scipy.stats import rankdata
@@ -15,9 +17,22 @@ from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.validation import check_array, check_consistent_length, check_is_fitted
 
 from .catalog import REBATE, list_methods
+from .julia_relief import JULIA_OPTIONS, julia_scores
+from .historical import METHODS_1994, categorical_relief
 from .corelearn import CORE_METHODS, core_scores
 from .filters import laplacian_score, mrmr_order, original_relief, rrelieff
 from .reliefe_classes import ReliefE
+
+
+# sklearn renamed this parameter in 1.6 and removed the old name in 1.8.
+_FINITE_OPTION = ("ensure_all_finite" if "ensure_all_finite" in signature(check_array).parameters
+                  else "force_all_finite")
+
+
+def _validated_x(X, method, accept_sparse, dtype):
+    missing = method in METHODS_1994[1:]
+    return check_array(X, accept_sparse=accept_sparse, dtype=dtype,
+                       **{_FINITE_OPTION: "allow-nan" if missing else True})
 
 
 def _rebate(method, x, y, classification, params, seed):
@@ -68,7 +83,7 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
             raise ValueError("Unknown method: " + str(self.method))
         spec = methods[self.method]
         names = getattr(X, "columns", None)
-        x = check_array(X, accept_sparse="csr" if spec.sparse else False, dtype=np.float64)
+        x = _validated_x(X, self.method, "csr" if spec.sparse else False, np.float64)
         k = x.shape[1] if self.top_k is None else self.top_k
         if isinstance(k, bool) or not isinstance(k, (int, np.integer)) or not 1 <= k <= x.shape[1]:
             raise ValueError("top_k must be between 1 and the feature count")
@@ -103,7 +118,7 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         values = np.asarray(raw, dtype=float)
         if values.shape != (x.shape[1],):
             raise ValueError("Backend returned an incorrect number of feature values")
-        ordinal = self.method in ("mrmr", "rfe")
+        ordinal = self.method in ("mrmr", "rfe", "ec-relieff")
         # Undefined statistics (e.g. F for a constant column) sort last.
         ascending = ordinal or self.method in ("laplacian", "per-target")
         order_values = values if ascending else -values
@@ -122,6 +137,10 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
     def _fit_scores(self, x, y, task, params):
         m = self.method
         classification = task == "classification"
+        if m in JULIA_OPTIONS:
+            return julia_scores(m, x, y, self.random_state, **params)
+        if m in METHODS_1994:
+            return categorical_relief(x, y, m[-1], **params)
         if m == "laplacian":
             return laplacian_score(x, **params)
         if m == "per-target":
@@ -228,7 +247,7 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         names = getattr(X, "columns", None)
         if self.feature_names_in_ is not None and not np.array_equal(names, self.feature_names_in_):
             raise ValueError("Input feature names or order differ from fit")
-        values = check_array(X, accept_sparse="csr", dtype=None)
+        values = _validated_x(X, self.method, "csr", None)
         if values.shape[1] != self.n_features_in_:
             raise ValueError("Feature count differs from fit")
         return values[:, self.support_]
