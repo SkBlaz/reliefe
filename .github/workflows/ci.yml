@@ -21,6 +21,8 @@ jobs:
       - run: uv sync --locked
       - name: Test the base library without MCP dependencies
         run: NUMBA_DISABLE_JIT=1 uv run --no-sync python -m unittest discover -s tests -v
+      - name: Compile and verify native ranking kernels
+        run: NUMBA_DISABLE_JIT=0 NUMBA_NUM_THREADS=1 uv run --no-sync python -m unittest discover -s tests -p test_native_kernels.py -v
       - run: uv run --no-sync python examples/minimal_reliefe2.py
 
   coverage-and-mcp:

@@ -1,7 +1,7 @@
 """Dense numeric filters. Each function returns a value per input column."""
 import numpy as np
-from sklearn.metrics import mutual_info_score
-from sklearn.preprocessing import MinMaxScaler
+from .native import (concordance_scores, greedy_information, original_scores,
+                     regression_scores, scale_columns)
 
 
 def original_relief(x, y):
@@ -9,16 +9,7 @@ def original_relief(x, y):
     labels, counts = np.unique(y, return_counts=True)
     if len(labels) != 2 or min(counts) < 2:
         raise ValueError("Original Relief requires two classes with at least two rows each")
-    values = MinMaxScaler().fit_transform(x)
-    scores = np.zeros(values.shape[1])
-    for i, row in enumerate(values):
-        squared = (values - row) ** 2
-        distances = squared.sum(axis=1)
-        distances[i] = np.inf
-        hit = np.argmin(np.where(y == y[i], distances, np.inf))
-        miss = np.argmin(np.where(y != y[i], distances, np.inf))
-        scores += squared[miss] - squared[hit]
-    return scores / len(y)
+    return original_scores(scale_columns(x), y)
 
 
 def rrelieff(x, y, k=10, sigma=50.0):
@@ -26,63 +17,29 @@ def rrelieff(x, y, k=10, sigma=50.0):
     if not isinstance(k, (int, np.integer)) or k < 1 or sigma <= 0 or len(y) < 2:
         raise ValueError("RReliefF requires positive k, sigma and at least two rows")
     k = min(k, len(y) - 1)
-    values = MinMaxScaler().fit_transform(x)
-    target = MinMaxScaler().fit_transform(y.reshape(-1, 1)).ravel()
     ranks = np.arange(1, k + 1, dtype=float)
     # Subtract the nearest neighbor's log weight before exponentiation.
     influence = np.exp(-((ranks - 1) / sigma) * ((ranks + 1) / sigma))
     influence /= influence.sum()
-    feature_diff = np.zeros(x.shape[1])
-    joint = np.zeros_like(feature_diff)
-    target_diff = 0.
-    for i, row in enumerate(values):
-        diffs = np.abs(values - row)
-        distances = diffs.sum(axis=1)
-        distances[i] = np.inf
-        neighbors = np.argsort(distances, kind="stable")[:k]
-        weighted = influence * np.abs(target[i] - target[neighbors])
-        target_diff += weighted.sum()
-        joint += weighted @ diffs[neighbors]
-        feature_diff += influence @ diffs[neighbors]
-    if target_diff <= 0 or target_diff >= len(y):
-        return np.zeros_like(feature_diff)
-    return joint / target_diff - (feature_diff - joint) / (len(y) - target_diff)
+    target = scale_columns(y.reshape(-1, 1)).ravel()
+    return regression_scores(scale_columns(x), target, influence)
 
 
-def information_order(x, y, method, bins=8):
-    """Greedy discrete information criteria with empirical quantile discretization."""
+def quantile_codes(x, bins):
+    """Discretize each column and return one contiguous row of codes per feature."""
     if not isinstance(bins, int) or bins < 2:
         raise ValueError("bins must be an integer >= 2")
     columns = []
     for col in x.T:
         cuts = np.unique(np.quantile(col, np.arange(1, bins) / bins))
         columns.append(np.searchsorted(cuts, col, side="left"))
-    relevance = np.array([mutual_info_score(y, col) for col in columns])
-    penalty = np.zeros(len(columns))
-    worst = np.full(len(columns), -np.inf)
-    classes, counts = np.unique(y, return_counts=True)
-    class_rows = [(y == c, count / len(y)) for c, count in zip(classes, counts)]
-    remaining = np.ones(len(columns), dtype=bool)
-    order = []
-    for step in range(len(columns)):
-        if method == "cmim" and step:
-            criterion = relevance - worst
-        elif method == "cife":
-            criterion = relevance - penalty
-        else:
-            criterion = relevance - penalty / max(step, 1)
-        best = np.argmax(np.where(remaining, criterion, -np.inf))
-        remaining[best] = False
-        order.append(best)
-        for j in np.flatnonzero(remaining):
-            change = mutual_info_score(columns[best], columns[j])
-            if method != "mrmr":
-                conditional = sum(prob * mutual_info_score(columns[best][rows], columns[j][rows])
-                                  for rows, prob in class_rows)
-                change -= conditional
-            penalty[j] += change
-            worst[j] = max(worst[j], change)
-    return np.argsort(order) + 1
+    return np.asarray(columns, dtype=np.int64)
+
+
+def information_order(x, y, method, bins=8):
+    codes = quantile_codes(x, bins)
+    return greedy_information(codes, y, int(y.max()) + 1, int(codes.max()) + 1,
+                              method != "mrmr", method == "cmim", method == "cife")
 
 
 def laplacian_score(x, k=5, heat_width=1.0):
@@ -114,16 +71,7 @@ def survival_concordance(x, y, tied_tol=1e-8):
             or (y[:, 1] < 0).any() or tied_tol < 0):
         raise ValueError("Expected binary event indicators, finite nonnegative times and tolerance")
     event, time = y[:, 0].astype(bool), y[:, 1]
-    pairs = 0
-    credit = np.zeros(x.shape[1])
-    for i in np.flatnonzero(event):
-        later = (time > time[i]) | ((time == time[i]) & ~event)
-        delta = x[i] - x[later]
-        credit += (delta > tied_tol).sum(axis=0) + .5 * (np.abs(delta) <= tied_tol).sum(axis=0)
-        pairs += later.sum()
-    if pairs == 0:
-        raise ValueError("No comparable survival pairs")
-    return credit / pairs
+    return concordance_scores(x, event, time, tied_tol)
 
 
 def rank_association(x, y, method):

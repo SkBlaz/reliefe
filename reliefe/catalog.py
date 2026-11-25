@@ -1,6 +1,7 @@
 """Discover rankers and the targets and input formats accepted by each."""
 from typing import NamedTuple
 
+from .native import RADIUS_METHODS
 from .julia_relief import JULIA_OPTIONS
 from .historical import METHODS_1994
 from .corelearn import CLASSIFICATION, CORE_METHODS
@@ -25,6 +26,21 @@ REBATE = {
 }
 
 _METHODS = {
+    "numba-variance": Method(("unsupervised",), False, "population variance"),
+    "numba-f": Method(CR, False, "univariate F statistic"),
+    "numba-chi2": Method(C, False, "chi-square statistic on nonnegative features"),
+    "numba-pearson": Method(R, False, "absolute Pearson correlation"),
+    "numba-spearman": Method(R, False, "absolute Spearman correlation"),
+    "numba-iterative-relief": Method(C, False, "iterative hypersphere Relief weight"),
+    "numba-mu-relief": Method(C, False, "class-mean distance deviation Relief weight"),
+    "numba-turf": Method(C, False, "iterative ReliefF elimination tier"),
+    "numba-vls": Method(C, False, "maximum subspace ReliefF weight"),
+    "numba-irelief": Method(C, False, "iterated nonnegative margin weight"),
+    "numba-reliefmss": Method(C, False, "above-background ReliefF difference"),
+    "numba-info-gain": Method(C, False, "empirical information gain in nats"),
+    "numba-gain-ratio": Method(C, False, "information gain divided by feature entropy"),
+    "numba-symmetrical-uncertainty": Method(C, False, "symmetric normalized mutual information"),
+    "numba-gini": Method(C, False, "reduction in Gini impurity"),
     "relief": Method(C, False, "binary squared-difference Relief weight"),
     "relieff": Method(C, True, "direct multiclass ReliefF weight"),
     "reliefe": Method(C + ("multilabel",), True, "embedding-neighborhood ReliefE weight"),
@@ -62,6 +78,10 @@ _METHODS.update({key: Method(C, False, "1994 categorical " + key + " weight")
                  for key in METHODS_1994})
 _METHODS.update({key: Method(C, False, "Relief.jl " + key + (" rank" if key == "ec-relieff" else " weight"))
                  for key in JULIA_OPTIONS})
+
+
+_METHODS.update({"numba-" + key: Method(CR, False, "native " + key + " neighborhood weight")
+                 for key in RADIUS_METHODS})
 
 
 def list_methods():
