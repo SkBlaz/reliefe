@@ -23,6 +23,8 @@ jobs:
         run: NUMBA_DISABLE_JIT=1 uv run --no-sync python -m unittest discover -s tests -v
       - name: Compile and verify native ranking kernels
         run: NUMBA_DISABLE_JIT=0 NUMBA_NUM_THREADS=1 uv run --no-sync python -m unittest discover -s tests -p test_native_kernels.py -v
+      - name: Compare compiled ports to frozen reference scores
+        run: NUMBA_NUM_THREADS=1 uv run --no-sync python -m unittest discover -s tests -p test_reference_parity.py -v
       - run: uv run --no-sync python examples/minimal_reliefe2.py
 
   coverage-and-mcp:
@@ -35,36 +37,3 @@ jobs:
       - run: uv sync --locked --extra mcp --group dev
       - name: Require full coverage, MCP round trips, and compiled numerical checks
         run: make test
-
-  corelearn:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-        with:
-          python-version: '3.12'
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true
-      - name: Install reference attribute evaluators
-        shell: Rscript {0}
-        run: |
-          install.packages(c("plotrix", "rpart.plot", "cluster", "nnet"))
-          install.packages("https://cran.r-project.org/src/contrib/Archive/CORElearn/CORElearn_1.56.0.tar.gz", repos=NULL, type="source")
-          stopifnot(requireNamespace("CORElearn"))
-      - run: NUMBA_DISABLE_JIT=1 uv run --locked python -m unittest discover -s tests -p test_corelearn.py -v
-
-  julia-relief:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-        with:
-          python-version: '3.12'
-      - uses: julia-actions/setup-julia@v2
-        with:
-          version: '1.10'
-      - run: uv sync --locked
-      - name: Install Relief.jl with the project Python interpreter
-        run: PYTHON="$PWD/.venv/bin/python" julia -e 'using Pkg; Pkg.add(PackageSpec(name="Relief", version="0.2.0")); using Relief'
-      - run: RELIEFE_TEST_JULIA=1 NUMBA_DISABLE_JIT=1 uv run --no-sync python -m unittest discover -s tests -p test_julia_relief.py -v

@@ -16,8 +16,8 @@ from sklearn.utils import check_random_state
 from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.validation import check_array, check_consistent_length, check_is_fitted
 
-from .catalog import REBATE, list_methods
-from .julia_relief import JULIA_OPTIONS, julia_scores
+from .catalog import REBATE, classification_strategies, list_methods
+from .legacy_relief import OPTIONS as RELIEF_OPTIONS, legacy_scores
 from .stir import stir_scores
 from .native import RADIUS_METHODS, categorical_impurity, native_margin, native_radius, native_subset, native_univariate
 from .historical import METHODS_1994, categorical_relief
@@ -66,13 +66,16 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
     """Rank columns and optionally select the top k in original column order.
 
     task='auto' follows sklearn target typing. Set task='regression' for
-    integer-valued responses. method_params holds backend-specific options.
+    integer-valued responses. target_strategy='auto' extends binary methods to
+    multiclass and single-output classifiers to multilabel. 'label-powerset'
+    ranks against observed label combinations. method_params holds backend options.
     Ordinal methods expose ranks_ and scores_=None. Other methods expose raw
     scores_ in input order. Equal scores get equal ranks, then ties at the
     selection boundary retain column order.
     """
     def __init__(self, method="relieff", *, top_k=None, task="auto", random_state=42,
-                 estimator=None, method_params=None):
+                 estimator=None, method_params=None, target_strategy="direct"):
+        self.target_strategy = target_strategy
         self.method = method
         self.top_k = top_k
         self.task = task
@@ -91,6 +94,7 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         if isinstance(k, bool) or not isinstance(k, (int, np.integer)) or not 1 <= k <= x.shape[1]:
             raise ValueError("top_k must be between 1 and the feature count")
         task = self.task
+        target_columns = getattr(y, "columns", None)
         if y is not None:
             y = y.toarray() if sparse.issparse(y) else np.asarray(y)
             check_consistent_length(x, y)
@@ -102,14 +106,26 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
                 task = {"binary": "classification", "multiclass": "classification",
                         "continuous": "regression", "multilabel-indicator": "multilabel",
                         "multiclass-multioutput": "multioutput", "continuous-multioutput": "multioutput"}.get(kind)
-        if task not in spec.tasks or (task != "unsupervised" and y is None):
+        strategy = "direct"
+        if self.target_strategy == "auto" and y is not None and task in ("classification", "multilabel"):
+            if task == "multilabel" or type_of_target(y) == "multiclass":
+                kind = "multilabel" if task == "multilabel" else "multiclass"
+                strategy = classification_strategies(kind).get(self.method, "direct")
+        if self.target_strategy == "label-powerset":
+            if task != "multilabel" or "classification" not in spec.tasks:
+                raise ValueError("label-powerset requires a classification ranker and multilabel indicators")
+            strategy = "label-powerset"
+        elif self.target_strategy not in ("auto", "direct"):
+            raise ValueError("target_strategy must be direct, auto or label-powerset")
+        reduced = strategy != "direct" and self.method != "per-target"
+        if (task not in spec.tasks and not reduced) or (task != "unsupervised" and y is None):
             raise ValueError(f"{self.method} supports {spec.tasks}; received task {task}")
         if self.estimator is not None and self.method not in ("rfe", "permutation", "boruta", "estimator"):
             raise ValueError("estimator is supported by estimator, rfe, permutation and boruta")
         if task == "classification":
             if type_of_target(y) not in ("binary", "multiclass") or len(np.unique(y)) < 2:
                 raise ValueError("Classification requires at least two distinct classes")
-            _, y = np.unique(y, return_inverse=True)
+            classes, y = np.unique(y, return_inverse=True)
             y = y.ravel()
         if task == "regression":
             y = check_array(y, ensure_2d=False, dtype=float)
@@ -117,13 +133,35 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
                 raise ValueError("Regression requires a one-dimensional response")
         if task == "multilabel" and type_of_target(y) != "multilabel-indicator":
             raise ValueError("Expected a binary indicator matrix for multilabel ranking")
-        raw = self._fit_scores(x, y, task, dict(self.method_params or {}))
+        # Fitted attributes, including backend diagnostics, belong to this fit.
+        for attr in list(vars(self)):
+            if attr.endswith("_"):
+                delattr(self, attr)
+        if strategy == "label-powerset":
+            combinations, encoded = np.unique(y, axis=0, return_inverse=True)
+            self.label_combinations_ = combinations
+            if len(combinations) == 1:
+                raw = np.ones(x.shape[1])
+            else:
+                base = clone(self).set_params(task="classification", target_strategy="auto")
+                raw = base.fit(x, encoded.ravel()).ranks_
+        elif reduced:
+            targets = y[:, None] == np.arange(len(classes)) if strategy == "one-vs-rest" else y
+            self.target_names_ = classes if strategy == "one-vs-rest" else (
+                np.arange(targets.shape[1]) if target_columns is None else np.asarray(target_columns))
+            raw = self._mean_target_ranks(x, targets, self.method, "classification", self.method_params)
+        else:
+            raw = self._fit_scores(x, y, task, dict(self.method_params or {}))
+        self.target_strategy_ = strategy
+        if self.method == "per-target":
+            self.target_names_ = np.arange(y.shape[1]) if target_columns is None else np.asarray(target_columns)
+            self.target_strategy_ = "binary-relevance" if task == "multilabel" else "per-target"
         values = np.asarray(raw, dtype=float)
         if values.shape != (x.shape[1],):
             raise ValueError("Backend returned an incorrect number of feature values")
-        ordinal = self.method in ("mrmr", "jmi", "cmim", "cife", "rfe", "ec-relieff", "boruta", "numba-turf")
+        ordinal = not reduced and self.method in ("mrmr", "jmi", "cmim", "cife", "rfe", "ec-relieff", "boruta", "numba-turf")
         # Undefined statistics (e.g. F for a constant column) sort last.
-        ascending = ordinal or self.method in ("laplacian", "per-target")
+        ascending = reduced or ordinal or self.method in ("laplacian", "per-target")
         order_values = values if ascending else -values
         order_values = np.where(np.isnan(order_values), np.inf, order_values)
         self.order_ = np.argsort(order_values, kind="stable")
@@ -135,6 +173,9 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         self.feature_names_in_ = None if names is None else np.asarray(names, dtype=object)
         self.task_ = task
         self.score_meaning_ = spec.meaning
+        if reduced:
+            self.score_meaning_ = ("rank for observed label combinations (lower is better)"
+                                   if strategy == "label-powerset" else "mean per-target rank (lower is better)")
         return self
 
     def _fit_scores(self, x, y, task, params):
@@ -157,8 +198,8 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
         if m == "survival-concordance":
             self.concordance_ = survival_concordance(x, y, **params)
             return np.abs(2 * self.concordance_ - 1)
-        if m in JULIA_OPTIONS:
-            return julia_scores(m, x, y, self.random_state, **params)
+        if m in RELIEF_OPTIONS:
+            return legacy_scores(m, x, y, self.random_state, **params)
         if m in METHODS_1994:
             return categorical_relief(x, y, m[-1], **params)
         if m == "laplacian":
@@ -168,16 +209,7 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
             base_task = params.pop("base_task", "classification" if task == "multilabel" else "auto")
             if y.ndim != 2 or base == m:
                 raise ValueError("per-target requires a target matrix and a single-output base method")
-            ranks = []
-            for target in y.T:
-                if np.unique(target).size < 2:
-                    ranks.append(np.full(x.shape[1], (x.shape[1] + 1) / 2))
-                else:
-                    model = FeatureRanker(base, task=base_task, random_state=self.random_state,
-                                          method_params=params).fit(x, target)
-                    ranks.append(rankdata(model.ranks_, method="average"))
-            self.per_target_ranks_ = np.asarray(ranks)
-            return self.per_target_ranks_.mean(axis=0)
+            return self._mean_target_ranks(x, y, base, base_task, params)
         if m == "shadow-forest":
             repeats = params.pop("n_repeats", 10)
             if not isinstance(repeats, int) or repeats < 1:
@@ -277,6 +309,18 @@ class FeatureRanker(TransformerMixin, BaseEstimator):
                                         random_state=self.random_state, **params)
         self.permutation_std_ = result.importances_std
         return result.importances_mean
+
+    def _mean_target_ranks(self, x, y, method, task, params):
+        ranks = []
+        for target in y.T:
+            if np.unique(target).size < 2:
+                ranks.append(np.full(x.shape[1], (x.shape[1] + 1) / 2))
+            else:
+                model = FeatureRanker(method, task=task, random_state=self.random_state,
+                                      estimator=self.estimator, method_params=params).fit(x, target)
+                ranks.append(rankdata(model.ranks_, method="average"))
+        self.per_target_ranks_ = np.asarray(ranks)
+        return self.per_target_ranks_.mean(axis=0)
 
     def ranking(self):
         """Return ordered feature identities, native scores, tied ranks and selection."""

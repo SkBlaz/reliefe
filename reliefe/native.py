@@ -244,13 +244,19 @@ def irelief_scores(x, y, max_iter, width, tolerance):
             diffs = np.abs(x - x[i])
             distances = diffs @ weights
             distances[i] = np.inf
-            # A common shift cancels in the hit, miss and inlier probabilities.
-            affinity = np.exp(-(distances - distances.min()) / width)
-            hits = affinity * (y == y[i])
-            misses = affinity * (y != y[i])
-            h, m = hits.sum(), misses.sum()
-            if h > 0 and m > 0:
-                margin += (h / (h + m)) * ((misses / m - hits / h) @ diffs)
+            hit_rows = (y == y[i]) & (np.arange(n) != i)
+            miss_rows = y != y[i]
+            hit_min, miss_min = distances[hit_rows].min(), distances[miss_rows].min()
+            # Normalize within each class before mixing the two probability masses.
+            # A distant class may have nonzero conditional expectation even when
+            # its unshifted kernel weights all underflow.
+            hits = np.exp(-(distances[hit_rows] - hit_min) / width)
+            misses = np.exp(-(distances[miss_rows] - miss_min) / width)
+            nearest = min(hit_min, miss_min)
+            h = hits.sum() * np.exp(-(hit_min - nearest) / width)
+            m = misses.sum() * np.exp(-(miss_min - nearest) / width)
+            difference = (misses / misses.sum()) @ diffs[miss_rows] - (hits / hits.sum()) @ diffs[hit_rows]
+            margin += (h / (h + m)) * difference
         updated = np.maximum(margin, 0)
         norm = np.linalg.norm(updated)
         if norm > 0:

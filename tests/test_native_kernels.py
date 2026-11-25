@@ -134,3 +134,53 @@ class NativeTests(unittest.TestCase):
                 FeatureRanker("stir-relieff", method_params=options).fit(self.x, target)
         scores = FeatureRanker("stir-surf", method_params={"sd_fraction": 100}).fit(x, y).scores_
         self.assertTrue(np.isnan(scores).all())
+
+    def test_rare_category_information_is_invariant_to_recoding(self):
+        y = np.r_[1, np.zeros(31, dtype=int)]
+        x = np.c_[np.ones(len(y)), y, 1-y]
+        entropy = -sum(p*np.log(p) for p in (1/32, 31/32))
+        for method, score in [("info-gain", entropy), ("gain-ratio", 1),
+                              ("symmetrical-uncertainty", 1), ("gini", 2*31/32**2)]:
+            result = FeatureRanker("numba-" + method).fit(x, y)
+            np.testing.assert_allclose(result.scores_, [0, score, score], atol=1e-14)
+        for method in ("mrmr", "cmim", "jmi", "cife"):
+            for j in (1, 2):
+                np.testing.assert_array_equal(FeatureRanker(method).fit(x[:, [0, j]], y).ranks_, [2, 1])
+
+    def test_narrow_neighborhood_limits(self):
+        # Every hit is identical, every miss differs only on the first feature.
+        x = np.array([[0., 0], [0, 0], [1, 0], [1, 0]])
+        y = np.array([0, 0, 1, 1])
+        weights = FeatureRanker("numba-irelief", method_params={"width": 1e-6}).fit(x, y).scores_
+        np.testing.assert_allclose(weights, [1, 0])
+        x = self.x
+        def fit(k, sigma):
+            return FeatureRanker("rrelieff", task="regression",
+                                 method_params={"k": k, "sigma": sigma}).fit(x, self.r).scores_
+        np.testing.assert_allclose(fit(4, np.nextafter(0., 1.)), fit(1, 1.))
+        with self.assertRaises(ValueError):
+            fit(2, np.nan)
+
+    def test_greedy_information_against_joint_contingencies(self):
+        from sklearn.metrics import mutual_info_score as mi
+        rng = np.random.RandomState(61)
+        x = rng.randint(0, 3, size=(90, 6))
+        y = (x[:, 0] + x[:, 2] + (x[:, 4] == 0)) % 3
+        # Independent oracle using joint codes. I((a,b);y)-I(b;y) = I(a;y|b).
+        relevance = [mi(col, y) for col in x.T]
+        for method in ("mrmr", "jmi", "cmim", "cife"):
+            selected = []
+            while len(selected) < x.shape[1]:
+                def criterion(j):
+                    if not selected:
+                        return relevance[j]
+                    if method == "mrmr":
+                        return relevance[j] - np.mean([mi(x[:, j], x[:, k]) for k in selected])
+                    conditional = [mi(3*x[:, j] + x[:, k], y) - relevance[k] for k in selected]
+                    if method == "cmim":
+                        return min(conditional)
+                    if method == "jmi":
+                        return np.mean(conditional)
+                    return sum(conditional) - (len(selected)-1)*relevance[j]
+                selected.append(max((j for j in range(x.shape[1]) if j not in selected), key=criterion))
+            np.testing.assert_array_equal(FeatureRanker(method).fit(x, y).order_, selected)

@@ -15,7 +15,6 @@ from sklearn.pipeline import make_pipeline
 
 from reliefe import FeatureRanker, list_methods
 from reliefe.catalog import REBATE
-from reliefe.julia_relief import JULIA_OPTIONS
 
 
 class NamedTable:
@@ -37,8 +36,6 @@ class RankerTests(unittest.TestCase):
 
     def test_catalog_and_target_matrix(self):
         for m, spec in list_methods().items():
-            if m.startswith("core-") or m in JULIA_OPTIONS:
-                continue  # Covered by the optional R integration suite.
             if m == "boruta" and importlib.util.find_spec("boruta") is None:
                 continue
             if m in REBATE and importlib.util.find_spec("skrebate") is None:
